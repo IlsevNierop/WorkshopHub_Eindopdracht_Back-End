@@ -1,9 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,9 +44,11 @@ public class Workshop {
     @NotNull
     private String location;
 
-    private String highlightedInfo;
+//    // moet opsomming worden, daarom een arraylist van gemaakt
+//    private ArrayList<String> highlightedInfos;
 
     @NotNull
+    @Column(columnDefinition = "text")
     private String description;
 
     @NotNull
@@ -71,6 +70,7 @@ public class Workshop {
     @NotNull
     private boolean workshopVerified;
 
+    @Column(columnDefinition = "text")
     private String feedbackAdmin;
 
 
