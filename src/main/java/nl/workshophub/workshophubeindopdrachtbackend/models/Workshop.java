@@ -28,7 +28,7 @@ public class Workshop {
 
     // even de NotNull annotatie verwijderd, want dit zorgde ervoor dat ik de error meldingen niet zelf kon meegeven.
     //Nu zit de NotNull check in de controller
-//    @NotNull
+//    @NotNull(message = "Titel van de workshop mag niet leeg zijn")
     private String title;
 
 //    @NotNull
@@ -42,6 +42,7 @@ public class Workshop {
     private double price;
 
 //    @NotNull
+    @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;
 
 //    @NotNull
