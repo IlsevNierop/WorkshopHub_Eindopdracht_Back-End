@@ -17,6 +17,8 @@ import java.util.Optional;
 @RequestMapping("/workshops")
 public class WorkshopController {
 
+    // nog checken of identieke workshop al bestaat? Gebaseerd op datum, tijdstip, title, locatie & workshopowner?
+
 
     private final WorkshopRepository repos;
 
@@ -38,12 +40,19 @@ public class WorkshopController {
         Workshop workshop = optionalWorkshop.get();
         return new ResponseEntity<>(workshop, HttpStatus.OK);
     }
+    @GetMapping("/findbytitle")
+    public ResponseEntity<List<Workshop>> getWorkshopsByTitleSubstring(@RequestParam String title) throws RecordNotFoundException {
+        if (repos.findByTitleContainingIgnoreCase(title).isEmpty()) {
+            throw new RecordNotFoundException("Er bestaan geen workshops met het woord " + title + " in de titel");
+        }
+        return new ResponseEntity<>(repos.findByTitleContainingIgnoreCase(title), HttpStatus.OK);
+    }
 
 //    @GetMapping ("/workshopowner")
 //    public ResponseEntity<List<Workshop>> getWorkshopsByWorkshopOwner (@RequestParam User workshopOwner) throws RecordNotFoundException {
 //        //Nog toevoegen: check of workshopOwner uberhaupt bestaat in de database
 //        if (repos.findByWorkshopOwner(workshopOwner).isEmpty()){
-//            throw RecordNotFoundException("De workshopeigenaar met naam " + workshopOwner.getFullName() + " heeft geen workshops geregistreerd staan");
+//            throw new RecordNotFoundException("De workshopeigenaar met naam " + workshopOwner.getFullName() + " heeft geen workshops geregistreerd staan");
 //        }
 //        return new ResponseEntity<>(repos.findByWorkshopOwner(workshopOwner), HttpStatus.OK);
 //    }
