@@ -25,33 +25,36 @@ public class Workshop {
 
 //    @NotNull
 //    private User workshopOwner
-    @NotNull
+
+    // even de NotNull annotatie verwijderd, want dit zorgde ervoor dat ik de error meldingen niet zelf kon meegeven.
+    //Nu zit de NotNull check in de controller
+//    @NotNull
     private String title;
 
-    @NotNull
+//    @NotNull
     private LocalDate date;
-    @NotNull
+//    @NotNull
     private LocalTime startTime;
-    @NotNull
+//    @NotNull
     private LocalTime endTime;
 
-    @NotNull
+//    @NotNull
     private double price;
 
-    @NotNull
+//    @NotNull
     private InOrOutdoors inOrOutdoors;
 
-    @NotNull
+//    @NotNull
     private String location;
 
 //    // moet opsomming worden, daarom een arraylist van gemaakt
-//    private ArrayList<String> highlightedInfos;
+//    private ArrayList<String> highlightedInfo;
 
-    @NotNull
+//    @NotNull
     @Column(columnDefinition = "text")
     private String description;
 
-    @NotNull
+//    @NotNull
     private int amountOfParticipants;
 
     private String workshopCategory;
@@ -59,16 +62,17 @@ public class Workshop {
 // geen enumeratie, maar mogelijk een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe kan toevoegen en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
 //    kan nog geen arraylist aanmaken
 //    @NotNull
-//    private ArrayList<String> workshopThemes;
+//    private ArrayList<String> workshopTheme;
 
 //    // check of byte het juiste type variabele is voor image
 //    @NotNull
-//    private ArrayList<byte> imageWorkshop;
+//    private ArrayList<byte> workshopImage;
 
+    // dit komt in de koppeltabel - deze niet toegevoegd in de standaard put mapping
 //    private ArrayList<Booking> workshopBookings;
 //    private ArrayList<Review> workshopOwnerReviews;
-    @NotNull
-    private boolean workshopVerified;
+//    @NotNull
+    private Boolean workshopVerified;
 
     @Column(columnDefinition = "text")
     private String feedbackAdmin;
