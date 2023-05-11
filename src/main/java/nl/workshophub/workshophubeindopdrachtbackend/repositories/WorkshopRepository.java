@@ -10,7 +10,8 @@ public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
 
 //    List<Workshop> findByWorkshopOwner (User workshopOwner);
 
-    List<Workshop> findByDateAfter(LocalDate date);
+    List<Workshop> findByDateAfterOrderByDate(LocalDate date);
+    List<Workshop> findByDate(LocalDate date);
     List<Workshop> findByTitleContainingIgnoreCase(String substring);
 
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,9 +28,9 @@ public class WorkshopController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Workshop>> getAllWorkshopsFromCurrentDateOnwards() {
+    public ResponseEntity<List<Workshop>> getAllWorkshopsFromCurrentDateOnwardsOrderByDate() {
 
-        return new ResponseEntity<>(repos.findByDateAfter(java.time.LocalDate.now()), HttpStatus.OK);
+        return new ResponseEntity<>(repos.findByDateAfterOrderByDate(java.time.LocalDate.now()), HttpStatus.OK);
     }
     @GetMapping("/{id}")
     public ResponseEntity<Workshop> getWorkshopById(@PathVariable Long id) throws RecordNotFoundException {
@@ -47,6 +48,13 @@ public class WorkshopController {
         }
         return new ResponseEntity<>(repos.findByTitleContainingIgnoreCase(title), HttpStatus.OK);
     }
+    @GetMapping("/findbydate")
+    public ResponseEntity<List<Workshop>> getWorkshopsByDate(@RequestParam LocalDate date) throws RecordNotFoundException {
+        if (repos.findByDate(date).isEmpty()) {
+            throw new RecordNotFoundException("Er bestaan geen workshops op datum " + date);
+        }
+        return new ResponseEntity<>(repos.findByDate(date), HttpStatus.OK);
+    }
 
 //    @GetMapping ("/workshopowner")
 //    public ResponseEntity<List<Workshop>> getWorkshopsByWorkshopOwner (@RequestParam User workshopOwner) throws RecordNotFoundException {
@@ -59,9 +67,6 @@ public class WorkshopController {
 
     @PostMapping
     public ResponseEntity<Workshop> createWorkshop(@RequestBody Workshop workshop) throws VariableCannotBeEmptyException {
-        System.out.println(workshop.getTitle());
-        System.out.println(workshop.getDate());
-        System.out.println(workshop.getStartTime());
         if (workshop.getTitle() == null) {
             throw new VariableCannotBeEmptyException("Titel van de workshop mag niet leeg zijn");
         }
