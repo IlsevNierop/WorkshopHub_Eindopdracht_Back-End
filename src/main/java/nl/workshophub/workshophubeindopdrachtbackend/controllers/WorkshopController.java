@@ -57,7 +57,7 @@ public class WorkshopController {
     }
 
 //    @GetMapping ("/workshopowner")
-//    public ResponseEntity<List<Workshop>> getWorkshopsByWorkshopOwner (@RequestParam User workshopOwner) throws RecordNotFoundException {
+//    public ResponseEntity<List<Workshop>> getAllWorkshopsByWorkshopOwner (@RequestParam User workshopOwner) throws RecordNotFoundException {
 //        //Nog toevoegen: check of workshopOwner uberhaupt bestaat in de database
 //        if (repos.findByWorkshopOwner(workshopOwner).isEmpty()){
 //            throw new RecordNotFoundException("De workshopeigenaar met naam " + workshopOwner.getFullName() + " heeft geen workshops geregistreerd staan");
@@ -67,45 +67,6 @@ public class WorkshopController {
 
     @PostMapping
     public ResponseEntity<Workshop> createWorkshop(@RequestBody Workshop workshop) throws VariableCannotBeEmptyException {
-        if (workshop.getTitle() == null) {
-            throw new VariableCannotBeEmptyException("Titel van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getDate() == null) {
-            throw new VariableCannotBeEmptyException("De datum van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getStartTime() == null) {
-            throw new VariableCannotBeEmptyException("De starttijd van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getEndTime() == null) {
-            throw new VariableCannotBeEmptyException("De eindtijd van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getPrice() == 0.0) {
-            throw new VariableCannotBeEmptyException("De prijs van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getInOrOutdoors() == null) {
-            throw new VariableCannotBeEmptyException("Er moet aangegeven worden of de workshop binnen, buiten of binnen en buiten wordt gehouden");
-        }
-        if (workshop.getLocation() == null) {
-            throw new VariableCannotBeEmptyException("De locatie van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getDescription() == null) {
-            throw new VariableCannotBeEmptyException("De omschrijving van de workshop mag niet leeg zijn");
-        }
-        if (workshop.getAmountOfParticipants() == 0) {
-            throw new VariableCannotBeEmptyException("Het maximale aantal deelnemers van de workshop mag niet leeg zijn");
-        }
-
-        // check dit is pas als de admin het thema kiest - dus workshop kan wel aangemaakt worden door eigenaar. Dit moet waarschijnlijk ter check in de putmapping van de admin!
-//        if (workshop.getWorkshopTheme().isEmtpy()) {
-//            throw new VariableCannotBeEmptyException("Het thema van de workshop mag niet leeg zijn");
-//        }
-//
-//        if (workshop.getWorkshopImage().isEmtpy()) {
-//            throw new VariableCannotBeEmptyException("Het maximale aantal deelnemers van de workshop mag niet leeg zijn");
-//        }
-        if (workshop.getWorkshopVerified() == null) {
-            throw new VariableCannotBeEmptyException("Er moet aangegeven worden of de workshop geverifieerd is");
-        }
             repos.save(workshop);
             URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshop.getId()).toUriString());
             return ResponseEntity.created(uri).body(workshop);
@@ -178,7 +139,6 @@ public class WorkshopController {
         Workshop workshop = optionalWorkshop.get();
         repos.delete(workshop);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
     }
 
 
