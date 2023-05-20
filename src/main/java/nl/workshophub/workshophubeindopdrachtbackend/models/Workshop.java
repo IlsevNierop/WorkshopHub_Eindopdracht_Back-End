@@ -20,48 +20,40 @@ import java.util.ArrayList;
 public class Workshop {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-//    @NotNull
-//    private User workshopOwner
-
-    // even de NotNull annotatie verwijderd, want dit zorgde ervoor dat ik de error meldingen niet zelf kon meegeven.
-    //Nu zit de NotNull check in de controller
-//    @NotNull(message = "Titel van de workshop mag niet leeg zijn")
     private String title;
-
-//    @NotNull
     private LocalDate date;
-//    @NotNull
     private LocalTime startTime;
-//    @NotNull
     private LocalTime endTime;
-
-//    @NotNull
     private double price;
-
-//    @NotNull
     @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;
-
-//    @NotNull
     private String location;
 
-//    // moet opsomming worden, daarom een arraylist van gemaakt
-//    private ArrayList<String> highlightedInfo;
+    // bij opsomming mogelijk met \n werken en dan in frontend goed weergeven
+private String highlightedInfo;
 
-//    @NotNull
     @Column(columnDefinition = "text")
     private String description;
-
-//    @NotNull
     private int amountOfParticipants;
 
     private String workshopCategory;
 
-// geen enumeratie, maar mogelijk een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe kan toevoegen en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
-//    kan nog geen arraylist aanmaken
+
+    private Boolean workshopVerified;
+
+    @Column(columnDefinition = "text")
+    private String feedbackAdmin;
+
+    private Boolean publishWorkshop;
+
+
+    //    private User workshopOwner
+
+    // geen enumeratie, maar mogelijk een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe kan toevoegen en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
+//    kan nog geen arraylist aanmaken - hoe werkt dit als het een lijst met strings is? Kan dit een arraylist zijn?
 //    @NotNull
 //    private ArrayList<String> workshopTheme;
 
@@ -69,14 +61,8 @@ public class Workshop {
 //    @NotNull
 //    private ArrayList<byte> workshopImage;
 
-    // dit komt in de koppeltabel - deze niet toegevoegd in de standaard put mapping
 //    private ArrayList<Booking> workshopBookings;
 //    private ArrayList<Review> workshopOwnerReviews;
-//    @NotNull
-    private Boolean workshopVerified;
-
-    @Column(columnDefinition = "text")
-    private String feedbackAdmin;
 
 
 
