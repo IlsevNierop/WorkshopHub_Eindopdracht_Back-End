@@ -10,7 +10,7 @@ import java.time.LocalTime;
 //getters en setters nodig voor modelmapper
 @Getter
 @Setter
-public class WorkshopOutputDtoDefault {
+public class WorkshopOutputDto {
 
     public Long id;
     public String title;
@@ -23,15 +23,14 @@ public class WorkshopOutputDtoDefault {
     public String highlightedInfo;
     public String description;
     public int amountOfParticipants;
-    public String workshopCategory;
-
     public Float averageRatingWorkshopOwner;
+
+    public String workshopCategory1;
+    public String workshopCategory2;
+
 
     // public workshopImage --> list of verschillende variabelen?
     //public ArrayList<Review> workshopOwnerReviews;
-
-
-    // public String (?/) workshopTheme;
 
 
     //owner output & admin output

@@ -1,19 +1,15 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDtoDefault;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
-import org.hibernate.jdbc.Work;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.management.modelmbean.ModelMBean;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class WorkshopService {
@@ -26,52 +22,48 @@ public class WorkshopService {
         this.workshopRepository = workshopRepository;
     }
 
-    public List<WorkshopOutputDtoDefault> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
-        List<Workshop> workshops = workshopRepository.findByDateAfterOrderByDate(java.time.LocalDate.now());
-        List<WorkshopOutputDtoDefault> workshopOutputDtoDefaults = new ArrayList<>();
-        for (Workshop w : workshops) {
-            if (w.getWorkshopVerified() != null && w.getPublishWorkshop() != null && w.getWorkshopVerified() == true && w.getPublishWorkshop() == true) {
-                WorkshopOutputDtoDefault workshopOutputDtoDefault = transferWorkshopToWorkshopOutputDefault(w);
-//            get average rating user - connected to workshop - set average rating owner to workshopoutput
-                workshopOutputDtoDefaults.add(workshopOutputDtoDefault);
-            }
-
-        }
-        return workshopOutputDtoDefaults;
-    }
-
-    public List<WorkshopOutputDtoDefault> testQueryGetAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
+    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
-        List<WorkshopOutputDtoDefault> workshopOutputDtoDefaults = new ArrayList<>();
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
-            WorkshopOutputDtoDefault workshopOutputDtoDefault = transferWorkshopToWorkshopOutputDefault(w);
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
 //            get average rating user - connected to workshop - set average rating owner to workshopoutput
-            workshopOutputDtoDefaults.add(workshopOutputDtoDefault);
+            workshopOutputDtos.add(workshopOutputDto);
         }
-        return workshopOutputDtoDefaults;
+        return workshopOutputDtos;
     }
 
-    public WorkshopOutputDtoDefault getWorkshopById(Long id)  throws RecordNotFoundException {
+    public WorkshopOutputDto getWorkshopById(Long id)  throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
-        return transferWorkshopToWorkshopOutputDefault(workshop);
+        return transferWorkshopToWorkshopOutputDto(workshop);
+    }
+
+    public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
+        List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        for (Workshop w : workshops) {
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
+//            get average rating user - connected to workshop - set average rating owner to workshopoutput
+            workshopOutputDtos.add(workshopOutputDto);
+        }
+        return workshopOutputDtos;
+    }
+
+    public WorkshopOutputDto createWorkshop(WorkshopInputDto workshopInputDto){
+        Workshop workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto);
+        workshopRepository.save(workshop);
+        return transferWorkshopToWorkshopOutputDto(workshop);
+    }
+
+
+
+    public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop) {
+        return modelMapper.map(workshop, WorkshopOutputDto.class);
 
     }
 
-    public WorkshopOutputDtoDefault getAllWorkshopsByWorkshopOwner
-
-
-
-
-    public WorkshopOutputDtoDefault transferWorkshopToWorkshopOutputDefault(Workshop workshop) {
-        return modelMapper.map(workshop, WorkshopOutputDtoDefault.class);
-//        WorkshopOutputDtoDefault test = new WorkshopOutputDtoDefault();
-//        test.title = workshop.getTitle();
-//        return test;
-
-    }
-
-    public Workshop transferWorkshopOutputDefaultToWorkshop(WorkshopOutputDtoDefault workshopOutputDtoDefault) {
-        return modelMapper.map(workshopOutputDtoDefault, Workshop.class);
+    public Workshop transferWorkshopInputDtoToWorkshop(WorkshopInputDto workshopInputDto) {
+        return modelMapper.map(workshopInputDto, Workshop.class);
 
     }
 }

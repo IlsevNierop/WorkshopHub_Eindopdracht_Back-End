@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "workshops")
@@ -39,9 +40,6 @@ private String highlightedInfo;
     private String description;
     private int amountOfParticipants;
 
-    private String workshopCategory;
-
-
     private Boolean workshopVerified;
 
     @Column(columnDefinition = "text")
@@ -49,17 +47,15 @@ private String highlightedInfo;
 
     private Boolean publishWorkshop;
 
+    // geen enumeratie, maar mogelijk een extra klasse maken (incl service, etc) met een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe strings kan toevoegen die dan ook toegevoegd worden aan de database en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
+    private String workshopCategory1;
+    private String workshopCategory2;
+
+    // check of byte het juiste type variabele is voor image - even checken hoe dit verwerkt wordt - lijst of niet?
+
+//    private ArrayList<byte> workshopImage;
 
     //    private User workshopOwner
-
-    // geen enumeratie, maar mogelijk een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe kan toevoegen en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
-//    kan nog geen arraylist aanmaken - hoe werkt dit als het een lijst met strings is? Kan dit een arraylist zijn?
-//    @NotNull
-//    private ArrayList<String> workshopTheme;
-
-//    // check of byte het juiste type variabele is voor image
-//    @NotNull
-//    private ArrayList<byte> workshopImage;
 
 //    private ArrayList<Booking> workshopBookings;
 //    private ArrayList<Review> workshopOwnerReviews;
