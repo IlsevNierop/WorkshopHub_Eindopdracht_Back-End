@@ -32,13 +32,12 @@ public class WorkshopOutputDto {
     // public workshopImage --> list of verschillende variabelen?
     //public ArrayList<Review> workshopOwnerReviews;
 
+    //owner output & admin output -- later in extra dto klasse plaatsen? nice to have
+    public Boolean workshopVerified;
 
-    //owner output & admin output
-   //  public Boolean workshopVerified;
-    //
-    //    public String feedbackAdmin;
-    //
-    // public Boolean publishWorkshop;
+    public String feedbackAdmin;
+
+    public Boolean publishWorkshop;
 
 
 }

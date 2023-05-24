@@ -21,7 +21,7 @@ import java.util.List;
 public class Workshop {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -34,12 +34,13 @@ public class Workshop {
     private String location;
 
     // bij opsomming mogelijk met \n werken en dan in frontend goed weergeven
-private String highlightedInfo;
+    private String highlightedInfo;
 
     @Column(columnDefinition = "text")
     private String description;
     private int amountOfParticipants;
 
+    //mogelijk enumeratie van maken? met zelfde waardes als publishworkshop.
     private Boolean workshopVerified;
 
     @Column(columnDefinition = "text")
@@ -59,14 +60,6 @@ private String highlightedInfo;
 
 //    private ArrayList<Booking> workshopBookings;
 //    private ArrayList<Review> workshopOwnerReviews;
-
-
-
-
-
-
-
-
 
 
 }

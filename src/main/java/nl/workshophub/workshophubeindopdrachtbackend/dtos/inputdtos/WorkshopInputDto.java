@@ -1,5 +1,7 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +22,7 @@ public class WorkshopInputDto {
     public LocalDate date;
 
     @NotNull(message = "Starttijd kan niet leeg zijn")
+    // add validation of how time needs to be written?
     public LocalTime startTime;
     @NotNull(message = "Eindtijd kan niet leeg zijn")
     public LocalTime endTime;
@@ -27,8 +30,9 @@ public class WorkshopInputDto {
     @Positive(message = "Prijs kan niet leeg zijn")
     public double price;
 
-    //validatie annotation toevoegen voor enumeration
-//    @NotNull (message = "Vul in of het binnen of buiten is")
+    // add validation to enum - below code is not working
+//    @NotNull
+//    @Enumerated(EnumType.STRING)
     public InOrOutdoors inOrOutdoors;
 
     @NotBlank(message = "Locatie kan niet leeg zijn")
@@ -36,24 +40,23 @@ public class WorkshopInputDto {
     public String highlightedInfo;
 
     @NotBlank(message = "Omschrijving kan niet leeg zijn")
-    @Size(min=50, max=400, message= "Omschrijving moet minimaal 50 en maximaal 400 karakters bevatten.")
+    @Size(min = 50, max = 400, message = "Omschrijving moet minimaal 50 en maximaal 400 karakters bevatten.")
     public String description;
 
     @Positive(message = "Aantal deelnemers kan niet leeg zijn")
     public int amountOfParticipants;
+
+    // als owner de workshop edit - gaat deze automatisch op null
     public Boolean publishWorkshop;
 
-    @NotBlank (message = "Er moet minstens 1 workshop thema gevuld zijn")
+    @NotBlank(message = "Er moet minstens 1 workshop thema gevuld zijn")
     public String workshopCategory1;
     public String workshopCategory2;
 
-//     admin input: --> extra input dto klasse maken - nice to have
-      public Boolean workshopVerified;
-      public String feedbackAdmin;
-
-
-
-
+    //     admin input: --> extra input dto klasse maken - nice to have
+// als owner de workshop edit - gaat deze automatisch op null
+    public Boolean workshopVerified;
+    public String feedbackAdmin;
 
 
 }

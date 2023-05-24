@@ -5,11 +5,19 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOut
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class WorkshopService {
@@ -24,6 +32,9 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
+        if (workshops.isEmpty()) {
+            throw new RecordNotFoundException("Er zijn momenteel geen workshops beschikbaar");
+        }
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
@@ -33,13 +44,16 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    public WorkshopOutputDto getWorkshopById(Long id)  throws RecordNotFoundException {
+    public WorkshopOutputDto getWorkshopById(Long id) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
+        if (workshops.isEmpty()) {
+            throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren workshops");
+        }
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
@@ -49,12 +63,94 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    public WorkshopOutputDto createWorkshop(WorkshopInputDto workshopInputDto){
+    public WorkshopOutputDto createWorkshop(WorkshopInputDto workshopInputDto) {
         Workshop workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto);
         workshopRepository.save(workshop);
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
+    public WorkshopOutputDto updateWorkshopByOwner(Long id, WorkshopInputDto workshopInputDto) {
+        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
+        workshop.setTitle(workshopInputDto.title);
+        workshop.setDate(workshopInputDto.date);
+        workshop.setStartTime(workshopInputDto.startTime);
+        workshop.setEndTime(workshopInputDto.endTime);
+        workshop.setPrice(workshopInputDto.price);
+        //check default waarde!
+        if (workshopInputDto.inOrOutdoors != null) {
+            workshop.setInOrOutdoors(workshopInputDto.inOrOutdoors);
+        }
+        workshop.setLocation(workshopInputDto.location);
+        if (workshopInputDto.highlightedInfo != null) {
+            workshop.setHighlightedInfo(workshopInputDto.highlightedInfo);
+        }
+        workshop.setDescription(workshopInputDto.description);
+        workshop.setAmountOfParticipants(workshopInputDto.amountOfParticipants);
+        workshop.setWorkshopCategory1(workshopInputDto.workshopCategory1);
+        if (workshopInputDto.workshopCategory2 != null) {
+            workshop.setWorkshopCategory2(workshopInputDto.workshopCategory2);
+        }
+        // na het wijzigen van een workshop wordt de status automatisch op geverifieerd null en publish null gezet:
+        workshop.setPublishWorkshop(null);
+        workshop.setWorkshopVerified(null);
+        // owner kan feedback niet wijzigen, dus die wordt ook niet met deze put gewijzigd.
+        workshopRepository.save(workshop);
+
+        return transferWorkshopToWorkshopOutputDto(workshop);
+    }
+
+    @PutMapping
+    public WorkshopOutputDto verifyWorkshopByOwner(Long id, Boolean publishWorkshop) throws RecordNotFoundException {
+        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
+
+        workshop.setPublishWorkshop(publishWorkshop);
+        workshopRepository.save(workshop);
+        return transferWorkshopToWorkshopOutputDto(workshop);
+    }
+
+    //admin:
+
+    public WorkshopOutputDto verifyWorkshopByAdmin(Long id, WorkshopInputDto workshopInputDto) {
+        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
+        workshop.setTitle(workshopInputDto.title);
+        workshop.setDate(workshopInputDto.date);
+        workshop.setStartTime(workshopInputDto.startTime);
+        workshop.setEndTime(workshopInputDto.endTime);
+        workshop.setPrice(workshopInputDto.price);
+        //check default waarde!
+        if (workshopInputDto.inOrOutdoors != null) {
+            workshop.setInOrOutdoors(workshopInputDto.inOrOutdoors);
+        }
+        workshop.setLocation(workshopInputDto.location);
+        if (workshopInputDto.highlightedInfo != null) {
+            workshop.setHighlightedInfo(workshopInputDto.highlightedInfo);
+        }
+        workshop.setDescription(workshopInputDto.description);
+        workshop.setAmountOfParticipants(workshopInputDto.amountOfParticipants);
+        workshop.setWorkshopCategory1(workshopInputDto.workshopCategory1);
+        if (workshopInputDto.workshopCategory2 != null) {
+            workshop.setWorkshopCategory2(workshopInputDto.workshopCategory2);
+        }
+        if (workshopInputDto.workshopVerified != null) {
+            workshop.setWorkshopVerified(workshopInputDto.workshopVerified);
+        }
+        if (workshopInputDto.feedbackAdmin != null) {
+            workshop.setFeedbackAdmin(workshopInputDto.feedbackAdmin);
+        }
+
+        // na het wijzigen van een workshop wordt de status automatisch publish null gezet:
+        workshop.setPublishWorkshop(null);
+
+        workshopRepository.save(workshop);
+
+        return transferWorkshopToWorkshopOutputDto(workshop);
+    }
+
+    public void deleteWorkshop(Long id) throws RecordNotFoundException {
+        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
+        //wat als er relaties zijn? boekingen kan niet verwijderen.
+        workshopRepository.delete(workshop);
+    }
 
 
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop) {
@@ -66,4 +162,21 @@ public class WorkshopService {
         return modelMapper.map(workshopInputDto, Workshop.class);
 
     }
+
+//    // als voorbeeld voor het uitsluiten van bepaalde properties als bepaalde properties waarde null hebben. helemaal onderaan het skippen van properties.
+//    public Workshop updateWorkshopTransferWorkshopInputDtoToWorkshop(WorkshopInputDto workshopInputDto) {
+//        TypeMap<WorkshopInputDto, Workshop> propertyMapper = modelMapper.createTypeMap(WorkshopInputDto.class, Workshop.class);
+//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getHighlightedInfo, Workshop::setHighlightedInfo));
+//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getPublishWorkshop, Workshop::setPublishWorkshop));
+//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getWorkshopCategory2, Workshop::setWorkshopCategory2));
+//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getWorkshopVerified, Workshop::setWorkshopVerified));
+//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getFeedbackAdmin, Workshop::setFeedbackAdmin));
+//        propertyMapper.addMappings(modelMapper -> modelMapper.skip(Workshop::setId));
+//
+//        return modelMapper.map(workshopInputDto, Workshop.class);
+//
+//    }
+
+//    TypeMap<Game, GameDTO> propertyMapper = this.mapper.createTypeMap(Game.class, GameDTO.class);
+//    propertyMapper.addMappings(mapper -> mapper.skip(GameDTO::setId));
 }

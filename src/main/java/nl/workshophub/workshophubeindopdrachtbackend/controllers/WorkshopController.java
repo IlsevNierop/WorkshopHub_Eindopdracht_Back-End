@@ -74,74 +74,42 @@ public class WorkshopController {
     }
 
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<Workshop> updateWorkshop(@PathVariable Long id, @RequestBody Workshop w) throws RecordNotFoundException, VariableCannotBeEmptyException {
-//        Optional<Workshop> optionalWorkshop = repos.findById(id);
-//        if (optionalWorkshop.isEmpty()) {
-//            throw new RecordNotFoundException("De workshop met ID " + id + " bestaat niet");
-//        }
-//        Workshop workshop = optionalWorkshop.get();
-//        if (w.getTitle() != null) {
-//            workshop.setTitle(w.getTitle());
-//        }
-//        if (w.getDate() != null) {
-//            workshop.setDate(w.getDate());
-//        }
-//        if (w.getStartTime() != null) {
-//            workshop.setStartTime(w.getStartTime());
-//        }
-//        if (w.getEndTime() != null) {
-//            workshop.setEndTime(w.getEndTime());
-//        }
-//        if (w.getPrice() != 0.0) {
-//            workshop.setPrice(w.getPrice());
-//        }
-//        //check default waarde!
-//        if (w.getInOrOutdoors() != null) {
-//            workshop.setInOrOutdoors(w.getInOrOutdoors());
-//        }
-//        if (w.getLocation() != null) {
-//            workshop.setLocation(w.getLocation());
-//        }
-////        if (!w.getHighlightedInfo().isEmtpy()) {
-////            workshop.setHighlightedInfo(w.getHighlightedInfo());
-////        }
-//        if (w.getDescription() != null) {
-//            workshop.setDescription(w.getDescription());
-//        }
-//        if (w.getAmountOfParticipants() != 0) {
-//            workshop.setAmountOfParticipants(w.getAmountOfParticipants());
-//        }
-//        if (w.getWorkshopCategory() != null) {
-//            workshop.setWorkshopCategory(w.getWorkshopCategory());
-//        }
-////        if (!w.getWorkshopTheme().isEmtpy()) {
-////            workshop.setWorkshopTheme(w.getWorkshopTheme());
-////        }
-//
-////        if (!w.getWorkshopImage().isEmtpy()) {
-////            workshop.setWorkshopImage(w.getWorkshopImage());
-////        }
-//        if (w.getWorkshopVerified() != null) {
-//            workshop.setWorkshopVerified(w.getWorkshopVerified());
-//        }
-//        if (w.getFeedbackAdmin() != null) {
-//            workshop.setFeedbackAdmin(w.getFeedbackAdmin());
-//        }
-//        repos.save(workshop);
-//        return new ResponseEntity<>(workshop, HttpStatus.ACCEPTED);
-//    }
+
+
+    //put mapping: owner can edit everything but not feedback and approve --> if some variables are edited automatisch verified == null. If only publish is edited --> dan verified niet wijzigen en andere dingen niet wijzigen.
+    // aparte put voor alleen verifieren door owner - met een request param?
+    //owner id nog toevoegen {workshopownerid}/
+    @PutMapping ("/{id}")
+    public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable Long id, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(errorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(workshopService.updateWorkshopByOwner(id, workshopInputDto), HttpStatus.ACCEPTED);
+    }
+
+    // nog workshopowner toevoegen in url en pathvariable opzoeken via die repository
+    @PutMapping ("/goedkeuren/{id}")
+    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner (@PathVariable Long id, @RequestParam Boolean publishWorkshop) {
+
+        return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(id, publishWorkshop), HttpStatus.ACCEPTED);
+    }
+
+    // admin:
+    // put mapping: admin can edit and add feedback and approve
+    @PutMapping ("/admin/{id}")
+    public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long id, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(errorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(id, workshopInputDto), HttpStatus.ACCEPTED);
+    }
+
 
     //delete mapping admin: alleen als publish == false
     // delete mapping owner (kan niet als bookings heeft)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Workshop> deleteWorkshop(@PathVariable Long id) throws RecordNotFoundException {
-        Optional<Workshop> optionalWorkshop = repos.findById(id);
-        if (optionalWorkshop.isEmpty()) {
-            throw new RecordNotFoundException("De workshop met id " + id + " bestaat niet");
-        }
-        Workshop workshop = optionalWorkshop.get();
-        repos.delete(workshop);
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long id) {
+        workshopService.deleteWorkshop(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
