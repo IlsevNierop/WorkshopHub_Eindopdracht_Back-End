@@ -89,7 +89,7 @@ public class WorkshopController {
 
     // admin:
     // put mapping: admin can edit and add feedback and approve
-    @PutMapping ("/admin/{id}")
+    @PutMapping ("/admin/goedkeuren/{id}")
     public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long id, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));

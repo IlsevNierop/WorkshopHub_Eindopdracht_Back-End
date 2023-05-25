@@ -1,24 +1,29 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
 public class ReviewInputDto {
 
-    @NotBlank
+    @Min(value=0, message= "Beoordeling mag niet lager dan 0 zijn")
+    @Max(value=5, message="Beoordeling mag niet hoger dan 5 zijn")
     public double rating;
-    @NotBlank
+    @NotBlank (message = "Omschrijving mag niet leeg zijn")
     public String reviewDescription;
 
-    private Boolean reviewVerified;
-    private String feedbackAdmin;
+    public Boolean reviewVerified;
+    public String feedbackAdmin;
 
-    //private User customer;
-    //private User workshopOwner;
-    //private Workshop workshop;
+    //public User customer;
+    //public User workshopOwner;
+    //public Workshop workshop;
 
 
 

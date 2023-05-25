@@ -26,7 +26,7 @@ public class WorkshopService {
         this.workshopRepository = workshopRepository;
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
+    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
         if (workshops.isEmpty()) {
             throw new RecordNotFoundException("Er zijn momenteel geen workshops beschikbaar");
@@ -45,7 +45,7 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
+    public List<WorkshopOutputDto> getAllWorkshopsToVerify() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
         if (workshops.isEmpty()) {
             throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren workshops");
@@ -65,7 +65,7 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public WorkshopOutputDto updateWorkshopByOwner(Long id, WorkshopInputDto workshopInputDto) {
+    public WorkshopOutputDto updateWorkshopByOwner(Long id, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         workshop.setTitle(workshopInputDto.title);
         workshop.setDate(workshopInputDto.date);
@@ -106,7 +106,7 @@ public class WorkshopService {
 
     //admin:
 
-    public WorkshopOutputDto verifyWorkshopByAdmin(Long id, WorkshopInputDto workshopInputDto) {
+    public WorkshopOutputDto verifyWorkshopByAdmin(Long id, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         workshop.setTitle(workshopInputDto.title);
         workshop.setDate(workshopInputDto.date);
@@ -143,7 +143,7 @@ public class WorkshopService {
     }
 
     //create exception for
-    public void deleteWorkshop(Long id) throws ValidationException {
+    public void deleteWorkshop(Long id) throws ValidationException, RecordNotFoundException{
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         //admin kan niet verwijderen als owner op publish heeft gezet
         if (workshop.getPublishWorkshop() == true) {

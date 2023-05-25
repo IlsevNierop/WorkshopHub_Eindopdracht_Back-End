@@ -9,17 +9,19 @@ import lombok.Setter;
 public class ReviewOutputDto {
 
     public Long id;
-
     public double rating;
-
     public String reviewDescription;
+    public Boolean reviewVerified;
+    public String feedbackAdmin;
+    public String firstNameReviewer;
+    public String companyNameWorkshopOwner;
 
-    private Boolean reviewVerified;
-    private String feedbackAdmin;
+    public double averageRatingWorkshopOwner;
 
-    //private User customer;
-    //private User workshopOwner;
-    //private Workshop workshop;
+
+    //public User customer;
+    //public User workshopOwner;
+    //public Workshop workshop;
 
 
 }
