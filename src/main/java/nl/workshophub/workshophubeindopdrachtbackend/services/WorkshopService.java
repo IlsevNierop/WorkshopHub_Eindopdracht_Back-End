@@ -1,8 +1,10 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
+import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import org.modelmapper.ModelMapper;
@@ -140,10 +142,16 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public void deleteWorkshop(Long id) throws RecordNotFoundException {
+    //create exception for
+    public void deleteWorkshop(Long id) throws ValidationException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
-        //wat als er relaties zijn? boekingen kan niet verwijderen.
-        workshopRepository.delete(workshop);
+        //admin kan niet verwijderen als owner op publish heeft gezet
+        if (workshop.getPublishWorkshop() == true) {
+            throw new ValidationException("Deze workshop kan niet verwijderd worden omdat deze door de eigenaar geaccordeerd is.");
+        }
+            //wat als er relaties zijn? boekingen kan niet verwijderen.
+            workshopRepository.delete(workshop);
+
     }
 
 

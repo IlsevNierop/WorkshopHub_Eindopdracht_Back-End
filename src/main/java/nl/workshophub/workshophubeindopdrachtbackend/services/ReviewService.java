@@ -30,6 +30,27 @@ public class ReviewService {
         return transferReviewToReviewOutputDto(review);
     }
 
+    //niet ingelogde users & gewone users: //eigenaar bedrijfsnaam toevoegen, user firstname en workshopnaam toevoegen
+    //getmapping all reviews van 1 owner / user, waar approved = true, average rating teruggeven
+    //getmapping ownerid /userid-  by id review approved = true, incl workshopnaam en date
+
+    //admin
+    //getmapping goed te keuren
+    //getmapping all reviews?
+
+    //user:
+    //postmapping als attended workshop==true & workshopdate is in past
+
+    //put
+    // check van workshop
+
+    //delete
+    // admin
+
+
+
+
+
 
     public ReviewOutputDto transferReviewToReviewOutputDto(Review review) {
         return modelMapper.map(review, ReviewOutputDto.class);
