@@ -1,23 +1,19 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
+import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
-import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class WorkshopService {
@@ -30,7 +26,7 @@ public class WorkshopService {
         this.workshopRepository = workshopRepository;
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
+    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
         if (workshops.isEmpty()) {
             throw new RecordNotFoundException("Er zijn momenteel geen workshops beschikbaar");
@@ -49,7 +45,7 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
+    public List<WorkshopOutputDto> getAllWorkshopsToVerify() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
         if (workshops.isEmpty()) {
             throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren workshops");
@@ -69,7 +65,7 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public WorkshopOutputDto updateWorkshopByOwner(Long id, WorkshopInputDto workshopInputDto) {
+    public WorkshopOutputDto updateWorkshopByOwner(Long id, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         workshop.setTitle(workshopInputDto.title);
         workshop.setDate(workshopInputDto.date);
@@ -110,7 +106,7 @@ public class WorkshopService {
 
     //admin:
 
-    public WorkshopOutputDto verifyWorkshopByAdmin(Long id, WorkshopInputDto workshopInputDto) {
+    public WorkshopOutputDto verifyWorkshopByAdmin(Long id, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         workshop.setTitle(workshopInputDto.title);
         workshop.setDate(workshopInputDto.date);
@@ -146,10 +142,16 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public void deleteWorkshop(Long id) throws RecordNotFoundException {
+    //create exception for
+    public void deleteWorkshop(Long id) throws ValidationException, RecordNotFoundException{
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
-        //wat als er relaties zijn? boekingen kan niet verwijderen.
-        workshopRepository.delete(workshop);
+        //admin kan niet verwijderen als owner op publish heeft gezet
+        if (workshop.getPublishWorkshop() == true) {
+            throw new ValidationException("Deze workshop kan niet verwijderd worden omdat deze door de eigenaar geaccordeerd is.");
+        }
+            //wat als er relaties zijn? boekingen kan niet verwijderen.
+            workshopRepository.delete(workshop);
+
     }
 
 
