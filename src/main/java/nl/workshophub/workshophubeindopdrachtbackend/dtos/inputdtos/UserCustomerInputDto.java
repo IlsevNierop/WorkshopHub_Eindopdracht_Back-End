@@ -3,13 +3,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
-@Getter
-@Setter
 public class UserCustomerInputDto {
 
     @NotBlank(message = "Voornaam kan niet leeg zijn")
@@ -22,9 +16,4 @@ public class UserCustomerInputDto {
     public String email;
     @NotBlank (message = "Wachtwoord kan niet leeg zijn")
     public String password;
-
-    @NotNull
-    public Boolean workshopOwner;
-
-
 }

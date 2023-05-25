@@ -83,6 +83,19 @@ VALUES (103, 2.8, 'Helaas voldeed de workshop niet aan mijn verwachtingen. De in
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin)
 VALUES (104, 4.7, 'De workshop was fantastisch! Ik heb zoveel geleerd en het heeft mijn creatieve vaardigheden echt verbeterd. Een geweldige ervaring!', default, 'Bedankt voor je geweldige feedback. We zijn blij dat je tevreden bent met de workshop!');
 
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (100, 'Jan', 'Jansen', 'jan.jansen@example.com', 'wachtwoord123', false);
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (101, 'Lisa', 'de Vries', 'lisa.devries@example.com', 'geheim123', false);
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (102, 'Mohammed', 'Ali', 'mohammed.ali@example.com', 'wachtwoord456', false);
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (103, 'Sarah', 'van der Meer', 'sarah.vandermeer@example.com', 'verborgen567', false);
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (104, 'Eva', 'Bakker', 'eva.bakker@example.com', 'geheim789', false);
 
-
-
+INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number, workshop_owner_verified, workshop_owner)
+VALUES (105, 'Jan', 'Pietersen', 'jan@example.com', 'wachtwoord123', 'Voorbeeld Bedrijf', 12345678, 'NL123456789B01', true, true);
+INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number, workshop_owner_verified, workshop_owner)
+VALUES (106, 'Lisa', 'Jansen', 'lisa@example.com', 'wachtwoord456', 'Test Bedrijf', 98765432, 'NL987654321B01', false, true);
+INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number, workshop_owner_verified, workshop_owner)
+VALUES (107, 'Pieter', 'Hendriks', 'pieter@example.com', 'wachtwoord789', 'Voorbeeld BV', 54321678, 'NL543216789B01', default, false);
+INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number, workshop_owner_verified, workshop_owner)
+VALUES (108, 'Emma', 'van der Meer', 'emma@example.com', 'wachtwoord123', 'Test BV', 87654321, 'NL876543219B01', false, true);
+INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number, workshop_owner_verified, workshop_owner)
+VALUES (109, 'Hugo', 'Bakker', 'hugo@example.com', 'wachtwoord456', 'Voorbeeld VOF', 13579246, 'NL135792468B01', default, false);

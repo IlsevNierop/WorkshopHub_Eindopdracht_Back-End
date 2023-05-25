@@ -21,12 +21,12 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private String firstname;
-    private String lastname;
+    private String firstName;
+    private String lastName;
     private String email;
     private String password;
     private String companyName;
-    private int kvkNumber;
+    private Integer kvkNumber;
     private String vatNumber;
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
