@@ -45,6 +45,7 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
+    //nu alleen omhoog als ze null zijn - niet als false?
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
         if (workshops.isEmpty()) {
@@ -60,6 +61,7 @@ public class WorkshopService {
     }
 
     public WorkshopOutputDto createWorkshop(WorkshopInputDto workshopInputDto) {
+        // checken of user workshopowner is en verified is
         Workshop workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto);
         workshopRepository.save(workshop);
         return transferWorkshopToWorkshopOutputDto(workshop);

@@ -67,8 +67,6 @@ public class WorkshopController {
     }
 
 
-
-
     //put mapping: owner can edit everything but not feedback and approve --> if some variables are edited automatisch verified == null. If only publish is edited --> dan verified niet wijzigen en andere dingen niet wijzigen.
     // aparte put voor alleen verifieren door owner - met een request param?
     //owner id nog toevoegen {workshopownerid}/
