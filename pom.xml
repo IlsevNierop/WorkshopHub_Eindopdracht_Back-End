@@ -10,7 +10,7 @@
     </parent>
     <groupId>nl.workshophub</groupId>
     <artifactId>WorkshopHub-Eindopdracht-Back-End</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>WorkshopHub-Eindopdracht-Back-End</name>
     <description>WorkshopHub-Eindopdracht-Back-End</description>
     <properties>
