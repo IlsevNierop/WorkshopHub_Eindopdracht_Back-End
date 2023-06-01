@@ -58,7 +58,8 @@ public class Workshop {
 
     //    private User workshopOwner
 
-//    private ArrayList<Booking> workshopBookings;
+    @OneToMany(mappedBy = "workshop")
+    private ArrayList<Booking> workshopBookings;
 //    private ArrayList<Review> workshopOwnerReviews;
 
 

@@ -2,10 +2,12 @@ package nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.InOrOutdoors;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 //getters en setters nodig voor modelmapper
 @Getter
@@ -38,6 +40,10 @@ public class WorkshopOutputDto {
     public String feedbackAdmin;
 
     public Boolean publishWorkshop;
+
+    public List<Booking> bookings;
+
+    // ook sumiere output dto maken voor de kalender overview - daar ook bedrijfsnaam toevoegen?
 
 
 }
