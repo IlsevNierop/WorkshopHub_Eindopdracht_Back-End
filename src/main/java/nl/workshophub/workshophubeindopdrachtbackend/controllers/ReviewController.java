@@ -34,13 +34,13 @@ public class ReviewController {
 
     }
 
-    @GetMapping("/admin/goedkeuren")
+    @GetMapping("/admin/")
     public ResponseEntity<List<ReviewOutputDto>> getReviewsToVerify(){
         return new ResponseEntity<>(reviewService.getReviewsToVerify(), HttpStatus.OK);
 
     }
 
-    @PutMapping ("/admin/goedkeuren/{id}")
+    @PutMapping ("/admin/{id}")
     public ResponseEntity<Object> verifyReviewByAdmin (@PathVariable Long id, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
