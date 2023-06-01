@@ -99,3 +99,9 @@ INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk
 VALUES (108, 'Emma', 'van der Meer', 'emma@example.com', 'wachtwoord123', 'Test BV', 87654321, 'NL876543219B01', default, true);
 INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number, workshop_owner_verified, workshop_owner)
 VALUES (109, 'Hugo', 'Bakker', 'hugo@example.com', 'wachtwoord456', 'Voorbeeld VOF', 13579246, 'NL135792468B01', default, false);
+
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id) VALUES (101, '2023-06-01', 'Geweldige workshop!', 2, 101);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id) VALUES (102, '2023-05-29', 'Ik kijk ernaar uit! En ben vegetarier.', 1, 101);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id) VALUES (103, '2023-05-30', 'Leuk concept!', 3, 103);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id) VALUES (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 107);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id) VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 106);
