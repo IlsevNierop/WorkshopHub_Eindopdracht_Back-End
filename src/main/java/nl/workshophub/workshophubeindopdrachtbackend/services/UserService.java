@@ -31,25 +31,27 @@ public class UserService {
 
     public UserCustomerOutputDto getCustomerById(Long id) throws RecordNotFoundException {
         User customer = userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + id + " bestaat niet"));
-        if (customer.getWorkshopOwner() == true){
+        if (customer.getWorkshopOwner() == true) {
             throw new RecordNotFoundException("De gebruiker met ID " + id + " is een workshopeigenaar");
         }
         return transferUserToCustomerOutputDto(customer);
     }
+
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long id) throws RecordNotFoundException {
         User workshopOwner = userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + id + " bestaat niet"));
-        if (workshopOwner.getWorkshopOwner() == false){
+        if (workshopOwner.getWorkshopOwner() == false) {
             throw new RecordNotFoundException("De gebruiker met ID " + id + " is geen workshopeigenaar");
         }
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
-    public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() throws RecordNotFoundException{
+
+    public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() throws RecordNotFoundException {
         List<User> workshopowners = userRepository.findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNull();
-        if (workshopowners.isEmpty()){
+        if (workshopowners.isEmpty()) {
             throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren workshopeigenaren");
         }
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
-        for (User workshopowner: workshopowners) {
+        for (User workshopowner : workshopowners) {
             UserWorkshopOwnerOutputDto workshopOwnerOutputDto = transferUserToWorkshopOwnerOutputDto(workshopowner);
             workshopOwnerOutputDtos.add(workshopOwnerOutputDto);
         }
@@ -58,19 +60,56 @@ public class UserService {
     }
 
 
-
     public UserCustomerOutputDto transferUserToCustomerOutputDto(User customer) {
-        return modelMapper.map(customer, UserCustomerOutputDto.class);
+        UserCustomerOutputDto customerOutputDto = new UserCustomerOutputDto();
+        customerOutputDto.firstName = customer.getFirstName();
+        customerOutputDto.lastName = customer.getLastName();
+        customerOutputDto.email = customer.getEmail();
+//        customerOutputDto.password = customer.getPassword();
+        customerOutputDto.workshopOwner = customer.getWorkshopOwner();
+
+        return customerOutputDto;
     }
 
     public UserWorkshopOwnerOutputDto transferUserToWorkshopOwnerOutputDto(User workshopOwner) {
-        return modelMapper.map(workshopOwner, UserWorkshopOwnerOutputDto.class);
+        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = new UserWorkshopOwnerOutputDto();
+        workshopOwnerOutputDto.id = workshopOwner.getId();
+        workshopOwnerOutputDto.firstName = workshopOwner.getFirstName();
+        workshopOwnerOutputDto.lastName = workshopOwner.getLastName();
+        workshopOwnerOutputDto.email = workshopOwner.getEmail();
+//        workshopOwnerOutputDto.password = workshopOwner.getPassword();
+        workshopOwnerOutputDto.companyName = workshopOwner.getCompanyName();
+        workshopOwnerOutputDto.kvkNumber = workshopOwner.getKvkNumber();
+        workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
+        workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
+        workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
+
+        return workshopOwnerOutputDto;
     }
 
     public User transferWorkshopOwnerInputDtoToUser(UserWorkshopOwnerInputDto workshopOwnerInputDto) {
-        return modelMapper.map(workshopOwnerInputDto, User.class);
+        User workshopOwner = new User();
+        workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
+        workshopOwner.setLastName(workshopOwnerInputDto.lastName);
+        workshopOwner.setEmail(workshopOwnerInputDto.email);
+        workshopOwner.setPassword(workshopOwnerInputDto.password);
+        workshopOwner.setCompanyName(workshopOwnerInputDto.companyName);
+        workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
+        workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
+        workshopOwner.setWorkshopOwnerVerified(workshopOwnerInputDto.workshopOwnerVerified);
+        workshopOwner.setWorkshopOwner(workshopOwnerInputDto.workshopOwner);
+
+        return workshopOwner;
     }
+
     public User transferCustomerInputDtoToUser(UserCustomerInputDto customerInputDto) {
-        return modelMapper.map(customerInputDto, User.class);
+        User customer = new User();
+        customer.setFirstName(customerInputDto.firstName);
+        customer.setLastName(customerInputDto.lastName);
+        customer.setEmail(customerInputDto.email);
+        customer.setPassword(customerInputDto.password);
+        customer.setWorkshopOwner(customerInputDto.workshopOwner);
+
+        return customer;
     }
 }

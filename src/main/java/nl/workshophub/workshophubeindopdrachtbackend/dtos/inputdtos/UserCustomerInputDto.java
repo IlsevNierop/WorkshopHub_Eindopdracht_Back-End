@@ -16,4 +16,6 @@ public class UserCustomerInputDto {
     public String email;
     @NotBlank (message = "Wachtwoord kan niet leeg zijn")
     public String password;
+
+    public Boolean workshopOwner;
 }
