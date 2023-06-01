@@ -60,7 +60,9 @@ public class Workshop {
 
     @OneToMany(mappedBy = "workshop")
     private ArrayList<Booking> workshopBookings;
-//    private ArrayList<Review> workshopOwnerReviews;
+
+    @OneToMany(mappedBy = "workshop")
+    private ArrayList<Review> workshopOwnerReviews;
 
 
 }

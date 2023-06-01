@@ -21,9 +21,11 @@ public class ReviewInputDto {
     public Boolean reviewVerified;
     public String feedbackAdmin;
 
+    public Long workshopId;
+
     //public User customer;
     //public User workshopOwner;
-    //public Workshop workshop;
+
 
 
 

@@ -1,9 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,9 +25,12 @@ public class Review {
     private Boolean reviewVerified;
     private String feedbackAdmin;
 
+    @ManyToOne
+    private Workshop workshop;
+
     //private User customer;
     //private User workshopOwner;
-    //private Workshop workshop;
+
 
     //private Boolean attendedWorkshop? --> methode om bookings te checken van de workshop?
 

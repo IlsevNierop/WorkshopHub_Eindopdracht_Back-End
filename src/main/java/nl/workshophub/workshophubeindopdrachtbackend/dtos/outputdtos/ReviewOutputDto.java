@@ -15,13 +15,17 @@ public class ReviewOutputDto {
     public String feedbackAdmin;
     public String firstNameReviewer;
     public String companyNameWorkshopOwner;
-
     public double averageRatingWorkshopOwner;
-
+    public Long workshopId;
+    public String workshopTitle;
 
     //public User customer;
     //public User workshopOwner;
-    //public Workshop workshop;
+//    public String workshopOwnerCompanyName;
+//    public Long workshopOwnerId;
+
+
+
 
 
 }
