@@ -1,0 +1,14 @@
+package nl.workshophub.workshophubeindopdrachtbackend.repositories;
+
+import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ReviewRepository extends JpaRepository <Review, Long> {
+//    findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate
+
+//    List<Review> findByUserAndReviewVerifiedIsTrue(Long id);
+    List<Review> findByReviewVerifiedIsNull();
+
+}

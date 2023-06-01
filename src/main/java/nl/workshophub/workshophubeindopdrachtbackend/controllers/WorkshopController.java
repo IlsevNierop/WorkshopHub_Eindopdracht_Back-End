@@ -3,32 +3,25 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.VariableCannotBeEmptyException;
-import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
-import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.methods.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/workshops")
 public class WorkshopController {
 
     private final WorkshopService workshopService;
-    private final WorkshopRepository repos;
 
-    public WorkshopController(WorkshopService workshopService, WorkshopRepository repos) {
+    public WorkshopController(WorkshopService workshopService) {
         this.workshopService = workshopService;
-        this.repos = repos;
     }
 
     @GetMapping
@@ -66,14 +59,12 @@ public class WorkshopController {
     @PostMapping
     public ResponseEntity<Object> createWorkshop(@Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(errorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }
-
-
 
 
     //put mapping: owner can edit everything but not feedback and approve --> if some variables are edited automatisch verified == null. If only publish is edited --> dan verified niet wijzigen en andere dingen niet wijzigen.
@@ -82,7 +73,7 @@ public class WorkshopController {
     @PutMapping ("/{id}")
     public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable Long id, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(errorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(workshopService.updateWorkshopByOwner(id, workshopInputDto), HttpStatus.ACCEPTED);
     }
@@ -96,10 +87,10 @@ public class WorkshopController {
 
     // admin:
     // put mapping: admin can edit and add feedback and approve
-    @PutMapping ("/admin/{id}")
+    @PutMapping ("/admin/goedkeuren/{id}")
     public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long id, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(errorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(id, workshopInputDto), HttpStatus.ACCEPTED);
     }
@@ -112,16 +103,5 @@ public class WorkshopController {
         workshopService.deleteWorkshop(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    public String errorToStringHandling (BindingResult bindingResult){
-        StringBuilder sb = new StringBuilder();
-        for (FieldError fe : bindingResult.getFieldErrors()){
-            sb.append(fe.getField() + ": ");
-            sb.append(fe.getDefaultMessage());
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
 
 }
