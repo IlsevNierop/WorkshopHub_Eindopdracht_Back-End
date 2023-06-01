@@ -4,8 +4,12 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.ReviewInputD
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.ReviewRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
@@ -19,8 +23,11 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    public ReviewService(ReviewRepository reviewRepository) {
+    private final WorkshopRepository workshopRepository;
+
+    public ReviewService(ReviewRepository reviewRepository, WorkshopRepository workshopRepository) {
         this.reviewRepository = reviewRepository;
+        this.workshopRepository = workshopRepository;
     }
     public ReviewOutputDto getReviewById(Long id) throws RecordNotFoundException {
         Review review = reviewRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De review met ID " + id + " bestaat niet"));
@@ -88,6 +95,15 @@ public class ReviewService {
 //    user
 //    public ReviewOutputDto updateReviewByUser check if user = customer
 
+    public ReviewOutputDto createReview (Long workshopId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
+        Review review = transferReviewInputDtoToReview(reviewInputDto);
+        review.setWorkshop(workshop);
+        reviewRepository.save(review);
+
+        return transferReviewToReviewOutputDto(review);
+    }
+
 
     // admin
     public void deleteReview(Long id) throws RecordNotFoundException {
@@ -100,12 +116,28 @@ public class ReviewService {
 
 
     public ReviewOutputDto transferReviewToReviewOutputDto(Review review) {
-        return modelMapper.map(review, ReviewOutputDto.class);
+       ReviewOutputDto reviewOutputDto = new ReviewOutputDto();
+       reviewOutputDto.id = review.getId();
+       reviewOutputDto.rating = review.getRating();
+       reviewOutputDto.reviewDescription = review.getReviewDescription();
+       reviewOutputDto.reviewVerified = review.getReviewVerified();
+       reviewOutputDto.feedbackAdmin = review.getFeedbackAdmin();
+       reviewOutputDto.workshopId = review.getWorkshop().getId();
+       reviewOutputDto.workshopTitle = review.getWorkshop().getTitle();
+
+       return reviewOutputDto;
 
     }
 
     public Review transferReviewInputDtoToReview(ReviewInputDto reviewInputDto) {
-        return modelMapper.map(reviewInputDto, Review.class);
+        Review review = new Review();
+        review.setRating(reviewInputDto.rating);
+        review.setReviewDescription(reviewInputDto.reviewDescription);
+        review.setReviewVerified(reviewInputDto.reviewVerified);
+        review.setFeedbackAdmin(reviewInputDto.feedbackAdmin);
+       //als je in de body van reviewinputdto de workshopId meegeeft, kun je hier, via de workshoprepository, ook nog de workshop setten.
+
+        return review;
 
     }
 

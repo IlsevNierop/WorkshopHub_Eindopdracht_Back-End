@@ -48,6 +48,15 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.verifyReviewByAdmin(id, reviewInputDto), HttpStatus.ACCEPTED);
     }
 
+    //userId nog toevoegen na relatie leggen
+    @PostMapping ("/{workshopId}")
+    public ResponseEntity<Object> createReview (@PathVariable Long workshopId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(reviewService.createReview(workshopId, reviewInputDto), HttpStatus.ACCEPTED);
+    }
+
 
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<HttpStatus> deleteReview(@PathVariable Long id) {

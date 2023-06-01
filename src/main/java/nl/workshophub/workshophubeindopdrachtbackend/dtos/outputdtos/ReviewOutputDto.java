@@ -13,11 +13,12 @@ public class ReviewOutputDto {
     public String reviewDescription;
     public Boolean reviewVerified;
     public String feedbackAdmin;
-    public String firstNameReviewer;
-    public String companyNameWorkshopOwner;
-    public double averageRatingWorkshopOwner;
     public Long workshopId;
     public String workshopTitle;
+
+//    public String firstNameReviewer;
+//    public String companyNameWorkshopOwner;
+//    public double averageRatingWorkshopOwner;
 
     //public User customer;
     //public User workshopOwner;

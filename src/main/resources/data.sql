@@ -68,20 +68,20 @@ Met een kleine groep van maximaal 8 deelnemers is er voldoende ruimte voor perso
 De kosten voor de workshop bedragen 42,50 euro per persoon, inclusief alle ingrediënten en materialen die nodig zijn om je eigen taarten te maken. Je gaat naar huis met nieuwe vaardigheden, een schat aan kennis en natuurlijk je zelfgemaakte taarten om te delen en van te genieten.
 Laat je creativiteit en smaakpapillen de vrije loop tijdens deze 3 uur durende workshop Taarten Bakken. Schrijf je nu in en ontdek de geheimen van het maken van heerlijke taarten in een gezellige en leerzame omgeving.', 8, 'Koken', 'Bakken', true, default);
 
-INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin)
-VALUES (100, 4.5, 'De workshop was echt geweldig! Ik heb zoveel geleerd en de docent was zeer behulpzaam. Een aanrader!', default, 'Bedankt voor je positieve feedback!');
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id)
+VALUES (100, 4.5, 'De workshop was echt geweldig! Ik heb zoveel geleerd en de docent was zeer behulpzaam. Een aanrader!', default, 'Bedankt voor je positieve feedback!', 107);
 
-INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin)
-VALUES (101, 3.2, 'De workshop was redelijk, maar ik had verwacht dat het interactiever zou zijn. De inhoud was wel interessant.', true, 'Dank je wel voor je feedback. We zullen je opmerkingen in overweging nemen.');
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id)
+VALUES (101, 3.2, 'De workshop was redelijk, maar ik had verwacht dat het interactiever zou zijn. De inhoud was wel interessant.', true, 'Dank je wel voor je feedback. We zullen je opmerkingen in overweging nemen.', 101);
 
-INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin)
-VALUES (102, 5.0, 'Ik ben zeer tevreden met de workshop! Het was inspirerend en de sfeer was geweldig. Ik raad het iedereen aan!', true, 'We zijn blij dat je ervan genoten hebt. Bedankt voor je positieve woorden!');
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id)
+VALUES (102, 5.0, 'Ik ben zeer tevreden met de workshop! Het was inspirerend en de sfeer was geweldig. Ik raad het iedereen aan!', true, 'We zijn blij dat je ervan genoten hebt. Bedankt voor je positieve woorden!', 101);
 
-INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin)
-VALUES (103, 2.8, 'Helaas voldeed de workshop niet aan mijn verwachtingen. De inhoud was te oppervlakkig en ik vond de organisatie slecht.', false, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.');
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id)
+VALUES (103, 2.8, 'Helaas voldeed de workshop niet aan mijn verwachtingen. De inhoud was te oppervlakkig en ik vond de organisatie slecht.', false, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.', 105);
 
-INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin)
-VALUES (104, 4.7, 'De workshop was fantastisch! Ik heb zoveel geleerd en het heeft mijn creatieve vaardigheden echt verbeterd. Een geweldige ervaring!', default, 'Bedankt voor je geweldige feedback. We zijn blij dat je tevreden bent met de workshop!');
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id)
+VALUES (104, 4.7, 'De workshop was fantastisch! Ik heb zoveel geleerd en het heeft mijn creatieve vaardigheden echt verbeterd. Een geweldige ervaring!', default, 'Bedankt voor je geweldige feedback. We zijn blij dat je tevreden bent met de workshop!', 103);
 
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (100, 'Jan', 'Jansen', 'jan.jansen@example.com', 'wachtwoord123', false);
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner) VALUES (101, 'Lisa', 'de Vries', 'lisa.devries@example.com', 'geheim123', false);

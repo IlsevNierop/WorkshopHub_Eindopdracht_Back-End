@@ -26,8 +26,6 @@ public class WorkshopOutputDto {
     public String highlightedInfo;
     public String description;
     public int amountOfParticipants;
-    public Float averageRatingWorkshopOwner;
-
     public String workshopCategory1;
     public String workshopCategory2;
 
@@ -42,11 +40,11 @@ public class WorkshopOutputDto {
 
     public Boolean publishWorkshop;
 
-    public List<Booking> bookings;
+    public List<Booking> workshopBookings;
 
     // niet gehele reviews teruggeven? Alleen de rating, firstname, workshoptitle?
     public List<Review> workshopOwnerReviews;
-    public float averageRatingWorkshopOwnerReviews;
+//    public Float averageRatingWorkshopOwnerReviews;
 
     // ook sumiere output dto maken voor de kalender overview - daar ook bedrijfsnaam toevoegen?
 

@@ -7,6 +7,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundEx
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
+import org.hibernate.jdbc.Work;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -145,42 +146,64 @@ public class WorkshopService {
     }
 
     //create exception for
-    public void deleteWorkshop(Long id) throws ValidationException, RecordNotFoundException{
+    public void deleteWorkshop(Long id) throws ValidationException, RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         //admin kan niet verwijderen als owner op publish heeft gezet
         if (workshop.getPublishWorkshop() == true) {
             throw new ValidationException("Deze workshop kan niet verwijderd worden omdat deze door de eigenaar geaccordeerd is.");
         }
-            //wat als er relaties zijn? boekingen kan niet verwijderen.
-            workshopRepository.delete(workshop);
+        //wat als er relaties zijn? boekingen kan niet verwijderen.
+        workshopRepository.delete(workshop);
 
     }
 
 
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop) {
-        return modelMapper.map(workshop, WorkshopOutputDto.class);
+        WorkshopOutputDto workshopOutputDto = new WorkshopOutputDto();
+        workshopOutputDto.id = workshop.getId();
+        workshopOutputDto.title = workshop.getTitle();
+        workshopOutputDto.date = workshop.getDate();
+        workshopOutputDto.startTime = workshop.getStartTime();
+        workshopOutputDto.endTime = workshop.getEndTime();
+        workshopOutputDto.price = workshop.getPrice();
+        workshopOutputDto.inOrOutdoors = workshop.getInOrOutdoors();
+        workshopOutputDto.location = workshop.getLocation();
+        workshopOutputDto.highlightedInfo = workshop.getHighlightedInfo();
+        workshopOutputDto.description = workshop.getDescription();
+        workshopOutputDto.amountOfParticipants = workshop.getAmountOfParticipants();
+        workshopOutputDto.workshopCategory1 = workshop.getWorkshopCategory1();
+        workshopOutputDto.workshopCategory2 = workshop.getWorkshopCategory2();
+        workshopOutputDto.workshopVerified = workshop.getWorkshopVerified();
+        workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
+        workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
+        workshopOutputDto.workshopBookings = workshop.getWorkshopBookings();
+        workshopOutputDto.workshopOwnerReviews = workshop.getWorkshopOwnerReviews();
+
+        return workshopOutputDto;
 
     }
 
     public Workshop transferWorkshopInputDtoToWorkshop(WorkshopInputDto workshopInputDto) {
-        return modelMapper.map(workshopInputDto, Workshop.class);
+        Workshop workshop = new Workshop();
+        workshop.setTitle(workshopInputDto.title);
+        workshop.setDate(workshopInputDto.date);
+        workshop.setStartTime(workshopInputDto.startTime);
+        workshop.setEndTime(workshopInputDto.endTime);
+        workshop.setPrice(workshopInputDto.price);
+        workshop.setInOrOutdoors(workshopInputDto.inOrOutdoors);
+        workshop.setLocation(workshopInputDto.location);
+        workshop.setHighlightedInfo(workshopInputDto.highlightedInfo);
+        workshop.setDescription(workshopInputDto.description);
+        workshop.setAmountOfParticipants(workshopInputDto.amountOfParticipants);
+        workshop.setWorkshopCategory1(workshopInputDto.workshopCategory1);
+        workshop.setWorkshopCategory2(workshopInputDto.workshopCategory2);
+        workshop.setWorkshopVerified(workshopInputDto.workshopVerified);
+        workshop.setFeedbackAdmin(workshopInputDto.feedbackAdmin);
+        workshop.setPublishWorkshop(workshopInputDto.publishWorkshop);
+
+        return workshop;
 
     }
 
-//    // als voorbeeld voor het uitsluiten van bepaalde properties als bepaalde properties waarde null hebben. helemaal onderaan het skippen van properties.
-//    public Workshop updateWorkshopTransferWorkshopInputDtoToWorkshop(WorkshopInputDto workshopInputDto) {
-//        TypeMap<WorkshopInputDto, Workshop> propertyMapper = modelMapper.createTypeMap(WorkshopInputDto.class, Workshop.class);
-//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getHighlightedInfo, Workshop::setHighlightedInfo));
-//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getPublishWorkshop, Workshop::setPublishWorkshop));
-//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getWorkshopCategory2, Workshop::setWorkshopCategory2));
-//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getWorkshopVerified, Workshop::setWorkshopVerified));
-//        propertyMapper.addMappings(modelMapper -> modelMapper.when(Conditions.isNull()).skip(WorkshopInputDto::getFeedbackAdmin, Workshop::setFeedbackAdmin));
-//        propertyMapper.addMappings(modelMapper -> modelMapper.skip(Workshop::setId));
-//
-//        return modelMapper.map(workshopInputDto, Workshop.class);
-//
-//    }
 
-//    TypeMap<Game, GameDTO> propertyMapper = this.mapper.createTypeMap(Game.class, GameDTO.class);
-//    propertyMapper.addMappings(mapper -> mapper.skip(GameDTO::setId));
 }

@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +40,9 @@ public class Workshop {
     @Column(columnDefinition = "text")
     private String description;
     private int amountOfParticipants;
+    // geen enumeratie, maar mogelijk een extra klasse maken (incl service, etc) met een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe strings kan toevoegen die dan ook toegevoegd worden aan de database en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
+    private String workshopCategory1;
+    private String workshopCategory2;
 
     //mogelijk enumeratie van maken? met zelfde waardes als publishworkshop.
     private Boolean workshopVerified;
@@ -48,9 +52,6 @@ public class Workshop {
 
     private Boolean publishWorkshop;
 
-    // geen enumeratie, maar mogelijk een extra klasse maken (incl service, etc) met een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe strings kan toevoegen die dan ook toegevoegd worden aan de database en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
-    private String workshopCategory1;
-    private String workshopCategory2;
 
     // check of byte het juiste type variabele is voor image - even checken hoe dit verwerkt wordt - lijst of niet?
 
@@ -59,10 +60,12 @@ public class Workshop {
     //    private User workshopOwner
 
     @OneToMany(mappedBy = "workshop")
-    private ArrayList<Booking> workshopBookings;
+    @JsonIgnore
+    private List<Booking> workshopBookings;
 
     @OneToMany(mappedBy = "workshop")
-    private ArrayList<Review> workshopOwnerReviews;
+    @JsonIgnore
+    private List<Review> workshopOwnerReviews;
 
 
 }
