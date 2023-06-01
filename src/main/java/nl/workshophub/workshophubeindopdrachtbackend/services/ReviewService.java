@@ -68,12 +68,6 @@ public class ReviewService {
     }
 
 
-
-
-
-    //user:
-    //postmapping als attended workshop==true & workshopdate is in past - begin van postmapping set true als date in past
-
     //put
     // admin
    public ReviewOutputDto verifyReviewByAdmin(Long id, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
@@ -93,7 +87,10 @@ public class ReviewService {
 
     }
 //    user
-//    public ReviewOutputDto updateReviewByUser check if user = customer
+//    put public ReviewOutputDto updateReviewByUser check if user = customer
+
+    //user:
+    //postmapping als attended workshop==true & workshopdate is in past - begin van postmapping set true als date in past - user has booking on workshop
 
     public ReviewOutputDto createReview (Long workshopId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
