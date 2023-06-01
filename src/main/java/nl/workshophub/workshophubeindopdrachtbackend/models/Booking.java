@@ -1,9 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +26,8 @@ public class Booking {
 
     private int amount;
 
-//    private Workshop workshop
+    @ManyToOne
+    private Workshop workshop;
 //    private User customer;
 
 

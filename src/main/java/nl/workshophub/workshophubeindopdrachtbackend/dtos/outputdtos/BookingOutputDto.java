@@ -17,5 +17,10 @@ public class BookingOutputDto {
 
     public int amount;
 
+    // of gehele workshop teruggeven? straks als verschillende dto's dan de workshop dto teruggeven met sumiere info?
+
+    public Long workshopId;
+    public String workshopTitle;
+
 
 }
