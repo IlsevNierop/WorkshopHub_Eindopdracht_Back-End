@@ -61,14 +61,14 @@ public class BookingService {
     public BookingOutputDto updateBooking(Long bookingId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException{
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("De boeking met ID nummer " + bookingId + " bestaat niet"));
         booking.setDateOrder(bookingInputDto.dateOrder);
-        if (bookingInputDto.commentsCustomer != null){
-            booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
-        }
         Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + bookingInputDto.workshopId + " bestaat niet"));
         if (AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop) < bookingInputDto.amount){
             throw new NoAvailableSpotsException("Er zijn nog maar " + (AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop) + " plekjes beschikbaar, en je probeert " + bookingInputDto.amount + " plekjes te boeken"));
         }
         booking.setAmount(bookingInputDto.amount);
+        if (bookingInputDto.commentsCustomer != null){
+            booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
+        }
         if (bookingInputDto.workshopId != null){
             booking.setWorkshop(workshop);
         }
