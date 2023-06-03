@@ -5,6 +5,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInpu
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
+import nl.workshophub.workshophubeindopdrachtbackend.methods.AvailableSpotsCalculation;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import org.hibernate.jdbc.Work;
@@ -178,6 +179,7 @@ public class WorkshopService {
         workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
         workshopOutputDto.workshopBookings = workshop.getWorkshopBookings();
         workshopOutputDto.workshopOwnerReviews = workshop.getWorkshopOwnerReviews();
+        workshopOutputDto.spotsAvailable = AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop);
 
         return workshopOutputDto;
 

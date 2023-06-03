@@ -27,7 +27,7 @@ public class WorkshopOutputDto {
     public String description;
     public int amountOfParticipants;
 
-    private int spotsAvailable;
+    public int spotsAvailable;
     public String workshopCategory1;
     public String workshopCategory2;
 
