@@ -2,7 +2,9 @@ package nl.workshophub.workshophubeindopdrachtbackend.services;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.methods.AvailableSpotsCalculation;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingRepository;
@@ -44,22 +46,30 @@ public class BookingService {
         return transferBookingToBookingOutputDto(booking);
     }
 
-    public BookingOutputDto createBooking(Long workshopId, BookingInputDto bookingInputDto){
+    // check toevoegen - als er niet genoeg plekken beschikbaar zijn, dan kan niet geboekt worden
+
+    public BookingOutputDto createBooking(Long workshopId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
+        if (AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop) < bookingInputDto.amount){
+            throw new NoAvailableSpotsException("Er zijn nog maar " + (AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop) + " plekjes beschikbaar, en je probeert " + bookingInputDto.amount + " plekjes te boeken"));
+        }
         Booking booking = transferBookingInputDtoToBooking(bookingInputDto);
         booking.setWorkshop(workshop);
         bookingRepository.save(booking);
         return transferBookingToBookingOutputDto(booking);
     }
-    public BookingOutputDto updateBooking(Long bookingId, BookingInputDto bookingInputDto){
+    public BookingOutputDto updateBooking(Long bookingId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException{
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("De boeking met ID nummer " + bookingId + " bestaat niet"));
         booking.setDateOrder(bookingInputDto.dateOrder);
         if (bookingInputDto.commentsCustomer != null){
             booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
         }
+        Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + bookingInputDto.workshopId + " bestaat niet"));
+        if (AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop) < bookingInputDto.amount){
+            throw new NoAvailableSpotsException("Er zijn nog maar " + (AvailableSpotsCalculation.getAvailableSpotsWorkshop(workshop) + " plekjes beschikbaar, en je probeert " + bookingInputDto.amount + " plekjes te boeken"));
+        }
         booking.setAmount(bookingInputDto.amount);
         if (bookingInputDto.workshopId != null){
-            Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + bookingInputDto.workshopId + " bestaat niet"));
             booking.setWorkshop(workshop);
         }
         bookingRepository.save(booking);
