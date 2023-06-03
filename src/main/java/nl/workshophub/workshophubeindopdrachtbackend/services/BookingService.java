@@ -44,6 +44,33 @@ public class BookingService {
         return transferBookingToBookingOutputDto(booking);
     }
 
+    public BookingOutputDto createBooking(Long workshopId, BookingInputDto bookingInputDto){
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
+        Booking booking = transferBookingInputDtoToBooking(bookingInputDto);
+        booking.setWorkshop(workshop);
+        bookingRepository.save(booking);
+        return transferBookingToBookingOutputDto(booking);
+    }
+    public BookingOutputDto updateBooking(Long bookingId, BookingInputDto bookingInputDto){
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("De boeking met ID nummer " + bookingId + " bestaat niet"));
+        booking.setDateOrder(bookingInputDto.dateOrder);
+        if (bookingInputDto.commentsCustomer != null){
+            booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
+        }
+        booking.setAmount(bookingInputDto.amount);
+        if (bookingInputDto.workshopId != null){
+            Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + bookingInputDto.workshopId + " bestaat niet"));
+            booking.setWorkshop(workshop);
+        }
+        bookingRepository.save(booking);
+        return transferBookingToBookingOutputDto(booking);
+    }
+
+    public void deleteBooking(Long bookingId){
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("De boeking met ID nummer " + bookingId + " bestaat niet"));
+        bookingRepository.delete(booking);
+    }
+
 
 
 

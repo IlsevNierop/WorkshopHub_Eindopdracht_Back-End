@@ -1,14 +1,14 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
+import jakarta.validation.Valid;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.methods.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,13 +36,38 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getAllBookingsFromWorkshop(workshopId), HttpStatus.OK);
 
     }
-    @GetMapping ("/booking/{bookingId}")
+    @GetMapping ("/{bookingId}")
     public ResponseEntity<BookingOutputDto> getOneBookingById(@PathVariable Long bookingId){
 
         return new ResponseEntity<>(bookingService.getOneBookingById(bookingId), HttpStatus.OK);
 
     }
 
+    @PostMapping ("/{workshopId}")
+    public ResponseEntity<Object> createBooking(@PathVariable Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(bookingService.createBooking(workshopId, bookingInputDto), HttpStatus.ACCEPTED);
+    }
+
+
+    //admin (of ook owner?)
+    @PutMapping("/{bookingId}")
+    public ResponseEntity<Object> updateBooking(@PathVariable Long bookingId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(bookingService.updateBooking(bookingId, bookingInputDto), HttpStatus.ACCEPTED);
+    }
+
+    //admin (of ook owner?)
+
+    @DeleteMapping("/admin/{bookingId}")
+    public ResponseEntity<HttpStatus> deleteBooking(@PathVariable Long bookingId) {
+        bookingService.deleteBooking(bookingId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
 
