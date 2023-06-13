@@ -23,7 +23,8 @@ public class ReviewInputDto {
 
     public Long workshopId;
 
-    //public User customer;
+    public Long customerId;
+
     //public User workshopOwner;
 
 

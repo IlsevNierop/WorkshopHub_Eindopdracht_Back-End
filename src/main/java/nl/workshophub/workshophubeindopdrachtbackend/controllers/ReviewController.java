@@ -47,13 +47,13 @@ public class ReviewController {
     }
 
     //userId nog toevoegen na relatie leggen
-    @PostMapping ("/{workshopId}")
-    public ResponseEntity<Object> createReview (@PathVariable Long workshopId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
+    @PostMapping ("/{workshopId}/{customerId}")
+    public ResponseEntity<Object> createReview (@PathVariable("workshopId") Long workshopId, @PathVariable ("customerId") Long customerId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         //uri toevoegen
-        return new ResponseEntity<>(reviewService.createReview(workshopId, reviewInputDto), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(reviewService.createReview(workshopId, customerId, reviewInputDto), HttpStatus.ACCEPTED);
     }
 
 

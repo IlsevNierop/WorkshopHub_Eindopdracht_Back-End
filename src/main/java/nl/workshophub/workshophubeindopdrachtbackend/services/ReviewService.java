@@ -4,12 +4,12 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.ReviewInputD
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
+import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.ReviewRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
@@ -22,11 +22,13 @@ public class ReviewService {
     ModelMapper modelMapper = new ModelMapper();
 
     private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     private final WorkshopRepository workshopRepository;
 
-    public ReviewService(ReviewRepository reviewRepository, WorkshopRepository workshopRepository) {
+    public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository, WorkshopRepository workshopRepository) {
         this.reviewRepository = reviewRepository;
+        this.userRepository = userRepository;
         this.workshopRepository = workshopRepository;
     }
     public ReviewOutputDto getReviewById(Long id) throws RecordNotFoundException {
@@ -86,10 +88,12 @@ public class ReviewService {
     //user:
     //postmapping als attended workshop==true & workshopdate is in past - begin van postmapping set true als date in past - user has booking on workshop
 
-    public ReviewOutputDto createReview (Long workshopId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
+    public ReviewOutputDto createReview (Long workshopId, Long customerId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID nummer " + customerId + " bestaat niet"));
         Review review = transferReviewInputDtoToReview(reviewInputDto);
         review.setWorkshop(workshop);
+        review.setCustomer(customer);
         reviewRepository.save(review);
 
         return transferReviewToReviewOutputDto(review);
@@ -115,6 +119,7 @@ public class ReviewService {
        reviewOutputDto.feedbackAdmin = review.getFeedbackAdmin();
        reviewOutputDto.workshopId = review.getWorkshop().getId();
        reviewOutputDto.workshopTitle = review.getWorkshop().getTitle();
+       reviewOutputDto.firstNameReviewer = review.getCustomer().getFirstName();
 
        return reviewOutputDto;
 

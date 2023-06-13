@@ -1,13 +1,13 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -30,5 +30,9 @@ public class User {
     private String vatNumber;
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
+
+    @OneToMany (mappedBy = "customer")
+    @JsonIgnore
+    private List<Review> reviews;
 
 }

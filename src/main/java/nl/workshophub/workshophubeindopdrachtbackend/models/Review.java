@@ -28,7 +28,9 @@ public class Review {
     @ManyToOne
     private Workshop workshop;
 
-    //private User customer;
+    @ManyToOne
+    private User customer;
+
     //private User workshopOwner;
 
 

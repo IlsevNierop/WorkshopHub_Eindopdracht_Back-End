@@ -16,7 +16,8 @@ public class ReviewOutputDto {
     public Long workshopId;
     public String workshopTitle;
 
-//    public String firstNameReviewer;
+    public String firstNameReviewer;
+
 //    public String companyNameWorkshopOwner;
 //    public double averageRatingWorkshopOwner;
 
