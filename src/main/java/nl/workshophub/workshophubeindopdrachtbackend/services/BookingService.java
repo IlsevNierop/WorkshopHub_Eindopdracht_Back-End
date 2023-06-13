@@ -4,7 +4,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInput
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
-import nl.workshophub.workshophubeindopdrachtbackend.methods.AvailableSpotsCalculation;
+import nl.workshophub.workshophubeindopdrachtbackend.util.AvailableSpotsCalculation;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingRepository;
@@ -29,9 +29,6 @@ public class BookingService {
     public List<BookingOutputDto> getAllBookingsFromWorkshop(Long workshopId) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
         List<Booking> workshopBookings = workshop.getWorkshopBookings();
-        if (workshopBookings.isEmpty()) {
-            throw new RecordNotFoundException("Er zijn momenteel geen boekingen van de workshop met ID nummer " + workshopId);
-        }
         List<BookingOutputDto> workshopBookingsOutputDto = new ArrayList<>();
         for (Booking b : workshopBookings) {
             BookingOutputDto workshopBookingOutputDto = transferBookingToBookingOutputDto(b);
@@ -45,8 +42,6 @@ public class BookingService {
 
         return transferBookingToBookingOutputDto(booking);
     }
-
-    // check toevoegen - als er niet genoeg plekken beschikbaar zijn, dan kan niet geboekt worden
 
     public BookingOutputDto createBooking(Long workshopId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));

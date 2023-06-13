@@ -3,7 +3,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.methods.FieldErrorHandling;
+import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +62,7 @@ public class WorkshopController {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopInputDto);
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto).toUriString());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }
 

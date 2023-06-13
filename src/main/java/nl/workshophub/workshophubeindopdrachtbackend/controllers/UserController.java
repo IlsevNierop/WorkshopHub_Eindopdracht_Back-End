@@ -40,6 +40,7 @@ public class UserController {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
     }
 
+    // bij het verifieren van een workshopowner - dan ook automatisch rol workshopowner toekennen.
 
 
 

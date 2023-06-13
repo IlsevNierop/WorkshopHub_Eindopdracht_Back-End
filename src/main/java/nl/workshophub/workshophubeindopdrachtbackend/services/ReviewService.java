@@ -43,9 +43,6 @@ public class ReviewService {
     //admin
     public List<ReviewOutputDto> getAllReviews() throws RecordNotFoundException {
         List<Review> reviews = reviewRepository.findAll();
-        if (reviews.isEmpty()){
-            throw new RecordNotFoundException("Er zijn geen reviews");
-        }
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Review r: reviews) {
             ReviewOutputDto reviewOutputDto = transferReviewToReviewOutputDto(r);
@@ -56,9 +53,6 @@ public class ReviewService {
 
     public List<ReviewOutputDto> getReviewsToVerify() throws RecordNotFoundException {
         List<Review> reviews = reviewRepository.findByReviewVerifiedIsNull();
-        if (reviews.isEmpty()){
-            throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren reviews");
-        }
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Review r: reviews) {
             ReviewOutputDto reviewOutputDto = transferReviewToReviewOutputDto(r);

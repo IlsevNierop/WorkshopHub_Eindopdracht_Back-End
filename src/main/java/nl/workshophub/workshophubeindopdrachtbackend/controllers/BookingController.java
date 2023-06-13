@@ -3,7 +3,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.methods.FieldErrorHandling;
+import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +48,7 @@ public class BookingController {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
+        //uri toevoegen
         return new ResponseEntity<>(bookingService.createBooking(workshopId, bookingInputDto), HttpStatus.ACCEPTED);
     }
 

@@ -28,7 +28,10 @@ public class Workshop {
     private String title;
     private LocalDate date;
     private LocalTime startTime;
+
+    //end time verwijderen
     private LocalTime endTime;
+//    zet hier de tijdsduur neer - duration
     private double price;
     @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;

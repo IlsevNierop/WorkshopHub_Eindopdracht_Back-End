@@ -1,14 +1,12 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
-import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
-import nl.workshophub.workshophubeindopdrachtbackend.methods.AvailableSpotsCalculation;
+import nl.workshophub.workshophubeindopdrachtbackend.util.AvailableSpotsCalculation;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
-import org.hibernate.jdbc.Work;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,9 +28,6 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
-        if (workshops.isEmpty()) {
-            throw new RecordNotFoundException("Er zijn momenteel geen workshops beschikbaar");
-        }
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
@@ -50,9 +45,6 @@ public class WorkshopService {
     //nu alleen omhoog als ze null zijn - niet als false?
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() throws RecordNotFoundException {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
-        if (workshops.isEmpty()) {
-            throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren workshops");
-        }
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
@@ -150,11 +142,11 @@ public class WorkshopService {
     public void deleteWorkshop(Long id) throws ValidationException, RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         //admin kan niet verwijderen als owner op publish heeft gezet
-        if (workshop.getPublishWorkshop() == true) {
-            throw new ValidationException("Deze workshop kan niet verwijderd worden omdat deze door de eigenaar geaccordeerd is.");
+        if (workshop.getPublishWorkshop() != null && workshop.getPublishWorkshop() == true) {
+            throw new ValidationException("Deze workshop kan niet verwijderd worden omdat deze al door de eigenaar geaccordeerd is.");
         }
-        //wat als er relaties zijn? boekingen kan niet verwijderen.
-        workshopRepository.delete(workshop);
+            //wat als er relaties zijn? boekingen kan niet verwijderen.
+            workshopRepository.delete(workshop);
 
     }
 
