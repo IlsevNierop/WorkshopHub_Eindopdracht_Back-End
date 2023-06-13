@@ -3,7 +3,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.methods.FieldErrorHandling;
+import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +41,7 @@ public class WorkshopController {
     // published workshops van owner after date (?)
     // published workshops owner allemaal (?)
 
-//    @GetMapping ("/{workshopowner}/goedkeuren")
+//    @GetMapping ("/{workshopowner}/")
 //    public ResponseEntity<List<Workshop>> getAllWorkshopsByWorkshopOwner (@RequestParam User workshopOwner) throws RecordNotFoundException {
 //        //Nog toevoegen: check of workshopOwner uberhaupt bestaat in de database
 //        if (repos.findByWorkshopOwner(workshopOwner).isEmpty()){
@@ -51,7 +51,7 @@ public class WorkshopController {
 //    }
 
     // admin getmappings:
-    @GetMapping("/admin/goedkeuren")
+    @GetMapping("/admin/")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerify() {
         return new ResponseEntity<>(workshopService.getAllWorkshopsToVerify(), HttpStatus.OK);
     }
@@ -62,7 +62,7 @@ public class WorkshopController {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopInputDto);
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto).toUriString());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }
 
@@ -79,7 +79,7 @@ public class WorkshopController {
     }
 
     // nog workshopowner toevoegen in url en pathvariable opzoeken via die repository
-    @PutMapping ("/goedkeuren/{id}")
+    @PutMapping ("/owner/{id}")
     public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner (@PathVariable Long id, @RequestParam Boolean publishWorkshop) {
 
         return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(id, publishWorkshop), HttpStatus.ACCEPTED);
@@ -87,7 +87,7 @@ public class WorkshopController {
 
     // admin:
     // put mapping: admin can edit and add feedback and approve
-    @PutMapping ("/admin/goedkeuren/{id}")
+    @PutMapping ("/admin/{id}")
     public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long id, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));

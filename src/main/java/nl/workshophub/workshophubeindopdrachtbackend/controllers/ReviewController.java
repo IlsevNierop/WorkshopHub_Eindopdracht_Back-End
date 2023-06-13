@@ -2,10 +2,8 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.ReviewInputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.methods.FieldErrorHandling;
+import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +32,13 @@ public class ReviewController {
 
     }
 
-    @GetMapping("/admin/goedkeuren")
+    @GetMapping("/admin/")
     public ResponseEntity<List<ReviewOutputDto>> getReviewsToVerify(){
         return new ResponseEntity<>(reviewService.getReviewsToVerify(), HttpStatus.OK);
 
     }
 
-    @PutMapping ("/admin/goedkeuren/{id}")
+    @PutMapping ("/admin/{id}")
     public ResponseEntity<Object> verifyReviewByAdmin (@PathVariable Long id, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -54,6 +52,7 @@ public class ReviewController {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
+        //uri toevoegen
         return new ResponseEntity<>(reviewService.createReview(workshopId, reviewInputDto), HttpStatus.ACCEPTED);
     }
 

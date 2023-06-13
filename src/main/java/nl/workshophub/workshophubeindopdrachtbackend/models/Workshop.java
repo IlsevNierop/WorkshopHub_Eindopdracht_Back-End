@@ -28,7 +28,10 @@ public class Workshop {
     private String title;
     private LocalDate date;
     private LocalTime startTime;
+
+    //end time verwijderen
     private LocalTime endTime;
+//    zet hier de tijdsduur neer - duration
     private double price;
     @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;
@@ -40,6 +43,7 @@ public class Workshop {
     @Column(columnDefinition = "text")
     private String description;
     private int amountOfParticipants;
+
     // geen enumeratie, maar mogelijk een extra klasse maken (incl service, etc) met een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe strings kan toevoegen die dan ook toegevoegd worden aan de database en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
     private String workshopCategory1;
     private String workshopCategory2;

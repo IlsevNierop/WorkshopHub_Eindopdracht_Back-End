@@ -32,7 +32,7 @@ public class UserService {
     public UserCustomerOutputDto getCustomerById(Long id) throws RecordNotFoundException {
         User customer = userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + id + " bestaat niet"));
         if (customer.getWorkshopOwner() == true) {
-            throw new RecordNotFoundException("De gebruiker met ID " + id + " is een workshopeigenaar");
+            throw new RecordNotFoundException("De gebruiker met ID " + id + " is een workshopeigenaar en geen klant");
         }
         return transferUserToCustomerOutputDto(customer);
     }
@@ -40,16 +40,13 @@ public class UserService {
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long id) throws RecordNotFoundException {
         User workshopOwner = userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + id + " bestaat niet"));
         if (workshopOwner.getWorkshopOwner() == false) {
-            throw new RecordNotFoundException("De gebruiker met ID " + id + " is geen workshopeigenaar");
+            throw new RecordNotFoundException("De gebruiker met ID " + id + " is geen workshopeigenaar, maar een klant");
         }
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() throws RecordNotFoundException {
         List<User> workshopowners = userRepository.findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNull();
-        if (workshopowners.isEmpty()) {
-            throw new RecordNotFoundException("Er zijn momenteel geen goed te keuren workshopeigenaren");
-        }
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
         for (User workshopowner : workshopowners) {
             UserWorkshopOwnerOutputDto workshopOwnerOutputDto = transferUserToWorkshopOwnerOutputDto(workshopowner);

@@ -1,4 +1,4 @@
-package nl.workshophub.workshophubeindopdrachtbackend.methods;
+package nl.workshophub.workshophubeindopdrachtbackend.util;
 
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;

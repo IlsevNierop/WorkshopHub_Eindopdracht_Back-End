@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,13 @@ public class ExceptionController {
     }
     @ExceptionHandler(value = ValidationException.class)
     public ResponseEntity<Object> exception(ValidationException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+
+    }
+
+    @ExceptionHandler(value = NoAvailableSpotsException.class)
+    public ResponseEntity<Object> exception(NoAvailableSpotsException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 
     }
 }
