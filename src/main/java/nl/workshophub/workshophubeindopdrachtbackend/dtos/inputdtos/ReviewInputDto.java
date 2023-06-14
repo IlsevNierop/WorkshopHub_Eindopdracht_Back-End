@@ -21,11 +21,15 @@ public class ReviewInputDto {
     public Boolean reviewVerified;
     public String feedbackAdmin;
 
+    @NotNull
     public Long workshopId;
-
+    @NotNull
     public Long customerId;
 
-    //public User workshopOwner;
+    // geen workshopowner id - die haal ik uit de workshop
+
+
+
 
 
 

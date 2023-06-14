@@ -94,6 +94,8 @@ public class ReviewService {
         Review review = transferReviewInputDtoToReview(reviewInputDto);
         review.setWorkshop(workshop);
         review.setCustomer(customer);
+        // als de owner gekoppeld is aan de workshop
+//        review.setWorkshopOwner(workshop.getWorkshopOwner().getId());
         reviewRepository.save(review);
 
         return transferReviewToReviewOutputDto(review);
@@ -117,9 +119,13 @@ public class ReviewService {
        reviewOutputDto.reviewDescription = review.getReviewDescription();
        reviewOutputDto.reviewVerified = review.getReviewVerified();
        reviewOutputDto.feedbackAdmin = review.getFeedbackAdmin();
-       reviewOutputDto.workshopId = review.getWorkshop().getId();
        reviewOutputDto.workshopTitle = review.getWorkshop().getTitle();
+       reviewOutputDto.workshopDate = review.getWorkshop().getDate();
+       reviewOutputDto.workshopLocation = review.getWorkshop().getLocation();
        reviewOutputDto.firstNameReviewer = review.getCustomer().getFirstName();
+       reviewOutputDto.lastNameReviewer = review.getCustomer().getLastName();
+//       reviewOutputDto.companyNameWorkshopOwner = review.getWorkshopOwner().getCompanyName();
+       // average rating nog toevoegen
 
        return reviewOutputDto;
 
@@ -131,7 +137,12 @@ public class ReviewService {
         review.setReviewDescription(reviewInputDto.reviewDescription);
         review.setReviewVerified(reviewInputDto.reviewVerified);
         review.setFeedbackAdmin(reviewInputDto.feedbackAdmin);
-       //als je in de body van reviewinputdto de workshopId meegeeft, kun je hier, via de workshoprepository, ook nog de workshop setten.
+        User customer = userRepository.findById(reviewInputDto.customerId).orElseThrow(() -> new RecordNotFoundException("De klant met ID " + reviewInputDto.customerId + " bestaat niet."));
+        review.setCustomer(customer);
+        Workshop workshop = workshopRepository.findById(reviewInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + reviewInputDto.workshopId + " bestaat niet, en er kan geen review achtergelaten worden zonder gekoppeld te zijn aan een workshop."));;
+        review.setWorkshop(workshop);
+        //workshopowner nog toevoegen na relatie met workshop
+//        review.setWorkshopOwner(workshop.get);
 
         return review;
 

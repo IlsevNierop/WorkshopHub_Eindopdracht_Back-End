@@ -31,8 +31,12 @@ public class User {
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
 
-    @OneToMany (mappedBy = "customer")
+    @OneToMany (mappedBy = "customer", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Review> reviews;
+    private List<Review> customerReviews;
+
+    @OneToMany (mappedBy = "workshopOwner", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Review> workshopOwnerReviews;
 
 }

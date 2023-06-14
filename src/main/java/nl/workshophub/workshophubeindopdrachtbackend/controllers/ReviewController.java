@@ -47,7 +47,7 @@ public class ReviewController {
     }
 
     //userId nog toevoegen na relatie leggen
-    @PostMapping ("/{workshopId}/{customerId}")
+    @PostMapping ("/{workshopId}/{customerId}/")
     public ResponseEntity<Object> createReview (@PathVariable("workshopId") Long workshopId, @PathVariable ("customerId") Long customerId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));

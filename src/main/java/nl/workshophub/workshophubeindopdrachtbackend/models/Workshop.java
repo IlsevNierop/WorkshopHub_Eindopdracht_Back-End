@@ -63,11 +63,11 @@ public class Workshop {
 
     //    private User workshopOwner
 
-    @OneToMany(mappedBy = "workshop")
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Booking> workshopBookings;
 
-    @OneToMany(mappedBy = "workshop")
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Review> workshopOwnerReviews;
 
