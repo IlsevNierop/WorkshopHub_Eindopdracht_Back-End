@@ -19,8 +19,8 @@ public class UserCustomerInputDto {
 
     //validatie gaat niet goed, check symbolen
     @NotBlank (message = "Wachtwoord kan niet leeg zijn")
-    @Pattern(regexp = "^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[\\!\\#\\@\\$\\%\\&\\/\\(\\)\\=\\?\\*\\-\\+\\-\\_\\.\\:\\;\\,\\]\\[\\{\\}\\^])[A-Za-z0-9!#%]{8,20}", message = "Wachtwoord moet aan de volgende eisen voldoen:" +
-            "1. Minstens 1 kleine letter. 2. Minstens 1 hoofdletter. 3. Minstens 1 nummer 4. Minstens 1 symbool bevatten. 5. Het moet tussen de 8 en 20 karakters lang zijn.")
+    @Pattern(regexp = "^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[\\!\\#\\%\\])[A-Za-z0-9!#%]{8,20}", message = "Wachtwoord moet aan de volgende eisen voldoen:" +
+            "1. Minstens 1 kleine letter. 2. Minstens 1 hoofdletter. 3. Minstens 1 nummer 4. Minstens 1 van de volgende symbolen bevatten: !, # of %. 5. Het moet tussen de 8 en 20 karakters lang zijn.")
 
     public String password;
 
