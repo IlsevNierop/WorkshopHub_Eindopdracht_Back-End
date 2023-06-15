@@ -4,6 +4,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomer
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
@@ -50,12 +51,29 @@ public class UserService {
             workshopOwnerOutputDtos.add(workshopOwnerOutputDto);
         }
         return workshopOwnerOutputDtos;
+    }
 
+    public UserCustomerOutputDto createCustomer(UserCustomerInputDto customerInputDto) throws BadRequestException {
+        if (userRepository.existsByEmail(customerInputDto.email)){
+            throw new BadRequestException("Er bestaat al een gebruiker met het emailadres: " + customerInputDto.email);
+        }
+        User customer = transferCustomerInputDtoToUser(customerInputDto);
+        userRepository.save(customer);
+        return transferUserToCustomerOutputDto(customer);
+    }
+    public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) throws BadRequestException {
+        if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
+            throw new BadRequestException("Er bestaat al een gebruiker met het emailadres: " + workshopOwnerInputDto.email);
+        }
+        User workshopOwner = transferWorkshopOwnerInputDtoToUser(workshopOwnerInputDto);
+        userRepository.save(workshopOwner);
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
 
     public UserCustomerOutputDto transferUserToCustomerOutputDto(User customer) {
         UserCustomerOutputDto customerOutputDto = new UserCustomerOutputDto();
+        customerOutputDto.id = customer.getId();
         customerOutputDto.firstName = customer.getFirstName();
         customerOutputDto.lastName = customer.getLastName();
         customerOutputDto.email = customer.getEmail();

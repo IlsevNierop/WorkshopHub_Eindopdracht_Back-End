@@ -6,11 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -70,7 +68,7 @@ public class Workshop {
 
     @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Review> workshopOwnerReviews;
+    private List<Review> workshopReviews;
 
 
 }

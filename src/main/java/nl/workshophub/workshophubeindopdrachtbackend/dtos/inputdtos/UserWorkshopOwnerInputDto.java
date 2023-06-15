@@ -1,12 +1,8 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
 @Getter
 @Setter
@@ -20,7 +16,11 @@ public class UserWorkshopOwnerInputDto {
     @Email (regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
             flags = Pattern.Flag.CASE_INSENSITIVE)
     public String email;
+
+    //validatie gaat niet goed, check symbolen
     @NotBlank (message = "Wachtwoord kan niet leeg zijn")
+    @Pattern(regexp = "^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[\\!\\#\\@\\$\\%\\&\\/\\(\\)\\=\\?\\*\\-\\+\\-\\_\\.\\:\\;\\,\\]\\[\\{\\}\\^])[A-Za-z0-9!#%]{8,20}", message = "Wachtwoord moet aan de volgende eisen voldoen:" +
+            "1. Minstens 1 kleine letter. 2. Minstens 1 hoofdletter. 3. Minstens 1 nummer 4. Minstens 1 symbool bevatten. 5. Het moet tussen de 8 en 20 karakters lang zijn.")
     public String password;
     @NotBlank (message = "Bedrijfsnaam kan niet leeg zijn")
     public String companyName;
@@ -30,6 +30,6 @@ public class UserWorkshopOwnerInputDto {
     public String vatNumber;
     public Boolean workshopOwnerVerified;
 
-    @NotNull
+    @NotNull(message= "Je moet aangeven of je een workshop eigenaar of klant bent")
     public Boolean workshopOwner;
 }

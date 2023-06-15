@@ -37,6 +37,8 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getWorkshopById(id), HttpStatus.OK);
     }
 
+    //getmapping om per bedrijf alle workshops te zien? voor niet ingelogde users?
+
 
     //owner getmappings:
     // goed te keuren workshops van owner - verified==true

@@ -157,7 +157,7 @@ public class WorkshopService {
         workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
         workshopOutputDto.workshopBookings = workshop.getWorkshopBookings();
-        workshopOutputDto.workshopOwnerReviews = workshop.getWorkshopOwnerReviews();
+        workshopOutputDto.workshopOwnerReviews = workshop.getWorkshopReviews();
         workshopOutputDto.spotsAvailable = availableSpotsCalculation.getAvailableSpotsWorkshop(workshop);
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         workshopOutputDto.averageRatingWorkshopOwnerReviews = averageRatingWorkshopOwnerCalculator.calculateAverageRatingWorkshopOwner(workshop.getWorkshopOwner());

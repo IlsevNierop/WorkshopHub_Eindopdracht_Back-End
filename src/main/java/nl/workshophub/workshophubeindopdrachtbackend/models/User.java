@@ -23,6 +23,8 @@ public class User {
 
     private String firstName;
     private String lastName;
+
+    @Column(unique=true)
     private String email;
     private String password;
     private String companyName;
@@ -35,9 +37,9 @@ public class User {
     @JsonIgnore
     private List<Review> customerReviews;
 
-    @OneToMany (mappedBy = "workshopOwner", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Review> workshopOwnerReviews;
+//    @OneToMany (mappedBy = "workshopOwner", cascade = CascadeType.ALL)
+//    @JsonIgnore
+//    private List<Review> workshopOwnerReviews;
 
     @OneToMany (mappedBy = "workshopOwner", cascade = CascadeType.ALL)
     @JsonIgnore

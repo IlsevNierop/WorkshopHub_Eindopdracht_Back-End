@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class UserCustomerOutputDto {
 
+    public Long id;
     public String firstName;
     public String lastName;
     public String email;
