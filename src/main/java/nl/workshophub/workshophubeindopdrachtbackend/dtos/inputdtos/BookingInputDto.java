@@ -21,7 +21,10 @@ public class BookingInputDto {
     @Min(value=1, message = "Aantal plekjes moet meer dan 1 zijn")
     public int amount;
 
+    //workshop wijzigen alleen via update - put methode
     public Long workshopId;
+
+
 
 
 }

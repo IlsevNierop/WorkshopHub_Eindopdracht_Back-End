@@ -15,6 +15,7 @@ public class UserCustomerInputDto {
             flags = Pattern.Flag.CASE_INSENSITIVE)
     public String email;
     @NotBlank (message = "Wachtwoord kan niet leeg zijn")
+    //nog validatie toevoegen
     public String password;
 
     public Boolean workshopOwner;

@@ -17,8 +17,8 @@ public class UserWorkshopOwnerOutputDto {
     public int kvkNumber;
     public String vatNumber;
     public Boolean workshopOwnerVerified;
-    public Boolean workshopOwner;
 
+    public Boolean workshopOwner;
     public Double averageRatingReviews;
 
 }

@@ -3,13 +3,16 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.BookingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,12 +28,10 @@ public class BookingController {
         this.fieldErrorHandling = fieldErrorHandling;
     }
 
-    //owner and customer
-//    @GetMapping ("/{userId}")
-//    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromOwner(@PathVariable Long userId){
-//        return new ResponseEntity<>(, HttpStatus.OK);
-//
-//    }
+    @GetMapping ("/user/{userId}")
+    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromUser(@PathVariable Long userId){
+        return new ResponseEntity<>(bookingService.getAllBookingsFromUser(userId), HttpStatus.OK);
+    }
 
     //nog checken of workshop van de specifieke owner is die ingelogd is / alleen door eerst naar workshop te gaan - dat is al de check / bookings ophalen
     @GetMapping ("/workshop/{workshopId}")
@@ -46,13 +47,14 @@ public class BookingController {
 
     }
 
-    @PostMapping ("/{workshopId}")
-    public ResponseEntity<Object> createBooking(@PathVariable Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
+    @PostMapping ("{customerId}/{workshopId}")
+    public ResponseEntity<Object> createBooking(@PathVariable("customerId") Long customerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        //uri toevoegen
-        return new ResponseEntity<>(bookingService.createBooking(workshopId, bookingInputDto), HttpStatus.ACCEPTED);
+        BookingOutputDto bookingOutputDto = bookingService.createBooking(customerId, workshopId, bookingInputDto);
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + bookingOutputDto.id).toUriString());
+        return ResponseEntity.created(uri).body(bookingOutputDto);
     }
 
 
@@ -66,7 +68,6 @@ public class BookingController {
     }
 
     //admin (of ook owner?)
-
     @DeleteMapping("/admin/{bookingId}")
     public ResponseEntity<HttpStatus> deleteBooking(@PathVariable Long bookingId) {
         bookingService.deleteBooking(bookingId);

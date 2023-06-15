@@ -37,7 +37,7 @@ public class UserController {
 
     //admin
 
-    @GetMapping("/admin/workshopowner/")
+    @GetMapping("/admin/workshopowners/")
     public ResponseEntity<List<UserWorkshopOwnerOutputDto>> getWorkshopOwnersToVerify() {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
     }
