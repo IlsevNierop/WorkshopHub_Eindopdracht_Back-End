@@ -31,7 +31,7 @@ public class Workshop {
 
     //end time verwijderen
     private LocalTime endTime;
-//    zet hier de tijdsduur neer - duration
+    //    zet hier de tijdsduur neer - duration
     private double price;
     @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;
@@ -61,7 +61,8 @@ public class Workshop {
 
 //    private ArrayList<byte> workshopImage;
 
-    //    private User workshopOwner
+    @ManyToOne
+    private User workshopOwner;
 
     @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore

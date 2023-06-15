@@ -39,4 +39,8 @@ public class User {
     @JsonIgnore
     private List<Review> workshopOwnerReviews;
 
+    @OneToMany (mappedBy = "workshopOwner", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Workshop> workshops;
+
 }

@@ -4,15 +4,11 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomer
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import nl.workshophub.workshophubeindopdrachtbackend.util.AverageRatingWorkshopOwnerCalculator;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +16,14 @@ import java.util.List;
 @Service
 public class UserService {
 
-    ModelMapper modelMapper = new ModelMapper();
-
     private final UserRepository userRepository;
 
+    private final AverageRatingWorkshopOwnerCalculator averageRatingWorkshopOwnerCalculator;
 
-    public UserService(UserRepository userRepository) {
+
+    public UserService(UserRepository userRepository, AverageRatingWorkshopOwnerCalculator averageRatingWorkshopOwnerCalculator) {
         this.userRepository = userRepository;
+        this.averageRatingWorkshopOwnerCalculator = averageRatingWorkshopOwnerCalculator;
     }
 
     public UserCustomerOutputDto getCustomerById(Long id) throws RecordNotFoundException {
@@ -80,6 +77,8 @@ public class UserService {
         workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
         workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
         workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
+        workshopOwnerOutputDto.averageRatingReviews = averageRatingWorkshopOwnerCalculator.calculateAverageRatingWorkshopOwner(workshopOwner);
+
 
         return workshopOwnerOutputDto;
     }

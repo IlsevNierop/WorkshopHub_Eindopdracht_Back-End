@@ -19,4 +19,6 @@ public class UserWorkshopOwnerOutputDto {
     public Boolean workshopOwnerVerified;
     public Boolean workshopOwner;
 
+    public Double averageRatingReviews;
+
 }
