@@ -6,6 +6,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustome
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
@@ -114,6 +115,18 @@ public class UserService {
         transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto);
         userRepository.save(workshopOwner);
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+    }
+
+    public void deleteUser(Long userId) throws RecordNotFoundException {
+        try {
+            User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + userId + " bestaat niet"));
+            userRepository.delete(user);
+        }
+        catch (Exception e){
+            throw new BadRequestException("Deze gebruiker heeft een relatie met een workshop, review of boeking. Daarom kun je de gebruiker niet verwijderen.");
+
+        }
+
     }
 
 

@@ -101,12 +101,13 @@ public class UserController {
     }
 
 
-    //putmapping voor owner en voor user (verschillende dto's) --> als user owner wordt - kan ook met putmapping
-//    @PutMapping
-
-    //putmapping voor verificatie owner
-
     //deletemapping (relaties?) - moet je een user kunnen verwijderen als die workshops / boekingen / reviews heeft? privacy wise moet je die kunnen verwijderen - maar als er boekingen en reviews zijn, dan wil je die behouden - anders kan owner zijn/haar account verwijderen en van scratch opnieuw beginnen na slechte reviews.
+
+    @DeleteMapping ("admin/{userId}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long userId){
+        userService.deleteUser(userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
 

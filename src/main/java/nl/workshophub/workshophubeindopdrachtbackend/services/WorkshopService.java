@@ -66,7 +66,7 @@ public class WorkshopService {
 
     public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException, BadRequestException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
-        if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != true) {
+        if (workshopOwner.getWorkshopOwnerVerified() == null || !workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() == false) {
             throw new BadRequestException("Je bent niet gemachtigd een nieuwe workshop aan te maken");
         }
         Workshop workshop = new Workshop();

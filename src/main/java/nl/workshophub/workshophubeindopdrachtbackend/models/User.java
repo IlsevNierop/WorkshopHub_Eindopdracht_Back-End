@@ -33,7 +33,7 @@ public class User {
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
 
-    @OneToMany (mappedBy = "customer", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "customer")
     @JsonIgnore
     private List<Review> customerReviews;
 
@@ -41,11 +41,11 @@ public class User {
 //    @JsonIgnore
 //    private List<Review> workshopOwnerReviews;
 
-    @OneToMany (mappedBy = "workshopOwner", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "workshopOwner")
     @JsonIgnore
     private List<Workshop> workshops;
 
-    @OneToMany (mappedBy = "customer", cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "customer")
     @JsonIgnore
     private List<Booking> bookings;
 
