@@ -105,7 +105,7 @@ public class WorkshopService {
         }
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
         if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != true) {
-            throw new BadRequestException("Je bent niet gemachtigd deze workshop aan te verifieren");
+            throw new BadRequestException("Je bent niet gemachtigd deze workshop te verifieren");
         }
         workshop.setPublishWorkshop(publishWorkshop);
         workshopRepository.save(workshop);

@@ -62,15 +62,51 @@ public class UserController {
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (workshopOwnerInputDto.workshopOwner == false) {
-            return ResponseEntity.badRequest().body("Om een nieuw account voor een klant aan te maken, moet je een andere link gebruiken en is er minder informatie nodig");
+            return ResponseEntity.badRequest().body("Dit is de endpoint voor de workshopeigenaar, om een nieuw account voor een klant aan te maken, moet je een andere link gebruiken en is er minder informatie nodig");
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.createWorkshopOwner(workshopOwnerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOwnerOutputDto);
     }
 
+    @PutMapping ("/admin/{workshopOwnerId}")
+    public ResponseEntity <UserWorkshopOwnerOutputDto> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId,@RequestParam Boolean workshopOwnerVerified){
+        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.verifyWorkshopOwnerByAdmin(workshopOwnerId, workshopOwnerVerified);
+        return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
+    }
 
-    // bij het verifieren van een workshopowner - dan ook automatisch rol workshopowner toekennen.
+ @PutMapping ("/customer/{customerId}")
+    public ResponseEntity <Object> updateCustomer(@PathVariable Long customerId,@RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult){
+     if (bindingResult.hasFieldErrors()){
+         return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+     }
+     if (customerInputDto.workshopOwner == true) {
+         return ResponseEntity.badRequest().body("Hier kun je een account wijzien voor een klant, als je voor een workshopeigenaar het account wilt wijzigen, moet je een andere link gebruiken en meer details invullen");
+     }
+        UserCustomerOutputDto customerOutputDto = userService.updateCustomer (customerId, customerInputDto);
+
+        return new ResponseEntity<>(customerOutputDto, HttpStatus.OK);
+    }
+
+    @PutMapping ("/workshopowner/{workshopOwnerId}")
+    public ResponseEntity <Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId,@RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult){
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        if (workshopOwnerInputDto.workshopOwner == false) {
+            return ResponseEntity.badRequest().body("Dit is de endpoint voor de workshopeigenaar, om een nieuw account voor een klant aan te maken, moet je een andere link gebruiken en is er minder informatie nodig");
+        }
+        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
+        return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
+    }
+
+
+    //putmapping voor owner en voor user (verschillende dto's) --> als user owner wordt - kan ook met putmapping
+//    @PutMapping
+
+    //putmapping voor verificatie owner
+
+    //deletemapping (relaties?) - moet je een user kunnen verwijderen als die workshops / boekingen / reviews heeft? privacy wise moet je die kunnen verwijderen - maar als er boekingen en reviews zijn, dan wil je die behouden - anders kan owner zijn/haar account verwijderen en van scratch opnieuw beginnen na slechte reviews.
 
 
 

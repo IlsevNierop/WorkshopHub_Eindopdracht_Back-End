@@ -7,6 +7,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorksho
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.util.AverageRatingWorkshopOwnerCalculator;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,8 @@ public class UserService {
         if (userRepository.existsByEmail(customerInputDto.email)){
             throw new BadRequestException("Er bestaat al een gebruiker met het emailadres: " + customerInputDto.email);
         }
-        User customer = transferCustomerInputDtoToUser(customerInputDto);
+        User customer = new User();
+        transferCustomerInputDtoToUser(customer, customerInputDto);
         userRepository.save(customer);
         return transferUserToCustomerOutputDto(customer);
     }
@@ -65,7 +67,51 @@ public class UserService {
         if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
             throw new BadRequestException("Er bestaat al een gebruiker met het emailadres: " + workshopOwnerInputDto.email);
         }
-        User workshopOwner = transferWorkshopOwnerInputDtoToUser(workshopOwnerInputDto);
+        User workshopOwner = new User();
+        transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto);
+        userRepository.save(workshopOwner);
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+    }
+
+    // ook automatisch rol workshopowner toevoegen na verificatie
+    public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean workshopOwnerVerified) throws RecordNotFoundException, BadRequestException {
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
+        if (workshopOwner.getWorkshopOwner() == false){
+            throw new BadRequestException("Dit is een klant en geen workshopeigenaar, laat de workshopeigenaar eerst al zijn/haar bedrijfsgegevens invullen en aangeven dat hij/zij workshopeigenaar is, voordat je kunt verifieren");
+        }
+        workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
+        if (workshopOwnerVerified == true){
+            // hier de rol toevoegen
+        }
+//        if (workshopOwnerVerified == false && workshopOwner heeft de rol workshopowner - dan die verwijderen)
+
+        userRepository.save(workshopOwner);
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+    }
+
+    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) throws RecordNotFoundException {
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("De klant met ID " + customerId + " bestaat niet"));
+        System.out.println(customer.getEmail());
+        if (!customer.getEmail().equals(customerInputDto.email)){
+            if (userRepository.existsByEmail(customerInputDto.email)){
+                throw new BadRequestException("Er bestaat al een andere gebruiker met het emailadres: " + customerInputDto.email);
+            }
+        }
+        transferCustomerInputDtoToUser(customer, customerInputDto);
+        userRepository.save(customer);
+        return transferUserToCustomerOutputDto(customer);
+    }
+
+
+
+    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto workshopOwnerInputDto) throws RecordNotFoundException {
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
+        if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)){
+            if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
+                throw new BadRequestException("Er bestaat al een andere gebruiker met het emailadres: " + workshopOwnerInputDto.email);
+            }
+        }
+        transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto);
         userRepository.save(workshopOwner);
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
@@ -77,7 +123,6 @@ public class UserService {
         customerOutputDto.firstName = customer.getFirstName();
         customerOutputDto.lastName = customer.getLastName();
         customerOutputDto.email = customer.getEmail();
-//        customerOutputDto.password = customer.getPassword();
         customerOutputDto.workshopOwner = customer.getWorkshopOwner();
 
         return customerOutputDto;
@@ -89,7 +134,6 @@ public class UserService {
         workshopOwnerOutputDto.firstName = workshopOwner.getFirstName();
         workshopOwnerOutputDto.lastName = workshopOwner.getLastName();
         workshopOwnerOutputDto.email = workshopOwner.getEmail();
-//        workshopOwnerOutputDto.password = workshopOwner.getPassword();
         workshopOwnerOutputDto.companyName = workshopOwner.getCompanyName();
         workshopOwnerOutputDto.kvkNumber = workshopOwner.getKvkNumber();
         workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
@@ -101,8 +145,7 @@ public class UserService {
         return workshopOwnerOutputDto;
     }
 
-    public User transferWorkshopOwnerInputDtoToUser(UserWorkshopOwnerInputDto workshopOwnerInputDto) {
-        User workshopOwner = new User();
+    public User transferWorkshopOwnerInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto) {
         workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
         workshopOwner.setLastName(workshopOwnerInputDto.lastName);
         workshopOwner.setEmail(workshopOwnerInputDto.email);
@@ -110,14 +153,14 @@ public class UserService {
         workshopOwner.setCompanyName(workshopOwnerInputDto.companyName);
         workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
         workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
-        workshopOwner.setWorkshopOwnerVerified(workshopOwnerInputDto.workshopOwnerVerified);
         workshopOwner.setWorkshopOwner(workshopOwnerInputDto.workshopOwner);
+
+        //bewust workshopverified hieruit gelaten, omdat het verifyen alleen via de put verify methode gaat - en dat kan alleen de admin doen
 
         return workshopOwner;
     }
 
-    public User transferCustomerInputDtoToUser(UserCustomerInputDto customerInputDto) {
-        User customer = new User();
+    public User transferCustomerInputDtoToUser(User customer, UserCustomerInputDto customerInputDto) {
         customer.setFirstName(customerInputDto.firstName);
         customer.setLastName(customerInputDto.lastName);
         customer.setEmail(customerInputDto.email);
