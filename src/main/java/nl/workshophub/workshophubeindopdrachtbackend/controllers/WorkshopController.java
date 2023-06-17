@@ -73,8 +73,6 @@ public class WorkshopController {
 
 
     //put mapping: owner can edit everything but not feedback and approve --> if some variables are edited automatisch verified == null. If only publish is edited --> dan verified niet wijzigen en andere dingen niet wijzigen.
-    // aparte put voor alleen verifieren door owner - met een request param?
-    //owner id nog toevoegen {workshopownerid}/
     @PutMapping ("/{workshopOwnerId}/{workshopId}")
     public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("id") Long workshopId,  @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
@@ -101,7 +99,7 @@ public class WorkshopController {
     }
 
 
-    //delete mapping admin: alleen als publish == false
+    //delete mapping admin: alleen als publish == false. Anders moet owner eerst op false zetten, voordat de workshop verwijderd kan worden
     // delete mapping owner (kan niet als bookings heeft)
     @DeleteMapping("/admin/{workshopId}")
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {

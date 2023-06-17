@@ -3,10 +3,9 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.services.UserService;
 import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import org.springframework.http.HttpStatus;
@@ -27,18 +26,15 @@ public class UserController {
         this.userService = userService;
         this.fieldErrorHandling = fieldErrorHandling;
     }
-    //customer
-    @GetMapping("/customer/{id}")
-    public ResponseEntity<UserCustomerOutputDto> getCustomerById(@PathVariable Long id) {
-        return new ResponseEntity<>(userService.getCustomerById(id), HttpStatus.OK);
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<UserCustomerOutputDto> getCustomerById(@PathVariable Long customerId) {
+        return new ResponseEntity<>(userService.getCustomerById(customerId), HttpStatus.OK);
     }
-    //owner
-    @GetMapping("/workshopowner/{id}")
-    public ResponseEntity<UserWorkshopOwnerOutputDto> getWorkshopOwnerById(@PathVariable Long id) {
-        return new ResponseEntity<>(userService.getWorkshopOwnerById(id), HttpStatus.OK);
+    @GetMapping("/workshopowner/{workshopOwnerId}")
+    public ResponseEntity<UserWorkshopOwnerOutputDto> getWorkshopOwnerById(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(userService.getWorkshopOwnerById(workshopOwnerId), HttpStatus.OK);
     }
 
-    //admin
     @GetMapping("/admin/workshopowners/")
     public ResponseEntity<List<UserWorkshopOwnerOutputDto>> getWorkshopOwnersToVerify() {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
@@ -50,7 +46,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (customerInputDto.workshopOwner == true) {
-            return ResponseEntity.badRequest().body("Om een nieuw account voor workshopeigenaar aan te maken, moet je een andere link gebruiken en meer details invullen");
+            return ResponseEntity.badRequest().body("To create a new account for a workshopowner you need to use a different link and more details are required.");
         }
         UserCustomerOutputDto customerOutputDto = userService.createCustomer(customerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + customerOutputDto.id).toUriString());
@@ -62,7 +58,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (workshopOwnerInputDto.workshopOwner == false) {
-            return ResponseEntity.badRequest().body("Dit is de endpoint voor de workshopeigenaar, om een nieuw account voor een klant aan te maken, moet je een andere link gebruiken en is er minder informatie nodig");
+            return ResponseEntity.badRequest().body("To create a new customer you need to use another link and less information is required.");
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.createWorkshopOwner(workshopOwnerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
@@ -70,7 +66,14 @@ public class UserController {
     }
 
     @PutMapping ("/admin/{workshopOwnerId}")
-    public ResponseEntity <UserWorkshopOwnerOutputDto> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId,@RequestParam Boolean workshopOwnerVerified){
+    public ResponseEntity <Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId,@RequestParam Boolean workshopOwnerVerified) throws BadRequestException {
+//        //how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
+//        if (workshopOwnerVerified != true || workshopOwnerVerified != false){
+//            throw new BadRequestException("You should either verify (set workshopOwnerVerified to true) this workshop owner or disapprove (set workshopOwnerVerified to false) this workshop owner.");
+//        }
+//        if (bindingResult.hasFieldErrors()){
+//            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+//        }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.verifyWorkshopOwnerByAdmin(workshopOwnerId, workshopOwnerVerified);
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
     }
@@ -81,7 +84,7 @@ public class UserController {
          return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
      }
      if (customerInputDto.workshopOwner == true) {
-         return ResponseEntity.badRequest().body("Hier kun je een account wijzien voor een klant, als je voor een workshopeigenaar het account wilt wijzigen, moet je een andere link gebruiken en meer details invullen");
+         return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
      }
         UserCustomerOutputDto customerOutputDto = userService.updateCustomer (customerId, customerInputDto);
 
@@ -94,22 +97,16 @@ public class UserController {
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (workshopOwnerInputDto.workshopOwner == false) {
-            return ResponseEntity.badRequest().body("Dit is de endpoint voor de workshopeigenaar, om een nieuw account voor een klant aan te maken, moet je een andere link gebruiken en is er minder informatie nodig");
+            return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
     }
 
-
-    //deletemapping (relaties?) - moet je een user kunnen verwijderen als die workshops / boekingen / reviews heeft? privacy wise moet je die kunnen verwijderen - maar als er boekingen en reviews zijn, dan wil je die behouden - anders kan owner zijn/haar account verwijderen en van scratch opnieuw beginnen na slechte reviews.
-
     @DeleteMapping ("admin/{userId}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long userId){
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId){
         userService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-
 
 }

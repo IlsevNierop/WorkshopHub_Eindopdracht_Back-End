@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    List<User> findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNull();
+    List<User> findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNullOrWorkshopOwnerVerifiedIsFalse();
     Boolean existsByEmail(String email);
 }

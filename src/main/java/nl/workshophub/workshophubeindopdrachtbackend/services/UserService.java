@@ -6,9 +6,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustome
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
-import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.util.AverageRatingWorkshopOwnerCalculator;
 import org.springframework.stereotype.Service;
@@ -29,57 +27,54 @@ public class UserService {
         this.averageRatingWorkshopOwnerCalculator = averageRatingWorkshopOwnerCalculator;
     }
 
-    public UserCustomerOutputDto getCustomerById(Long id) throws RecordNotFoundException {
-        User customer = userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + id + " bestaat niet"));
+    public UserCustomerOutputDto getCustomerById(Long customerId) throws RecordNotFoundException {
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
         if (customer.getWorkshopOwner() == true) {
-            throw new RecordNotFoundException("De gebruiker met ID " + id + " is een workshopeigenaar en geen klant");
+            throw new RecordNotFoundException("The user with ID " + customerId + " is a workshop owner and not a customer.");
         }
         return transferUserToCustomerOutputDto(customer);
     }
 
-    public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long id) throws RecordNotFoundException {
-        User workshopOwner = userRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + id + " bestaat niet"));
+    public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long workshopOwnerId) throws RecordNotFoundException {
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         if (workshopOwner.getWorkshopOwner() == false) {
-            throw new RecordNotFoundException("De gebruiker met ID " + id + " is geen workshopeigenaar, maar een klant");
+            throw new RecordNotFoundException("The user with ID "  + workshopOwnerId + " is a customer and not a workshop owner.");
         }
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() throws RecordNotFoundException {
-        List<User> workshopowners = userRepository.findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNull();
+    public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() {
+        List<User> workshopOwners = userRepository.findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNullOrWorkshopOwnerVerifiedIsFalse();
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
-        for (User workshopowner : workshopowners) {
-            UserWorkshopOwnerOutputDto workshopOwnerOutputDto = transferUserToWorkshopOwnerOutputDto(workshopowner);
-            workshopOwnerOutputDtos.add(workshopOwnerOutputDto);
+        for (User workshopOwner : workshopOwners) {
+            workshopOwnerOutputDtos.add(transferUserToWorkshopOwnerOutputDto(workshopOwner));
         }
         return workshopOwnerOutputDtos;
     }
 
     public UserCustomerOutputDto createCustomer(UserCustomerInputDto customerInputDto) throws BadRequestException {
         if (userRepository.existsByEmail(customerInputDto.email)){
-            throw new BadRequestException("Er bestaat al een gebruiker met het emailadres: " + customerInputDto.email);
+            throw new BadRequestException("Invalid request: another user exists with the email: " + customerInputDto.email);
         }
         User customer = new User();
-        transferCustomerInputDtoToUser(customer, customerInputDto);
-        userRepository.save(customer);
+        userRepository.save(transferCustomerInputDtoToUser(customer, customerInputDto));
         return transferUserToCustomerOutputDto(customer);
     }
     public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) throws BadRequestException {
         if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
-            throw new BadRequestException("Er bestaat al een gebruiker met het emailadres: " + workshopOwnerInputDto.email);
+            throw new BadRequestException("Invalid request: another user exists with the email: " + workshopOwnerInputDto.email);
         }
         User workshopOwner = new User();
-        transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto);
-        userRepository.save(workshopOwner);
+        userRepository.save(transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    // ook automatisch rol workshopowner toevoegen na verificatie
     public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean workshopOwnerVerified) throws RecordNotFoundException, BadRequestException {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist"));
         if (workshopOwner.getWorkshopOwner() == false){
-            throw new BadRequestException("Dit is een klant en geen workshopeigenaar, laat de workshopeigenaar eerst al zijn/haar bedrijfsgegevens invullen en aangeven dat hij/zij workshopeigenaar is, voordat je kunt verifieren");
+            throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
+//
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
         if (workshopOwnerVerified == true){
             // hier de rol toevoegen
@@ -90,45 +85,43 @@ public class UserService {
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) throws RecordNotFoundException {
-        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("De klant met ID " + customerId + " bestaat niet"));
-        System.out.println(customer.getEmail());
+    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) throws RecordNotFoundException, BadRequestException {
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + customerId + " doesn't exist"));
+        if (customer.getWorkshopOwner() == true){
+            throw new BadRequestException("The account with ID " + customerId + " is a workshop owner and not a customer.");
+        }
         if (!customer.getEmail().equals(customerInputDto.email)){
             if (userRepository.existsByEmail(customerInputDto.email)){
-                throw new BadRequestException("Er bestaat al een andere gebruiker met het emailadres: " + customerInputDto.email);
+                throw new BadRequestException("Invalid request: another user exists with the email: " + customerInputDto.email);
             }
         }
-        transferCustomerInputDtoToUser(customer, customerInputDto);
-        userRepository.save(customer);
+        userRepository.save(transferCustomerInputDtoToUser(customer, customerInputDto));
         return transferUserToCustomerOutputDto(customer);
     }
 
-
-
-    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto workshopOwnerInputDto) throws RecordNotFoundException {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
+    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto workshopOwnerInputDto) throws RecordNotFoundException, BadRequestException {
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        if (workshopOwner.getWorkshopOwner() == false){
+            throw new BadRequestException("The account with ID " + workshopOwnerId + " is a customer and not a workshop owner.");
+        }
         if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)){
             if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
-                throw new BadRequestException("Er bestaat al een andere gebruiker met het emailadres: " + workshopOwnerInputDto.email);
+                throw new BadRequestException("Invalid request: another user exists with the email: " + workshopOwnerInputDto.email);
             }
         }
-        transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto);
-        userRepository.save(workshopOwner);
+        userRepository.save(transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
         return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public void deleteUser(Long userId) throws RecordNotFoundException {
+    public void deleteUser(Long userId) throws RecordNotFoundException, BadRequestException {
         try {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID " + userId + " bestaat niet"));
+            User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
             userRepository.delete(user);
         }
         catch (Exception e){
-            throw new BadRequestException("Deze gebruiker heeft een relatie met een workshop, review of boeking. Daarom kun je de gebruiker niet verwijderen.");
-
+            throw new BadRequestException("This user has a relation with either one or more workshop(s), review(s) and/or booking(s). You can't remove this user before removing the other items.");
         }
-
     }
-
 
     public UserCustomerOutputDto transferUserToCustomerOutputDto(User customer) {
         UserCustomerOutputDto customerOutputDto = new UserCustomerOutputDto();
@@ -167,8 +160,7 @@ public class UserService {
         workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
         workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
         workshopOwner.setWorkshopOwner(workshopOwnerInputDto.workshopOwner);
-
-        //bewust workshopverified hieruit gelaten, omdat het verifyen alleen via de put verify methode gaat - en dat kan alleen de admin doen
+        //bewust workshopverified hieruit gelaten, omdat het verifyen alleen via de put verify methode gaat als request parameter - en dat kan alleen de admin doen
 
         return workshopOwner;
     }
