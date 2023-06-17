@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class ReviewOutputDto {
@@ -13,17 +15,17 @@ public class ReviewOutputDto {
     public String reviewDescription;
     public Boolean reviewVerified;
     public String feedbackAdmin;
-    public Long workshopId;
+
+    //niet nodig?
+//    public Long workshopId;
     public String workshopTitle;
+    public LocalDate workshopDate;
+    public String workshopLocation;
+    public String firstNameReviewer;
+    public String lastNameReviewer;
+    public String companyNameWorkshopOwner;
+    public double averageRatingWorkshopOwner;
 
-//    public String firstNameReviewer;
-//    public String companyNameWorkshopOwner;
-//    public double averageRatingWorkshopOwner;
-
-    //public User customer;
-    //public User workshopOwner;
-//    public String workshopOwnerCompanyName;
-//    public Long workshopOwnerId;
 
 
 

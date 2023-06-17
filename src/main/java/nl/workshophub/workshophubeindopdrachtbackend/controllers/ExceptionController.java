@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
@@ -24,6 +25,12 @@ public class ExceptionController {
 
     @ExceptionHandler(value = NoAvailableSpotsException.class)
     public ResponseEntity<Object> exception(NoAvailableSpotsException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+
+    }
+
+    @ExceptionHandler(value = BadRequestException.class)
+    public ResponseEntity<Object> exception(BadRequestException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 
     }

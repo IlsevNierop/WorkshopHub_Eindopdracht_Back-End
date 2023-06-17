@@ -28,7 +28,9 @@ public class Booking {
 
     @ManyToOne
     private Workshop workshop;
-//    private User customer;
+
+    @ManyToOne
+    private User customer;
 
 
 }

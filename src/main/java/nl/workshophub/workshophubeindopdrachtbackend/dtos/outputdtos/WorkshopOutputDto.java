@@ -26,16 +26,16 @@ public class WorkshopOutputDto {
     public String highlightedInfo;
     public String description;
     public int amountOfParticipants;
-
     public int spotsAvailable;
     public String workshopCategory1;
     public String workshopCategory2;
 
 
+
     // public workshopImage --> list of verschillende variabelen?
 
 
-    //owner output & admin output -- later in extra dto klasse plaatsen? nice to have
+    //owner output & admin output -- later in extra dto klasse plaatsen?
     public Boolean workshopVerified;
 
     public String feedbackAdmin;
@@ -46,7 +46,10 @@ public class WorkshopOutputDto {
 
     // niet gehele reviews teruggeven? Alleen de rating, firstname, workshoptitle?
     public List<Review> workshopOwnerReviews;
-//    public Float averageRatingWorkshopOwnerReviews;
+
+    public String workshopOwnerCompanyName;
+
+    public Double averageRatingWorkshopOwnerReviews;
 
     // ook sumiere output dto maken voor de kalender overview - daar ook bedrijfsnaam toevoegen?
 

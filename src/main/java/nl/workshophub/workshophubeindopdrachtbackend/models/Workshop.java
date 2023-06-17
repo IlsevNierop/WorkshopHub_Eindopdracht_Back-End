@@ -6,11 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,7 +29,7 @@ public class Workshop {
 
     //end time verwijderen
     private LocalTime endTime;
-//    zet hier de tijdsduur neer - duration
+    //    zet hier de tijdsduur neer - duration
     private double price;
     @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;
@@ -61,15 +59,16 @@ public class Workshop {
 
 //    private ArrayList<byte> workshopImage;
 
-    //    private User workshopOwner
+    @ManyToOne
+    private User workshopOwner;
 
-    @OneToMany(mappedBy = "workshop")
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Booking> workshopBookings;
 
-    @OneToMany(mappedBy = "workshop")
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Review> workshopOwnerReviews;
+    private List<Review> workshopReviews;
 
 
 }

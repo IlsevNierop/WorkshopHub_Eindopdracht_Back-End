@@ -27,7 +27,7 @@ public class WorkshopInputDto {
     @NotNull(message = "Eindtijd kan niet leeg zijn")
     public LocalTime endTime;
 
-    @Positive(message = "Prijs kan niet leeg zijn")
+    @Positive(message = "Prijs kan niet leeg of lager dan 0 zijn")
     public double price;
 
     // add validation to enum - below code is not working
@@ -46,8 +46,6 @@ public class WorkshopInputDto {
     @Positive(message = "Aantal deelnemers kan niet leeg zijn")
     public int amountOfParticipants;
 
-    // als owner de workshop edit - gaat deze automatisch op null
-    public Boolean publishWorkshop;
 
     @NotBlank(message = "Er moet minstens 1 workshop thema gevuld zijn")
     public String workshopCategory1;
@@ -57,6 +55,10 @@ public class WorkshopInputDto {
 // als owner de workshop edit - gaat deze automatisch op null
     public Boolean workshopVerified;
     public String feedbackAdmin;
+
+    // als owner de workshop edit - gaat deze automatisch op null
+    public Boolean publishWorkshop;
+
 
 
 }

@@ -12,11 +12,12 @@ public class UserWorkshopOwnerOutputDto {
     public String firstName;
     public String lastName;
     public String email;
-//    public String password;
     public String companyName;
     public int kvkNumber;
     public String vatNumber;
     public Boolean workshopOwnerVerified;
+
     public Boolean workshopOwner;
+    public Double averageRatingReviews;
 
 }

@@ -2,6 +2,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 
 import java.time.LocalDate;
 
@@ -21,6 +22,8 @@ public class BookingOutputDto {
 
     public Long workshopId;
     public String workshopTitle;
+
+    public User customer;
 
 
 }

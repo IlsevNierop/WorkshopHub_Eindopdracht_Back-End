@@ -18,8 +18,11 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    public ReviewController(ReviewService reviewService) {
+    private final FieldErrorHandling fieldErrorHandling;
+
+    public ReviewController(ReviewService reviewService, FieldErrorHandling fieldErrorHandling) {
         this.reviewService = reviewService;
+        this.fieldErrorHandling = fieldErrorHandling;
     }
 
     @GetMapping("/{id}")
@@ -41,19 +44,19 @@ public class ReviewController {
     @PutMapping ("/admin/{id}")
     public ResponseEntity<Object> verifyReviewByAdmin (@PathVariable Long id, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(reviewService.verifyReviewByAdmin(id, reviewInputDto), HttpStatus.ACCEPTED);
     }
 
     //userId nog toevoegen na relatie leggen
-    @PostMapping ("/{workshopId}")
-    public ResponseEntity<Object> createReview (@PathVariable Long workshopId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
+    @PostMapping ("/{workshopId}/{customerId}/")
+    public ResponseEntity<Object> createReview (@PathVariable("workshopId") Long workshopId, @PathVariable ("customerId") Long customerId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         //uri toevoegen
-        return new ResponseEntity<>(reviewService.createReview(workshopId, reviewInputDto), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(reviewService.createReview(workshopId, customerId, reviewInputDto), HttpStatus.ACCEPTED);
     }
 
 
