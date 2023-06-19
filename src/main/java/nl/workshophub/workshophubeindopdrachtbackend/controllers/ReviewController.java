@@ -35,6 +35,13 @@ public class ReviewController {
     public ResponseEntity <List<ReviewOutputDto>> getReviewsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(reviewService.getReviewsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity <List<ReviewOutputDto>> getReviewsFromCustomer(@PathVariable Long customerId) {
+        return new ResponseEntity<>(reviewService.getReviewsFromCustomer(customerId), HttpStatus.OK);
+    }
+
+
     @GetMapping
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
         return new ResponseEntity<>(reviewService.getAllReviews(), HttpStatus.OK);

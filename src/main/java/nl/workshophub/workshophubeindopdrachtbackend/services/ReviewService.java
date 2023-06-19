@@ -43,7 +43,7 @@ public class ReviewService {
     public List<ReviewOutputDto> getReviewsFromWorkshopOwner(Long workshopOwnerId) throws RecordNotFoundException, BadRequestException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
         if (workshopOwner.getWorkshopOwner() != true){
-            throw new BadRequestException("The user is a customer, and not a workshop owner.");
+            throw new BadRequestException("This user is a customer, and not a workshop owner.");
         }
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Workshop w: workshopOwner.getWorkshops()) {
@@ -57,9 +57,19 @@ public class ReviewService {
         return reviewOutputDtos;
     }
 
+    public List<ReviewOutputDto> getReviewsFromCustomer(Long customerId) {
+        List<Review> reviews = reviewRepository.findAllByCustomerId(customerId);
+        List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
+        for (Review r: reviews) {
+            ReviewOutputDto reviewOutputDto = transferReviewToReviewOutputDto(r);
+            reviewOutputDtos.add(reviewOutputDto);
+        }
+        return reviewOutputDtos;
+    }
+
 
     //admin
-    public List<ReviewOutputDto> getAllReviews() throws RecordNotFoundException {
+    public List<ReviewOutputDto> getAllReviews() {
         List<Review> reviews = reviewRepository.findAll();
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Review r: reviews) {
@@ -69,7 +79,7 @@ public class ReviewService {
         return reviewOutputDtos;
     }
 
-    public List<ReviewOutputDto> getReviewsToVerify() throws RecordNotFoundException {
+    public List<ReviewOutputDto> getReviewsToVerify() {
         List<Review> reviews = reviewRepository.findByReviewVerifiedIsNull();
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Review r: reviews) {

@@ -9,4 +9,6 @@ public interface ReviewRepository extends JpaRepository <Review, Long> {
 
     List<Review> findByReviewVerifiedIsNull();
 
+    List<Review> findAllByCustomerId(Long customerId);
+
 }
