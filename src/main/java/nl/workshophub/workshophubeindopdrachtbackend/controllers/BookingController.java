@@ -33,7 +33,7 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getAllBookingsFromUser(userId), HttpStatus.OK);
     }
 
-    //nog checken of workshop van de specifieke owner is die ingelogd is / alleen door eerst naar workshop te gaan - dat is al de check / bookings ophalen
+    //nog checken of workshop van de specifieke owner is die ingelogd is / alleen door eerst naar workshop te gaan - dat is al de check / bookings ophalen - na authenticatie toevoeging
     @GetMapping ("/workshop/{workshopId}")
     public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshop(@PathVariable Long workshopId){
 
@@ -57,8 +57,6 @@ public class BookingController {
         return ResponseEntity.created(uri).body(bookingOutputDto);
     }
 
-
-    //admin (of ook owner?)
     @PutMapping("/{bookingId}")
     public ResponseEntity<Object> updateBooking(@PathVariable Long bookingId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()){
@@ -67,7 +65,6 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.updateBooking(bookingId, bookingInputDto), HttpStatus.ACCEPTED);
     }
 
-    //admin (of ook owner?)
     @DeleteMapping("/admin/{bookingId}")
     public ResponseEntity<HttpStatus> deleteBooking(@PathVariable Long bookingId) {
         bookingService.deleteBooking(bookingId);
