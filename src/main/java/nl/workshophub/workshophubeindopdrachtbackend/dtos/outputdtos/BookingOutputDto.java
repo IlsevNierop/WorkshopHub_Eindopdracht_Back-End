@@ -11,19 +11,14 @@ import java.time.LocalDate;
 public class BookingOutputDto {
 
     public Long id;
-
     public LocalDate dateOrder;
-
     public String commentsCustomer;
-
     public int amount;
 
-    // of gehele workshop teruggeven? straks als verschillende dto's dan de workshop dto teruggeven met sumiere info?
-
     public Long workshopId;
+    // add extra information? Maybe add another workshopoutputdto that contains few variables
     public String workshopTitle;
-
-    public User customer;
+    public UserCustomerOutputDto customerOutputDto;
 
 
 }
