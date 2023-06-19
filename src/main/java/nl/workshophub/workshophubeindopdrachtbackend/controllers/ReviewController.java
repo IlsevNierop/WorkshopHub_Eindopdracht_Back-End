@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,9 +27,13 @@ public class ReviewController {
         this.fieldErrorHandling = fieldErrorHandling;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ReviewOutputDto> getReviewById(@PathVariable Long id) {
-        return new ResponseEntity<>(reviewService.getReviewById(id), HttpStatus.OK);
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ReviewOutputDto> getReviewById(@PathVariable Long reviewId) {
+        return new ResponseEntity<>(reviewService.getReviewById(reviewId), HttpStatus.OK);
+    }
+    @GetMapping("/workshopOwner/{workshopOwnerId}")
+    public ResponseEntity <List<ReviewOutputDto>> getReviewsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(reviewService.getReviewsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
     @GetMapping
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
@@ -41,28 +47,37 @@ public class ReviewController {
 
     }
 
-    @PutMapping ("/admin/{id}")
-    public ResponseEntity<Object> verifyReviewByAdmin (@PathVariable Long id, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
-        if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
-        }
-        return new ResponseEntity<>(reviewService.verifyReviewByAdmin(id, reviewInputDto), HttpStatus.ACCEPTED);
-    }
 
-    //userId nog toevoegen na relatie leggen
-    @PostMapping ("/{workshopId}/{customerId}/")
+    @PostMapping ("/{workshopId}/{customerId}")
     public ResponseEntity<Object> createReview (@PathVariable("workshopId") Long workshopId, @PathVariable ("customerId") Long customerId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        //uri toevoegen
-        return new ResponseEntity<>(reviewService.createReview(workshopId, customerId, reviewInputDto), HttpStatus.ACCEPTED);
+        ReviewOutputDto reviewOutputDto = reviewService.createReview(workshopId, customerId, reviewInputDto);
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + reviewOutputDto.id).toUriString());
+        return new ResponseEntity<>(reviewOutputDto, HttpStatus.ACCEPTED);
     }
 
+    @PutMapping ("/admin/{reviewId}")
+    public ResponseEntity<Object> verifyReviewByAdmin(@PathVariable Long reviewId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(reviewService.verifyReviewByAdmin(reviewId, reviewInputDto), HttpStatus.ACCEPTED);
+    }
 
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<HttpStatus> deleteReview(@PathVariable Long id) {
-        reviewService.deleteReview(id);
+    @PutMapping ("/{customerId}/{reviewId}")
+
+    public ResponseEntity<Object> updateReviewByCustomer (@PathVariable Long reviewId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()){
+            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(reviewService.updateReviewByCustomer(reviewId, reviewInputDto), HttpStatus.ACCEPTED);
+    }
+
+    @DeleteMapping("/admin/{reviewId}")
+    public ResponseEntity<HttpStatus> deleteReview(@PathVariable Long reviewId) {
+        reviewService.deleteReview(reviewId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

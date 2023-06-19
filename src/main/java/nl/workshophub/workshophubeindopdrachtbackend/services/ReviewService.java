@@ -2,17 +2,21 @@ package nl.workshophub.workshophubeindopdrachtbackend.services;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.ReviewInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.ReviewRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
+import org.hibernate.jdbc.Work;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,15 +35,27 @@ public class ReviewService {
         this.userRepository = userRepository;
         this.workshopRepository = workshopRepository;
     }
-    public ReviewOutputDto getReviewById(Long id) throws RecordNotFoundException {
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De review met ID " + id + " bestaat niet"));
+    public ReviewOutputDto getReviewById(Long reviewId) throws RecordNotFoundException {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
         return transferReviewToReviewOutputDto(review);
     }
 
-
-    //niet ingelogde users & gewone users: //eigenaar bedrijfsnaam toevoegen, user firstname en workshopnaam toevoegen
-    //getmapping all reviews van 1 owner / user, waar approved = true, average rating teruggeven
-    //getmapping ownerid /userid-  by id review approved = true, incl workshopnaam en date
+    public List<ReviewOutputDto> getReviewsFromWorkshopOwner(Long workshopOwnerId) throws RecordNotFoundException, BadRequestException {
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        if (workshopOwner.getWorkshopOwner() != true){
+            throw new BadRequestException("The user is a customer, and not a workshop owner.");
+        }
+        List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
+        for (Workshop w: workshopOwner.getWorkshops()) {
+            for (Review r: w.getWorkshopReviews()) {
+                if (r.getReviewVerified() != null && r.getReviewVerified() == true) {
+                    ReviewOutputDto reviewOutputDto = transferReviewToReviewOutputDto(r);
+                    reviewOutputDtos.add(reviewOutputDto);
+                }
+            }
+        }
+        return reviewOutputDtos;
+    }
 
 
     //admin
@@ -64,51 +80,53 @@ public class ReviewService {
     }
 
 
-    //put
-    // admin
-   public ReviewOutputDto verifyReviewByAdmin(Long id, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De review met ID " + id + " bestaat niet"));
 
-        review.setRating(reviewInputDto.rating);
-        review.setReviewDescription(reviewInputDto.reviewDescription);
-        if (reviewInputDto.reviewVerified != null) {
-            review.setReviewVerified(reviewInputDto.reviewVerified);
+    public ReviewOutputDto createReview (Long workshopId, Long customerId, ReviewInputDto reviewInputDto) throws RecordNotFoundException, BadRequestException {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
+        for (Review r: customer.getCustomerReviews()){
+            if (r.getWorkshop().getId() == workshop.getId()){
+                throw new BadRequestException("You've already placed a review for this workshop, you can only place 1 review per attended workshop.");
+            }
         }
-        if (reviewInputDto.feedbackAdmin != null){
-            review.setFeedbackAdmin(reviewInputDto.feedbackAdmin);
+        for (Booking b: customer.getBookings()){
+            if (b.getWorkshop().getId() == workshop.getId() && b.getWorkshop().getDate().isBefore(LocalDate.now())){
+                Review review = new Review();
+                transferReviewInputDtoToReview(reviewInputDto, review);
+                review.setWorkshop(workshop);
+                review.setCustomer(customer);
+                // when creating new review, reviewVerified and feedbackAdmin should get default values.
+                review.setReviewVerified(null);
+                review.setFeedbackAdmin(null);
+                reviewRepository.save(review);
+                return transferReviewToReviewOutputDto(review);
+            }
         }
-
-        reviewRepository.save(review);
-        return transferReviewToReviewOutputDto(review);
-
+        throw new BadRequestException("You're not allowed to create a review. Either you haven't attended the workshop or the workshop hasn't taken place yet.");
     }
-//    user
-//    put public ReviewOutputDto updateReviewByUser check if user = customer
 
-    //user:
-    //postmapping als attended workshop==true & workshopdate is in past - begin van postmapping set true als date in past - user has booking on workshop
-
-    public ReviewOutputDto createReview (Long workshopId, Long customerId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID nummer " + workshopId + " bestaat niet"));
-        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("De gebruiker met ID nummer " + customerId + " bestaat niet"));
-        Review review = transferReviewInputDtoToReview(reviewInputDto);
-        review.setWorkshop(workshop);
-        review.setCustomer(customer);
-        // als de owner gekoppeld is aan de workshop
-//        review.setWorkshopOwner(workshop.getWorkshopOwner().getId());
+   public ReviewOutputDto verifyReviewByAdmin(Long reviewId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
+        transferReviewInputDtoToReview(reviewInputDto, review);
         reviewRepository.save(review);
-
         return transferReviewToReviewOutputDto(review);
     }
 
+    //check if user is customer
+    public ReviewOutputDto updateReviewByCustomer(Long reviewId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
+        transferReviewInputDtoToReview(reviewInputDto, review);
+        // after update review by customer, reviewverified and feedbackadmin should get default calues.
+        review.setReviewVerified(null);
+        review.setFeedbackAdmin(null);
+        reviewRepository.save(review);
+        return transferReviewToReviewOutputDto(review);
+    }
 
-    // admin
-    public void deleteReview(Long id) throws RecordNotFoundException {
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De review met ID " + id + " bestaat niet"));
+    public void deleteReview(Long reviewId) throws RecordNotFoundException {
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
         reviewRepository.delete(review);
     }
-
-
 
 
 
@@ -124,25 +142,22 @@ public class ReviewService {
        reviewOutputDto.workshopLocation = review.getWorkshop().getLocation();
        reviewOutputDto.firstNameReviewer = review.getCustomer().getFirstName();
        reviewOutputDto.lastNameReviewer = review.getCustomer().getLastName();
-//       reviewOutputDto.companyNameWorkshopOwner = review.getWorkshopOwner().getCompanyName();
-       // average rating nog toevoegen
+       reviewOutputDto.companyNameWorkshopOwner = review.getWorkshop().getWorkshopOwner().getCompanyName();
+
 
        return reviewOutputDto;
 
     }
 
-    public Review transferReviewInputDtoToReview(ReviewInputDto reviewInputDto) {
-        Review review = new Review();
+    public Review transferReviewInputDtoToReview(ReviewInputDto reviewInputDto, Review review) {
         review.setRating(reviewInputDto.rating);
         review.setReviewDescription(reviewInputDto.reviewDescription);
-        review.setReviewVerified(reviewInputDto.reviewVerified);
-        review.setFeedbackAdmin(reviewInputDto.feedbackAdmin);
-        User customer = userRepository.findById(reviewInputDto.customerId).orElseThrow(() -> new RecordNotFoundException("De klant met ID " + reviewInputDto.customerId + " bestaat niet."));
-        review.setCustomer(customer);
-        Workshop workshop = workshopRepository.findById(reviewInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + reviewInputDto.workshopId + " bestaat niet, en er kan geen review achtergelaten worden zonder gekoppeld te zijn aan een workshop."));;
-        review.setWorkshop(workshop);
-        //workshopowner nog toevoegen na relatie met workshop
-//        review.setWorkshopOwner(workshop.get);
+        if (reviewInputDto.reviewVerified != null) {
+            review.setReviewVerified(reviewInputDto.reviewVerified);
+        }
+        if (reviewInputDto.feedbackAdmin != null){
+            review.setFeedbackAdmin(reviewInputDto.feedbackAdmin);
+        }
 
         return review;
 

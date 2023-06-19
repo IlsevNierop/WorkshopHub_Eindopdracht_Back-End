@@ -32,7 +32,7 @@ public class WorkshopInputDto {
 
     // add validation to enum - below code is not working
 //    @NotNull
-//    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     public InOrOutdoors inOrOutdoors;
 
     @NotBlank(message = "Locatie kan niet leeg zijn")
