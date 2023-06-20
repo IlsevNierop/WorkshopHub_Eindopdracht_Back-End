@@ -17,7 +17,6 @@ public class ReviewOutputDto {
     public String feedbackAdmin;
     public String workshopTitle;
     public LocalDate workshopDate;
-    public String workshopLocation;
     public String firstNameReviewer;
     public String lastNameReviewer;
     public String companyNameWorkshopOwner;

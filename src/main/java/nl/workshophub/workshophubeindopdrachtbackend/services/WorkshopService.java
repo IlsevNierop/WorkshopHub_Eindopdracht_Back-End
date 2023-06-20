@@ -47,6 +47,8 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
+    // add in output all reviews about workshopowner to getworkshop by id?
+
     public WorkshopOutputDto getWorkshopById(Long id) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
         return transferWorkshopToWorkshopOutputDto(workshop);
@@ -111,8 +113,6 @@ public class WorkshopService {
         workshopRepository.save(workshop);
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
-
-    //admin:
 
     public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + workshopId + " bestaat niet"));

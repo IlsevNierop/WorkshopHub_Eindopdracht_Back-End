@@ -11,7 +11,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.ReviewRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
-import org.hibernate.jdbc.Work;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +22,8 @@ import java.util.List;
 @Service
 public class ReviewService {
 
-    ModelMapper modelMapper = new ModelMapper();
-
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
-
     private final WorkshopRepository workshopRepository;
 
     public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository, WorkshopRepository workshopRepository) {
@@ -57,6 +53,7 @@ public class ReviewService {
         return reviewOutputDtos;
     }
 
+    //check if user is customer
     public List<ReviewOutputDto> getReviewsFromCustomer(Long customerId) {
         List<Review> reviews = reviewRepository.findAllByCustomerId(customerId);
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
@@ -90,13 +87,13 @@ public class ReviewService {
     }
 
 
-
+    //check if user is customer
     public ReviewOutputDto createReview (Long workshopId, Long customerId, ReviewInputDto reviewInputDto) throws RecordNotFoundException, BadRequestException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
         for (Review r: customer.getCustomerReviews()){
             if (r.getWorkshop().getId() == workshop.getId()){
-                throw new BadRequestException("You've already placed a review for this workshop, you can only place 1 review per attended workshop.");
+                throw new BadRequestException("You've already submitted a review for this workshop, you can only submit 1 review per attended workshop.");
             }
         }
         for (Booking b: customer.getBookings()){
@@ -105,7 +102,7 @@ public class ReviewService {
                 transferReviewInputDtoToReview(reviewInputDto, review);
                 review.setWorkshop(workshop);
                 review.setCustomer(customer);
-                // when creating new review, reviewVerified and feedbackAdmin should get default values.
+                // when creating new review by customer, reviewVerified and feedbackAdmin should get default values so admin can later verify and give feedback.
                 review.setReviewVerified(null);
                 review.setFeedbackAdmin(null);
                 reviewRepository.save(review);
@@ -126,7 +123,7 @@ public class ReviewService {
     public ReviewOutputDto updateReviewByCustomer(Long reviewId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
         transferReviewInputDtoToReview(reviewInputDto, review);
-        // after update review by customer, reviewverified and feedbackadmin should get default calues.
+        // after update review by customer, reviewVerified and feedbackAdmin should get default values so admin can later verify and give feedback.
         review.setReviewVerified(null);
         review.setFeedbackAdmin(null);
         reviewRepository.save(review);
@@ -149,7 +146,6 @@ public class ReviewService {
        reviewOutputDto.feedbackAdmin = review.getFeedbackAdmin();
        reviewOutputDto.workshopTitle = review.getWorkshop().getTitle();
        reviewOutputDto.workshopDate = review.getWorkshop().getDate();
-       reviewOutputDto.workshopLocation = review.getWorkshop().getLocation();
        reviewOutputDto.firstNameReviewer = review.getCustomer().getFirstName();
        reviewOutputDto.lastNameReviewer = review.getCustomer().getLastName();
        reviewOutputDto.companyNameWorkshopOwner = review.getWorkshop().getWorkshopOwner().getCompanyName();

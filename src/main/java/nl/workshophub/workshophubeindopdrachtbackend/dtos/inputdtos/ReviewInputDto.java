@@ -18,10 +18,6 @@ public class ReviewInputDto {
     public Boolean reviewVerified;
     public String feedbackAdmin;
 
-    @NotNull
-    public Long workshopId;
-    @NotNull
-    public Long customerId;
 
 
 

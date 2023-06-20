@@ -41,14 +41,14 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.getReviewsFromCustomer(customerId), HttpStatus.OK);
     }
 
-
+//admin
     @GetMapping
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
         return new ResponseEntity<>(reviewService.getAllReviews(), HttpStatus.OK);
 
     }
 
-    @GetMapping("/admin/")
+    @GetMapping("/admin/verify")
     public ResponseEntity<List<ReviewOutputDto>> getReviewsToVerify(){
         return new ResponseEntity<>(reviewService.getReviewsToVerify(), HttpStatus.OK);
 
@@ -65,7 +65,7 @@ public class ReviewController {
         return new ResponseEntity<>(reviewOutputDto, HttpStatus.ACCEPTED);
     }
 
-    @PutMapping ("/admin/{reviewId}")
+    @PutMapping ("/admin/verify/{reviewId}")
     public ResponseEntity<Object> verifyReviewByAdmin(@PathVariable Long reviewId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -74,7 +74,6 @@ public class ReviewController {
     }
 
     @PutMapping ("/{customerId}/{reviewId}")
-
     public ResponseEntity<Object> updateReviewByCustomer (@PathVariable Long reviewId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
