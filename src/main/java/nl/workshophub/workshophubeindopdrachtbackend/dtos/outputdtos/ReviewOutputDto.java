@@ -15,20 +15,10 @@ public class ReviewOutputDto {
     public String reviewDescription;
     public Boolean reviewVerified;
     public String feedbackAdmin;
-
-    //niet nodig?
-//    public Long workshopId;
     public String workshopTitle;
     public LocalDate workshopDate;
-    public String workshopLocation;
     public String firstNameReviewer;
     public String lastNameReviewer;
     public String companyNameWorkshopOwner;
-    public double averageRatingWorkshopOwner;
-
-
-
-
-
 
 }

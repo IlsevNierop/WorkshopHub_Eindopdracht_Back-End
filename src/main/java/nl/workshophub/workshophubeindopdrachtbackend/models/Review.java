@@ -24,8 +24,6 @@ public class Review {
 
     private Boolean reviewVerified;
     private String feedbackAdmin;
-//    private Boolean attendedWorkshop;
-
     @ManyToOne
     @JoinColumn(name = "workshop_id")
     private Workshop workshop;
@@ -33,10 +31,6 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private User customer;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "workshop_owner_id")
-//    private User workshopOwner;
 
 
     //private Boolean attendedWorkshop? --> methode om bookings te checken van de workshop?

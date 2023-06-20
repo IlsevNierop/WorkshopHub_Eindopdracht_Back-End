@@ -1,9 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -12,21 +9,16 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class ReviewInputDto {
 
-    @Min(value=0, message= "Beoordeling mag niet lager dan 0 zijn")
-    @Max(value=5, message="Beoordeling mag niet hoger dan 5 zijn")
+    @Max(value=5, message="Rating can't be higher than 5")
+    @Positive (message = "Rating can't be empty or below 0")
     public double rating;
-    @NotBlank (message = "Omschrijving mag niet leeg zijn")
+    @NotBlank (message = "Description can't be empty")
     public String reviewDescription;
 
     public Boolean reviewVerified;
     public String feedbackAdmin;
 
-    @NotNull
-    public Long workshopId;
-    @NotNull
-    public Long customerId;
 
-    // geen workshopowner id - die haal ik uit de workshop
 
 
 

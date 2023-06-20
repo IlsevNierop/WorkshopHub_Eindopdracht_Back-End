@@ -68,6 +68,9 @@ public class BookingService {
 
     public BookingOutputDto createBooking(Long customerId, Long workshopId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        if (workshop.getDate().isBefore(LocalDate.now())){
+            throw new BadRequestException("This workshop takes place in the past, you can't book a workshop that has already taken place.");
+        }
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
         if (availableSpotsCalculation.getAvailableSpotsWorkshop(workshop) < bookingInputDto.amount) {
             throw new NoAvailableSpotsException("Only " + (availableSpotsCalculation.getAvailableSpotsWorkshop(workshop) + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
