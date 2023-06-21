@@ -1,16 +1,17 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ValidationException;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.util.AvailableSpotsCalculation;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.util.AverageRatingWorkshopOwnerCalculator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -21,42 +22,36 @@ import java.util.List;
 @Service
 public class WorkshopService {
 
-//    ModelMapper modelMapper = new ModelMapper();
-
     private final WorkshopRepository workshopRepository;
     private final UserRepository userRepository;
+    private final ReviewService reviewService;
+    private final BookingService bookingService;
 
-    private final AverageRatingWorkshopOwnerCalculator averageRatingWorkshopOwnerCalculator;
-    private final AvailableSpotsCalculation availableSpotsCalculation;
-
-    public WorkshopService(WorkshopRepository workshopRepository, UserRepository userRepository, AverageRatingWorkshopOwnerCalculator averageRatingWorkshopOwnerCalculator, AvailableSpotsCalculation availableSpotsCalculation) {
+    public WorkshopService(WorkshopRepository workshopRepository, UserRepository userRepository, ReviewService reviewService, BookingService bookingService) {
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
-        this.averageRatingWorkshopOwnerCalculator = averageRatingWorkshopOwnerCalculator;
-        this.availableSpotsCalculation = availableSpotsCalculation;
+        this.reviewService = reviewService;
+        this.bookingService = bookingService;
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() throws RecordNotFoundException {
+    public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-//            get average rating user - connected to workshop - set average rating owner to workshopoutput
             workshopOutputDtos.add(workshopOutputDto);
         }
         return workshopOutputDtos;
     }
 
-    // add in output all reviews about workshopowner to getworkshop by id?
-
+    // add in output all reviews about workshopowner to getworkshop by id? List of reviewoutputdtos?
     public WorkshopOutputDto getWorkshopById(Long id) throws RecordNotFoundException {
-        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + id + " bestaat niet"));
+        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + id + " doesn't exist."));
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    //nu alleen omhoog als ze null zijn - niet als false?
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() throws RecordNotFoundException {
-        List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrderByDate(java.time.LocalDate.now());
+        List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(java.time.LocalDate.now());
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
@@ -126,12 +121,17 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    //create exception for
-    public void deleteWorkshop(Long workshopId) throws ValidationException, RecordNotFoundException {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + workshopId + " bestaat niet"));
-        //admin kan niet verwijderen als owner op publish heeft gezet
+    public void deleteWorkshop(Long workshopId) throws BadRequestException, RecordNotFoundException {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        if (!workshop.getWorkshopBookings().isEmpty()) {
+            throw new BadRequestException("This workshop can't be removed, since it already has bookings.");
+        }
+        if (!workshop.getWorkshopReviews().isEmpty()) {
+            throw new BadRequestException("This workshop can't be removed, since it already has reviews.");
+        }
+        //can't remove workshop, if owner has set publish on true. Then owner needs to verify deleten - by setting publish workshop on false.
         if (workshop.getPublishWorkshop() != null && workshop.getPublishWorkshop() == true) {
-            throw new ValidationException("Deze workshop kan niet verwijderd worden omdat deze al door de eigenaar geaccordeerd is.");
+            throw new BadRequestException("This workshop can't be removes, because the workshop owner has verified the workshop for publishing.");
         }
         workshopRepository.delete(workshop);
 
@@ -156,12 +156,11 @@ public class WorkshopService {
         workshopOutputDto.workshopVerified = workshop.getWorkshopVerified();
         workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
-        workshopOutputDto.workshopBookings = workshop.getWorkshopBookings();
-        workshopOutputDto.workshopOwnerReviews = workshop.getWorkshopReviews();
-        workshopOutputDto.spotsAvailable = availableSpotsCalculation.getAvailableSpotsWorkshop(workshop);
+        workshopOutputDto.workshopBookings = getAllBookingOutPutDtosFromWorkshop(workshop);
+        workshopOutputDto.workshopOwnerReviews = getAllReviewOutPutDtosFromWorkshopOwner(workshop);
+        workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
-        workshopOutputDto.averageRatingWorkshopOwnerReviews = averageRatingWorkshopOwnerCalculator.calculateAverageRatingWorkshopOwner(workshop.getWorkshopOwner());
-
+        workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingWorkshopOwner();
 
         return workshopOutputDto;
 
@@ -173,10 +172,7 @@ public class WorkshopService {
         workshop.setStartTime(workshopInputDto.startTime);
         workshop.setEndTime(workshopInputDto.endTime);
         workshop.setPrice(workshopInputDto.price);
-        //check default waarde!
-        if (workshopInputDto.inOrOutdoors != null) {
-            workshop.setInOrOutdoors(workshopInputDto.inOrOutdoors);
-        }
+        workshop.setInOrOutdoors(workshopInputDto.inOrOutdoors);
         workshop.setLocation(workshopInputDto.location);
         if (workshopInputDto.highlightedInfo != null) {
             workshop.setHighlightedInfo(workshopInputDto.highlightedInfo);
@@ -199,6 +195,30 @@ public class WorkshopService {
 
         return workshop;
 
+    }
+
+    public List<ReviewOutputDto> getAllReviewOutPutDtosFromWorkshopOwner(Workshop workshop) {
+        List<ReviewOutputDto> allReviewOutputDtosFromWorkshopOwner = new ArrayList<>();
+        if (workshop.getWorkshopOwner().getWorkshops() != null) {
+            for (Workshop w : workshop.getWorkshopOwner().getWorkshops()) {
+                if (w.getWorkshopReviews() != null) {
+                    for (Review r : w.getWorkshopReviews()) {
+                        allReviewOutputDtosFromWorkshopOwner.add(reviewService.transferReviewToReviewOutputDto(r));
+                    }
+                }
+            }
+        }
+        return allReviewOutputDtosFromWorkshopOwner;
+    }
+
+    public List<BookingOutputDto> getAllBookingOutPutDtosFromWorkshop(Workshop workshop) {
+        List<BookingOutputDto> allBookingOutPutDtosFromWorkshop = new ArrayList<>();
+        if (workshop.getWorkshopBookings() != null) {
+            for (Booking b : workshop.getWorkshopBookings()) {
+                allBookingOutPutDtosFromWorkshop.add(bookingService.transferBookingToBookingOutputDto(b));
+            }
+        }
+        return allBookingOutPutDtosFromWorkshop;
     }
 
 

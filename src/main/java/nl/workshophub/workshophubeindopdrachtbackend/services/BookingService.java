@@ -7,7 +7,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpots
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.util.AvailableSpotsCalculation;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingRepository;
@@ -28,14 +27,12 @@ public class BookingService {
     //not sure if it's good practice / bad practice to inject the user service here, but using it to convert customer to customerdto (transfer method)
     private final UserService userService;
 
-    private final AvailableSpotsCalculation availableSpotsCalculation;
 
-    public BookingService(BookingRepository bookingRepository, WorkshopRepository workshopRepository, UserRepository userRepository, UserService userService, AvailableSpotsCalculation availableSpotsCalculation) {
+    public BookingService(BookingRepository bookingRepository, WorkshopRepository workshopRepository, UserRepository userRepository, UserService userService) {
         this.bookingRepository = bookingRepository;
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
         this.userService = userService;
-        this.availableSpotsCalculation = availableSpotsCalculation;
     }
 
     public List<BookingOutputDto> getAllBookingsFromUser(Long userId) throws RecordNotFoundException {
@@ -72,8 +69,8 @@ public class BookingService {
             throw new BadRequestException("This workshop takes place in the past, you can't book a workshop that has already taken place.");
         }
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
-        if (availableSpotsCalculation.getAvailableSpotsWorkshop(workshop) < bookingInputDto.amount) {
-            throw new NoAvailableSpotsException("Only " + (availableSpotsCalculation.getAvailableSpotsWorkshop(workshop) + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
+        if (workshop.getAvailableSpotsWorkshop() < bookingInputDto.amount) {
+            throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
         }
         Booking booking = transferBookingInputDtoToBooking(bookingInputDto);
         booking.setWorkshop(workshop);
@@ -88,8 +85,8 @@ public class BookingService {
             throw new BadRequestException("You can't update a booking without connecting it to a workshop.");
         }
         Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + bookingInputDto.workshopId + " doesn't exist."));
-        if (availableSpotsCalculation.getAvailableSpotsWorkshop(workshop) < bookingInputDto.amount) {
-            throw new NoAvailableSpotsException("Only " + (availableSpotsCalculation.getAvailableSpotsWorkshop(workshop) + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
+        if (workshop.getAvailableSpotsWorkshop() < bookingInputDto.amount) {
+            throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
         }
         booking.setAmount(bookingInputDto.amount);
         if (bookingInputDto.commentsCustomer != null) {
@@ -116,7 +113,7 @@ public class BookingService {
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
 
-        // calling a service from anothere service might nog be best practice
+        // calling a service from another service might nog be best practice
         bookingOutputDto.customerOutputDto = userService.transferUserToCustomerOutputDto(booking.getCustomer());
 
         return bookingOutputDto;

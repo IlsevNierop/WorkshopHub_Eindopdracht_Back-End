@@ -26,16 +26,11 @@ public class Workshop {
     private String title;
     private LocalDate date;
     private LocalTime startTime;
-
-    //end time verwijderen
     private LocalTime endTime;
-    //    zet hier de tijdsduur neer - duration
     private double price;
     @Enumerated(EnumType.STRING)
     private InOrOutdoors inOrOutdoors;
     private String location;
-
-    // bij opsomming mogelijk met \n werken en dan in frontend goed weergeven
     private String highlightedInfo;
 
     @Column(columnDefinition = "text")
@@ -56,19 +51,34 @@ public class Workshop {
 
 
     // check of byte het juiste type variabele is voor image - even checken hoe dit verwerkt wordt - lijst of niet?
-
 //    private ArrayList<byte> workshopImage;
 
     @ManyToOne
     private User workshopOwner;
 
-    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Booking> workshopBookings;
 
-    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Review> workshopReviews;
+
+
+    //possibly cascade all - cause workshop needs to be able to be removed, even if it has been favourited.
+    @ManyToMany (mappedBy = "favouriteWorkshops")
+    @JsonIgnore
+    private List<User> userFavourites;
+
+
+    public int getAvailableSpotsWorkshop() {
+        int spotsBooked = 0;
+        if (this.getWorkshopBookings() != null){
+            for (Booking b : this.getWorkshopBookings()) {
+                spotsBooked += b.getAmount();
+            }}
+        return (this.getAmountOfParticipants() - spotsBooked);
+    }
 
 
 }

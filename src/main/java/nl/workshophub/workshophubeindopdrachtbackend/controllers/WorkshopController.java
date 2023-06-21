@@ -98,10 +98,7 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto), HttpStatus.ACCEPTED);
     }
 
-
-    //delete mapping admin: alleen als publish == false. Anders moet owner eerst op false zetten, voordat de workshop verwijderd kan worden
-    // delete mapping owner (kan niet als bookings heeft)
-    @DeleteMapping("/admin/{workshopId}")
+    @DeleteMapping("/{workshopId}")
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {
         workshopService.deleteWorkshop(workshopId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

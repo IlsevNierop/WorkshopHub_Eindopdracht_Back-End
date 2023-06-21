@@ -3,60 +3,44 @@ package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
 import nl.workshophub.workshophubeindopdrachtbackend.models.InOrOutdoors;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-//getters en setters nodig voor modelmapper
-@Getter
-@Setter
 public class WorkshopInputDto {
 
-    @NotBlank(message = "Workshop titel kan niet leeg zijn")
+    @NotBlank(message = "Workshop title can't be empty.")
     public String title;
-    @NotNull(message = "Datum mag niet leeg zin")
-    @Future(message = "Datum moet in de toekomst liggen")
+    @NotNull(message = "Date can't be empty.")
+    @Future(message = "Date needs to be in the future.")
+    @DateTimeFormat(pattern="YYYY-MM-DD")
+//    @Pattern(regexp = "YYYY-MM-DD", message = "Date format should be YYYY-MM-DD.") - not working, check validation date and time
     public LocalDate date;
-
-    @NotNull(message = "Starttijd kan niet leeg zijn")
-    // add validation of how time needs to be written?
+    @NotNull(message = "Start time can't be empty.")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     public LocalTime startTime;
-    @NotNull(message = "Eindtijd kan niet leeg zijn")
+    @NotNull(message = "End time can't be empty.")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     public LocalTime endTime;
-
-    @Positive(message = "Prijs kan niet leeg of lager dan 0 zijn")
+    @Positive(message = "Price can't be emtpy")
     public double price;
-
-    // add validation to enum - below code is not working
-//    @NotNull
     @Enumerated(EnumType.STRING)
     public InOrOutdoors inOrOutdoors;
-
-    @NotBlank(message = "Locatie kan niet leeg zijn")
+    @NotBlank(message = "Location can't be empty.")
     public String location;
     public String highlightedInfo;
-
-    @NotBlank(message = "Omschrijving kan niet leeg zijn")
-    @Size(min = 50, max = 400, message = "Omschrijving moet minimaal 50 en maximaal 400 karakters bevatten.")
+    @NotBlank(message = "Description can't be empty.")
+    @Size(min = 50, max = 1500, message = "Description needs to have a minimum of 50 characters and maximum of 1500.")
     public String description;
-
-    @Positive(message = "Aantal deelnemers kan niet leeg zijn")
+    @Positive(message = "Amount of participants can't be empty.")
     public int amountOfParticipants;
-
-
-    @NotBlank(message = "Er moet minstens 1 workshop thema gevuld zijn")
+    @NotBlank(message = "At least one workshop category should be filled in.")
     public String workshopCategory1;
     public String workshopCategory2;
-
-    //     admin input: --> extra input dto klasse maken - nice to have
-// als owner de workshop edit - gaat deze automatisch op null
     public Boolean workshopVerified;
     public String feedbackAdmin;
-
-    // als owner de workshop edit - gaat deze automatisch op null
     public Boolean publishWorkshop;
 
 

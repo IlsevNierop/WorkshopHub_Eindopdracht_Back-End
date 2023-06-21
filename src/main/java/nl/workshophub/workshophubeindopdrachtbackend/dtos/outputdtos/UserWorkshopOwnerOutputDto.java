@@ -1,10 +1,5 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class UserWorkshopOwnerOutputDto {
 
     public Long id;

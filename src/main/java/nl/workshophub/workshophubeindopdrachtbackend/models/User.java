@@ -44,4 +44,36 @@ public class User {
     @JsonIgnore
     private List<Booking> bookings;
 
+    //possibly cascade all - cause user needs to be able to be removed, even if it has workshops as favourites.
+    @ManyToMany
+    @JoinTable(
+            name = "users_favourite_workshops",
+            joinColumns = @JoinColumn,
+            inverseJoinColumns = @JoinColumn
+    )
+    private List<Workshop> favouriteWorkshops;
+
+
+    public Double calculateAverageRatingWorkshopOwner() {
+        if (this.getWorkshops() == null) {
+            return null;
+        }
+        double sumRatings = 0;
+        double numberReviews = 0;
+        for (Workshop w : this.getWorkshops()) {
+            if (w.getWorkshopReviews() != null) {
+                for (Review r : w.getWorkshopReviews()) {
+                    sumRatings += r.getRating();
+                    numberReviews++;
+                }
+            }
+        }
+        if (numberReviews == 0) {
+            return null;
+        }
+
+        return sumRatings / numberReviews;
+
+    }
+
 }
