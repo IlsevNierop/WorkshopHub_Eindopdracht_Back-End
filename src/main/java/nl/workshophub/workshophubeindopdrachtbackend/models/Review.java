@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,10 +26,12 @@ public class Review {
     private Boolean reviewVerified;
     private String feedbackAdmin;
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "workshop_id")
     private Workshop workshop;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "customer_id")
     private User customer;
 

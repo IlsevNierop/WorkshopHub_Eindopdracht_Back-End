@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,9 +28,11 @@ public class Booking {
     private int amount;
 
     @ManyToOne
+    @JsonIgnore
     private Workshop workshop;
 
     @ManyToOne
+    @JsonIgnore
     private User customer;
 
 

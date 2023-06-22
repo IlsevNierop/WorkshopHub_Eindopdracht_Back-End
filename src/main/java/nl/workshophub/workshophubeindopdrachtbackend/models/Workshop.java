@@ -9,7 +9,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "workshops")
@@ -54,6 +56,7 @@ public class Workshop {
 //    private ArrayList<byte> workshopImage;
 
     @ManyToOne
+    @JsonIgnore
     private User workshopOwner;
 
     @OneToMany(mappedBy = "workshop")
@@ -64,11 +67,9 @@ public class Workshop {
     @JsonIgnore
     private List<Review> workshopReviews;
 
-
-    //possibly cascade all - cause workshop needs to be able to be removed, even if it has been favourited.
     @ManyToMany (mappedBy = "favouriteWorkshops")
     @JsonIgnore
-    private List<User> userFavourites;
+    private Set<User> favsUser  = new HashSet<>();
 
 
     public int getAvailableSpotsWorkshop() {

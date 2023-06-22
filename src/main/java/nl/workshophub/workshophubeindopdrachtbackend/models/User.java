@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -44,15 +46,15 @@ public class User {
     @JsonIgnore
     private List<Booking> bookings;
 
-    //possibly cascade all - cause user needs to be able to be removed, even if it has workshops as favourites.
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
-            name = "users_favourite_workshops",
-            joinColumns = @JoinColumn,
-            inverseJoinColumns = @JoinColumn
-    )
-    private List<Workshop> favouriteWorkshops;
+            name = "user_favourite_workshop",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "workshop_id")
 
+    )
+    private  Set<Workshop> favouriteWorkshops = new HashSet<>();
 
     public Double calculateAverageRatingWorkshopOwner() {
         if (this.getWorkshops() == null) {
