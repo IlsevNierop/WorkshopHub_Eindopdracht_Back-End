@@ -21,11 +21,8 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    private final FieldErrorHandling fieldErrorHandling;
-
-    public BookingController(BookingService bookingService, FieldErrorHandling fieldErrorHandling) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
-        this.fieldErrorHandling = fieldErrorHandling;
     }
 
     @GetMapping ("/user/{userId}")
@@ -50,7 +47,7 @@ public class BookingController {
     @PostMapping ("{customerId}/{workshopId}")
     public ResponseEntity<Object> createBooking(@PathVariable("customerId") Long customerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         BookingOutputDto bookingOutputDto = bookingService.createBooking(customerId, workshopId, bookingInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + bookingOutputDto.id).toUriString());
@@ -60,7 +57,7 @@ public class BookingController {
     @PutMapping("/{bookingId}")
     public ResponseEntity<Object> updateBooking(@PathVariable Long bookingId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(bookingService.updateBooking(bookingId, bookingInputDto), HttpStatus.ACCEPTED);
     }

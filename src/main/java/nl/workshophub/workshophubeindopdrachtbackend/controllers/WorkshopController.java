@@ -20,11 +20,8 @@ public class WorkshopController {
 
     private final WorkshopService workshopService;
 
-    private final FieldErrorHandling fieldErrorHandling;
-
-    public WorkshopController(WorkshopService workshopService, FieldErrorHandling fieldErrorHandling) {
+    public WorkshopController(WorkshopService workshopService) {
         this.workshopService = workshopService;
-        this.fieldErrorHandling = fieldErrorHandling;
     }
 
     //open
@@ -79,7 +76,7 @@ public class WorkshopController {
     @PostMapping("/{workshopOwnerId}")
     public ResponseEntity<Object> createWorkshop(@PathVariable Long workshopOwnerId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
@@ -95,7 +92,7 @@ public class WorkshopController {
     @PutMapping ("/{workshopOwnerId}/{workshopId}")
     public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId,  @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto), HttpStatus.ACCEPTED);
     }
@@ -113,7 +110,7 @@ public class WorkshopController {
     @PutMapping ("/admin/{workshopId}")
     public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto), HttpStatus.ACCEPTED);
     }
