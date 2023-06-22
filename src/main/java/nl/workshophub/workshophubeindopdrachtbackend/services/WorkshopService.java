@@ -283,7 +283,7 @@ public class WorkshopService {
         workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingWorkshopOwner();
-        workshopOutputDto.amountOfFavsAndBookings = calculateAmountOfFavsAndBookingsWorkshop(workshop);
+        workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
 
         return workshopOutputDto;
 
@@ -334,14 +334,7 @@ public class WorkshopService {
         return allReviewOutputDtosFromWorkshopOwner;
     }
 
-    public int calculateAmountOfFavsAndBookingsWorkshop(Workshop workshop){
-        int popularityNumber = 0;
-        popularityNumber += workshop.getFavsUser().size();
-        for (Booking booking: workshop.getWorkshopBookings()) {
-            popularityNumber += booking.getAmount();
-        }
-        return popularityNumber;
-    }
+
 
 
 }

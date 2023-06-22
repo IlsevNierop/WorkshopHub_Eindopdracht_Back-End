@@ -81,5 +81,14 @@ public class Workshop {
         return (this.getAmountOfParticipants() - spotsBooked);
     }
 
+    public int calculateAmountOfFavsAndBookingsWorkshop(){
+        int popularityNumber = 0;
+        popularityNumber += this.getFavsUser().size();
+        for (Booking booking: this.getWorkshopBookings()) {
+            popularityNumber += booking.getAmount();
+        }
+        return popularityNumber;
+    }
+
 
 }
