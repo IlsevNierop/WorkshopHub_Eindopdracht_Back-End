@@ -85,11 +85,11 @@ Met een kleine groep van maximaal 8 deelnemers is er voldoende ruimte voor perso
 De kosten voor de workshop bedragen 42,50 euro per persoon, inclusief alle ingrediënten en materialen die nodig zijn om je eigen taarten te maken. Je gaat naar huis met nieuwe vaardigheden, een schat aan kennis en natuurlijk je zelfgemaakte taarten om te delen en van te genieten.
 Laat je creativiteit en smaakpapillen de vrije loop tijdens deze 3 uur durende workshop Taarten Bakken. Schrijf je nu in en ontdek de geheimen van het maken van heerlijke taarten in een gezellige en leerzame omgeving.', 8, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', default, 109);
 
-INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id) VALUES (101, '2023-06-01', 'Geweldige workshop!', 2, 101, 102);
-INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id) VALUES (102, '2023-05-29', 'Ik kijk ernaar uit! En ben vegetarier.', 1, 101, 102);
-INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id) VALUES (103, '2023-05-30', 'Leuk concept!', 3, 103, 105);
-INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id) VALUES (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 107, 100);
-INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id) VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 106, 100);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price) VALUES (101, '2023-06-01', 'Geweldige workshop!', 2, 101, 102, 90.0);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price) VALUES (102, '2023-05-29', 'Ik kijk ernaar uit! En ben vegetarier.', 1, 101, 102, 45.0);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price) VALUES (103, '2023-05-30', 'Leuk concept!', 3, 103, 105, 45.0);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price) VALUES (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 107, 100, 105.0);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price) VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 106, 100, 50.0);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (100, 4.5, 'De workshop was echt geweldig! Ik heb zoveel geleerd en de docent was zeer behulpzaam. Een aanrader!', default, 'Bedankt voor je positieve feedback!', 107, 101);

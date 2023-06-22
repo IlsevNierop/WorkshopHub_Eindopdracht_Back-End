@@ -75,6 +75,7 @@ public class BookingService {
         Booking booking = transferBookingInputDtoToBooking(bookingInputDto);
         booking.setWorkshop(workshop);
         booking.setCustomer(customer);
+        booking.setTotalPrice(bookingInputDto.amount * workshop.getPrice());
         bookingRepository.save(booking);
         return transferBookingToBookingOutputDto(booking);
     }
@@ -89,6 +90,7 @@ public class BookingService {
             throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
         }
         booking.setAmount(bookingInputDto.amount);
+        booking.setTotalPrice(bookingInputDto.amount * workshop.getPrice());
         if (bookingInputDto.commentsCustomer != null) {
             booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
         }
@@ -110,6 +112,7 @@ public class BookingService {
         bookingOutputDto.dateOrder = booking.getDateOrder();
         bookingOutputDto.commentsCustomer = booking.getCommentsCustomer();
         bookingOutputDto.amount = booking.getAmount();
+        bookingOutputDto.totalPrice = booking.getTotalPrice();
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
 

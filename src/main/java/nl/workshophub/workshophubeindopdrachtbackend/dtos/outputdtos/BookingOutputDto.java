@@ -9,7 +9,7 @@ public class BookingOutputDto {
     public LocalDate dateOrder;
     public String commentsCustomer;
     public int amount;
-
+    public double totalPrice;
     public Long workshopId;
     public String workshopTitle;
     public UserCustomerOutputDto customerOutputDto;
