@@ -27,6 +27,8 @@ public class Booking {
 
     private int amount;
 
+    private double totalPrice;
+
     @ManyToOne
     @JsonIgnore
     private Workshop workshop;
@@ -34,6 +36,5 @@ public class Booking {
     @ManyToOne
     @JsonIgnore
     private User customer;
-
-
+    
 }
