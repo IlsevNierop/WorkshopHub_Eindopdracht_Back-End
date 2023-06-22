@@ -20,11 +20,8 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    private final FieldErrorHandling fieldErrorHandling;
-
-    public ReviewController(ReviewService reviewService, FieldErrorHandling fieldErrorHandling) {
+    public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
-        this.fieldErrorHandling = fieldErrorHandling;
     }
 
     @GetMapping("/{reviewId}")
@@ -58,7 +55,7 @@ public class ReviewController {
     @PostMapping ("/{workshopId}/{customerId}")
     public ResponseEntity<Object> createReview (@PathVariable("workshopId") Long workshopId, @PathVariable ("customerId") Long customerId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         ReviewOutputDto reviewOutputDto = reviewService.createReview(workshopId, customerId, reviewInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + reviewOutputDto.id).toUriString());
@@ -68,7 +65,7 @@ public class ReviewController {
     @PutMapping ("/admin/verify/{reviewId}")
     public ResponseEntity<Object> verifyReviewByAdmin(@PathVariable Long reviewId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(reviewService.verifyReviewByAdmin(reviewId, reviewInputDto), HttpStatus.ACCEPTED);
     }
@@ -76,7 +73,7 @@ public class ReviewController {
     @PutMapping ("/{customerId}/{reviewId}")
     public ResponseEntity<Object> updateReviewByCustomer (@PathVariable Long reviewId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(reviewService.updateReviewByCustomer(reviewId, reviewInputDto), HttpStatus.ACCEPTED);
     }

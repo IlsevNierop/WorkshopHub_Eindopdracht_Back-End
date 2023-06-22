@@ -21,10 +21,8 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-    private final FieldErrorHandling fieldErrorHandling;
-    public UserController(UserService userService, FieldErrorHandling fieldErrorHandling) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.fieldErrorHandling = fieldErrorHandling;
     }
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<UserCustomerOutputDto> getCustomerById(@PathVariable Long customerId) {
@@ -43,7 +41,7 @@ public class UserController {
     @PostMapping ("/customer")
     public ResponseEntity<Object> createCustomer(@Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (customerInputDto.workshopOwner == true) {
             return ResponseEntity.badRequest().body("To create a new account for a workshopowner you need to use a different link and more details are required.");
@@ -55,7 +53,7 @@ public class UserController {
     @PostMapping ("/workshopOwner")
     public ResponseEntity<Object> createWorkshopOwner(@Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (workshopOwnerInputDto.workshopOwner == false) {
             return ResponseEntity.badRequest().body("To create a new customer you need to use another link and less information is required.");
@@ -81,7 +79,7 @@ public class UserController {
  @PutMapping ("/customer/{customerId}")
     public ResponseEntity <Object> updateCustomer(@PathVariable Long customerId,@RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult){
      if (bindingResult.hasFieldErrors()){
-         return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+         return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
      }
      if (customerInputDto.workshopOwner == true) {
          return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
@@ -94,7 +92,7 @@ public class UserController {
     @PutMapping ("/workshopowner/{workshopOwnerId}")
     public ResponseEntity <Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId,@RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()){
-            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         if (workshopOwnerInputDto.workshopOwner == false) {
             return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
