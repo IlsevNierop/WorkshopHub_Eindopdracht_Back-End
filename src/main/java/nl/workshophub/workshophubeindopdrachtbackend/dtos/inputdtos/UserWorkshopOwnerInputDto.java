@@ -1,11 +1,7 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class UserWorkshopOwnerInputDto {
 
     @NotBlank (message = "Firstname field shouldn't be empty.")

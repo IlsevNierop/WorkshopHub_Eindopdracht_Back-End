@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -43,5 +45,37 @@ public class User {
     @OneToMany (mappedBy = "customer")
     @JsonIgnore
     private List<Booking> bookings;
+
+    @ManyToMany
+    @JsonIgnore
+    @JoinTable(
+            name = "user_favourite_workshop",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "workshop_id")
+
+    )
+    private  Set<Workshop> favouriteWorkshops = new HashSet<>();
+
+    public Double calculateAverageRatingWorkshopOwner() {
+        if (this.getWorkshops() == null) {
+            return null;
+        }
+        double sumRatings = 0;
+        double numberReviews = 0;
+        for (Workshop w : this.getWorkshops()) {
+            if (w.getWorkshopReviews() != null) {
+                for (Review r : w.getWorkshopReviews()) {
+                    sumRatings += r.getRating();
+                    numberReviews++;
+                }
+            }
+        }
+        if (numberReviews == 0) {
+            return null;
+        }
+
+        return sumRatings / numberReviews;
+
+    }
 
 }

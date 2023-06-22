@@ -1,12 +1,7 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
-@Getter
-@Setter
 public class ReviewInputDto {
 
     @Max(value=5, message="Rating can't be higher than 5")

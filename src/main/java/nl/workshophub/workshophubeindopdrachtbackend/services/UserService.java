@@ -8,7 +8,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestExcept
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.util.AverageRatingWorkshopOwnerCalculator;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,12 +18,8 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final AverageRatingWorkshopOwnerCalculator averageRatingWorkshopOwnerCalculator;
-
-
-    public UserService(UserRepository userRepository, AverageRatingWorkshopOwnerCalculator averageRatingWorkshopOwnerCalculator) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.averageRatingWorkshopOwnerCalculator = averageRatingWorkshopOwnerCalculator;
     }
 
     public UserCustomerOutputDto getCustomerById(Long customerId) throws RecordNotFoundException {
@@ -145,7 +140,7 @@ public class UserService {
         workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
         workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
         workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
-        workshopOwnerOutputDto.averageRatingReviews = averageRatingWorkshopOwnerCalculator.calculateAverageRatingWorkshopOwner(workshopOwner);
+        workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingWorkshopOwner();
 
 
         return workshopOwnerOutputDto;
