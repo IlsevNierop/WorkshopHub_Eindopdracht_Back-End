@@ -34,6 +34,8 @@ public class WorkshopOutputDto {
 
     public Boolean isFavourite;
 
+    public int amountOfFavsAndBookings;
+
 
 
 }

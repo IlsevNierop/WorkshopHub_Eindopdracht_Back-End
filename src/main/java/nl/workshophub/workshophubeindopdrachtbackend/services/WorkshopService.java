@@ -5,6 +5,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutpu
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
@@ -282,6 +283,7 @@ public class WorkshopService {
         workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingWorkshopOwner();
+        workshopOutputDto.amountOfFavsAndBookings = calculateAmountOfFavsAndBookingsWorkshop(workshop);
 
         return workshopOutputDto;
 
@@ -330,6 +332,15 @@ public class WorkshopService {
             }
         }
         return allReviewOutputDtosFromWorkshopOwner;
+    }
+
+    public int calculateAmountOfFavsAndBookingsWorkshop(Workshop workshop){
+        int popularityNumber = 0;
+        popularityNumber += workshop.getFavsUser().size();
+        for (Booking booking: workshop.getWorkshopBookings()) {
+            popularityNumber += booking.getAmount();
+        }
+        return popularityNumber;
     }
 
 
