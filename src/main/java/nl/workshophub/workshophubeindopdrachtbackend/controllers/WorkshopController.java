@@ -27,38 +27,52 @@ public class WorkshopController {
         this.fieldErrorHandling = fieldErrorHandling;
     }
 
+    //open
+
     @GetMapping
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate() {
         return new ResponseEntity<>(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<WorkshopOutputDto> getWorkshopById(@PathVariable Long id) {
-        return new ResponseEntity<>(workshopService.getWorkshopById(id), HttpStatus.OK);
+    @GetMapping("/{workshopId}")
+    public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable Long workshopId) {
+        return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId), HttpStatus.OK);
     }
 
-    //getmapping om per bedrijf alle workshops te zien? voor niet ingelogde users?
+    @GetMapping("/workshopOwner/{workshopOwnerId}")
+    public ResponseEntity<List<WorkshopOutputDto>>  getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(workshopOwnerId), HttpStatus.OK);
+    }
+
+    //owner
+    @GetMapping("/workshopOwner/{workshopOwnerId}/workshop/{workshopId}")
+    public ResponseEntity<WorkshopOutputDto> getWorkshopByWorkshopOwnerId(@PathVariable Long workshopId, @PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getWorkshopByWorkshopOwnerId(workshopId, workshopOwnerId), HttpStatus.OK);
+    }
 
 
-    //owner getmappings:
-    // goed te keuren workshops van owner - verified==true
-    // afgekeurde workshops van owner - verified == false - incl feedback
-    // published workshops van owner after date (?)
-    // published workshops owner allemaal (?)
+    // filter at frontend on what to verify etc. show startdate today - but possibility to go back in time
+    @GetMapping("/workshopOwner/all/{workshopOwnerId}")
+    public ResponseEntity<List<WorkshopOutputDto>>  getAllWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    }
 
-//    @GetMapping ("/{workshopowner}/")
-//    public ResponseEntity<List<Workshop>> getAllWorkshopsByWorkshopOwner (@RequestParam User workshopOwner) throws RecordNotFoundException {
-//        //Nog toevoegen: check of workshopOwner uberhaupt bestaat in de database
-//        if (repos.findByWorkshopOwner(workshopOwner).isEmpty()){
-//            throw new RecordNotFoundException("De workshopeigenaar met naam " + workshopOwner.getFullName() + " heeft geen workshops geregistreerd staan");
-//        }
-//        return new ResponseEntity<>(repos.findByWorkshopOwner(workshopOwner), HttpStatus.OK);
-//    }
+
 
     // admin getmappings:
-    @GetMapping("/admin/")
+    @GetMapping("/admin/verify")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerify() {
         return new ResponseEntity<>(workshopService.getAllWorkshopsToVerify(), HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/")
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshops() {
+        return new ResponseEntity<>(workshopService.getAllWorkshops(), HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/{workshopId}")
+    public ResponseEntity<WorkshopOutputDto> getWorkshopById(@PathVariable Long workshopId) {
+        return new ResponseEntity<>(workshopService.getWorkshopById(workshopId), HttpStatus.OK);
     }
 
     @PostMapping("/{workshopOwnerId}")
@@ -72,9 +86,8 @@ public class WorkshopController {
     }
 
 
-    //put mapping: owner can edit everything but not feedback and approve --> if some variables are edited automatisch verified == null. If only publish is edited --> dan verified niet wijzigen en andere dingen niet wijzigen.
     @PutMapping ("/{workshopOwnerId}/{workshopId}")
-    public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("id") Long workshopId,  @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId,  @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
@@ -88,8 +101,9 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopOwnerId, workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
+//    putmapping: favourites
+
     // admin:
-    // put mapping: admin can edit and add feedback and approve
     @PutMapping ("/admin/{workshopId}")
     public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
@@ -98,6 +112,7 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto), HttpStatus.ACCEPTED);
     }
 
+    //owner mag ook eigenworkshop deleten - has role owner - check workshop.getWorkshopOwner().getId() != workshopOwner.getId()
     @DeleteMapping("/{workshopId}")
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {
         workshopService.deleteWorkshop(workshopId);

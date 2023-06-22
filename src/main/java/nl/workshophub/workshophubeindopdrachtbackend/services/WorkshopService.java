@@ -44,32 +44,85 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    // add in output all reviews about workshopowner to getworkshop by id? List of reviewoutputdtos?
-    public WorkshopOutputDto getWorkshopById(Long id) throws RecordNotFoundException {
-        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + id + " doesn't exist."));
-        return transferWorkshopToWorkshopOutputDto(workshop);
+    public WorkshopOutputDto getWorkshopByIdVerifiedAndPublish(Long workshopId) throws RecordNotFoundException, BadRequestException {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        if (workshop.getWorkshopVerified() == null || workshop.getWorkshopVerified() == false || workshop.getPublishWorkshop() == null || workshop.getPublishWorkshop() == false) {
+            throw new BadRequestException("You're not allowed to view this workshop.");
+        }
+        WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(workshop);
+        return workshopOutputDto;
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsToVerify() throws RecordNotFoundException {
-        List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(java.time.LocalDate.now());
+    public List<WorkshopOutputDto> getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(Long workshopOwnerId) {
+        List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now(), workshopOwnerId);
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-//            get average rating user - connected to workshop - set average rating owner to workshopoutput
             workshopOutputDtos.add(workshopOutputDto);
         }
         return workshopOutputDtos;
     }
 
+    //    check if user is owner
+    public WorkshopOutputDto getWorkshopByWorkshopOwnerId(Long workshopId, Long workshopOwnerId) throws RecordNotFoundException, BadRequestException {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        //is getting workshopowner from database necessary?
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() == null || workshopOwner.getWorkshopOwnerVerified() == false ||  workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
+            throw new BadRequestException("You're not allowed to view this workshop.");
+        }
+        return transferWorkshopToWorkshopOutputDto(workshop);
+    }
+
+    //    check if user is owner
+    public List<WorkshopOutputDto> getAllWorkshopsFromWorkshopOwner(Long workshopOwnerId) {
+        List<Workshop> workshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        for (Workshop w : workshops) {
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
+            workshopOutputDtos.add(workshopOutputDto);
+        }
+        return workshopOutputDtos;
+    }
+
+
+    public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
+        List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(java.time.LocalDate.now());
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        for (Workshop w : workshops) {
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
+            workshopOutputDtos.add(workshopOutputDto);
+        }
+        return workshopOutputDtos;
+    }
+
+    public List<WorkshopOutputDto> getAllWorkshops() {
+        List<Workshop> workshops = workshopRepository.findAll();
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        for (Workshop w : workshops) {
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
+            workshopOutputDtos.add(workshopOutputDto);
+        }
+        return workshopOutputDtos;
+    }
+
+    public WorkshopOutputDto getWorkshopById(Long workshopId) throws RecordNotFoundException, BadRequestException {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+
+        WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(workshop);
+        return workshopOutputDto;
+    }
+
+    //check if user is owner (or admin)
     public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException, BadRequestException {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
-        if (workshopOwner.getWorkshopOwnerVerified() == null || !workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() == false) {
-            throw new BadRequestException("Je bent niet gemachtigd een nieuwe workshop aan te maken");
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        if (workshopOwner.getWorkshopOwnerVerified() == null || workshopOwner.getWorkshopOwnerVerified() == false || !workshopOwner.getWorkshopOwner()) {
+            throw new BadRequestException("You're not allowed to create a new workshop.");
         }
         Workshop workshop = new Workshop();
         workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         workshop.setWorkshopOwner(workshopOwner);
-        // bij aanmaken van nieuwe workshop moeten publishWorkshop, workshopVerified en FeedbackAdmin default waardes krijgen.
+        // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin need to get default values.
         workshop.setPublishWorkshop(null);
         workshop.setWorkshopVerified(null);
         workshop.setFeedbackAdmin(null);
@@ -77,16 +130,17 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
+    //check if user is owner (or admin)
     public WorkshopOutputDto updateWorkshopByOwner(Long workshopOwnerId, Long workshopId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + workshopId + " bestaat niet"));
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
-        if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != true) {
-            throw new BadRequestException("Je bent niet gemachtigd een workshop aan te passen");
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() == null || workshopOwner.getWorkshopOwnerVerified() == false ||  workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
+            throw new BadRequestException("You're not allowed to update this workshop.");
         }
-        // om te voorkomen dat de owner de feedback van de admin in de workshopInputDto heeft aangepast, en dit in de transfer methode wordt overgenomen, pas ik hier de inputdto feedback aan naar de eventuele originele feedback.
+        // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original workshop. This could be prevented with a different inputdto for workshopowner (excluding feedbackadmin and verifyworkshop) and for admin.
         workshopInputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
-        // na het wijzigen van een workshop wordt de status automatisch op geverifieerd null en publish null gezet:
+        // after updating a workshop, publish and verify will be automatically set to default values.
         workshop.setPublishWorkshop(null);
         workshop.setWorkshopVerified(null);
         workshopRepository.save(workshop);
@@ -94,15 +148,16 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
+    //check if user is owner
     @PutMapping
     public WorkshopOutputDto verifyWorkshopByOwner(Long workshopOwnerId, Long workshopId, Boolean publishWorkshop) throws RecordNotFoundException, BadRequestException {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + workshopId + " bestaat niet"));
-        if (workshop.getWorkshopVerified() != true) {
-            throw new BadRequestException("Deze workshop is nog niet goedgekeurd door de administrator, dus deze workshop kan nog niet op publiceren gezet worden.");
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        if (workshop.getWorkshopVerified() == null || workshop.getWorkshopVerified() == false) {
+            throw new BadRequestException("This workshop is not yet approved by the administrator, therefore it can't be published.");
         }
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("De workshop eigenaar met ID " + workshopOwnerId + " bestaat niet"));
-        if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != true) {
-            throw new BadRequestException("Je bent niet gemachtigd deze workshop te verifieren");
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        if ( !workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() == null || workshopOwner.getWorkshopOwnerVerified() == false ||  workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
+            throw new BadRequestException("You're not allowed to publish this workshop, only the verified owner can publish.");
         }
         workshop.setPublishWorkshop(publishWorkshop);
         workshopRepository.save(workshop);
@@ -110,10 +165,10 @@ public class WorkshopService {
     }
 
     public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("De workshop met ID " + workshopId + " bestaat niet"));
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopId + " doesn't exist."));
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
 
-        // na het wijzigen van een workshop door admin, wordt de publish workshop automatisch op null gezet, zodat owner kan accorderen:
+        // After verifying / disapproving the workshop by admin, publish workshop will automatically get a default value.
         workshop.setPublishWorkshop(null);
 
         workshopRepository.save(workshop);
@@ -129,7 +184,7 @@ public class WorkshopService {
         if (!workshop.getWorkshopReviews().isEmpty()) {
             throw new BadRequestException("This workshop can't be removed, since it already has reviews.");
         }
-        //can't remove workshop, if owner has set publish on true. Then owner needs to verify deleten - by setting publish workshop on false.
+        //can't remove workshop, if owner has set publish on true. Then owner needs to verify delete - by setting publish workshop on false.
         if (workshop.getPublishWorkshop() != null && workshop.getPublishWorkshop() == true) {
             throw new BadRequestException("This workshop can't be removes, because the workshop owner has verified the workshop for publishing.");
         }
@@ -156,7 +211,6 @@ public class WorkshopService {
         workshopOutputDto.workshopVerified = workshop.getWorkshopVerified();
         workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
-        workshopOutputDto.workshopBookings = getAllBookingOutPutDtosFromWorkshop(workshop);
         workshopOutputDto.workshopOwnerReviews = getAllReviewOutPutDtosFromWorkshopOwner(workshop);
         workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
@@ -183,8 +237,6 @@ public class WorkshopService {
         if (workshopInputDto.workshopCategory2 != null) {
             workshop.setWorkshopCategory2(workshopInputDto.workshopCategory2);
         }
-
-        // bij update functies mogen de volgende waardes niet altijd gewijzigd worden, daarom bij die mappings dit overschreven.
         if (workshopInputDto.workshopVerified != null) {
             workshop.setWorkshopVerified(workshopInputDto.workshopVerified);
         }
@@ -203,7 +255,9 @@ public class WorkshopService {
             for (Workshop w : workshop.getWorkshopOwner().getWorkshops()) {
                 if (w.getWorkshopReviews() != null) {
                     for (Review r : w.getWorkshopReviews()) {
-                        allReviewOutputDtosFromWorkshopOwner.add(reviewService.transferReviewToReviewOutputDto(r));
+                        if (r.getReviewVerified() != null && r.getReviewVerified() == true) {
+                            allReviewOutputDtosFromWorkshopOwner.add(reviewService.transferReviewToReviewOutputDto(r));
+                        }
                     }
                 }
             }
@@ -211,15 +265,6 @@ public class WorkshopService {
         return allReviewOutputDtosFromWorkshopOwner;
     }
 
-    public List<BookingOutputDto> getAllBookingOutPutDtosFromWorkshop(Workshop workshop) {
-        List<BookingOutputDto> allBookingOutPutDtosFromWorkshop = new ArrayList<>();
-        if (workshop.getWorkshopBookings() != null) {
-            for (Booking b : workshop.getWorkshopBookings()) {
-                allBookingOutPutDtosFromWorkshop.add(bookingService.transferBookingToBookingOutputDto(b));
-            }
-        }
-        return allBookingOutPutDtosFromWorkshop;
-    }
 
 
 }

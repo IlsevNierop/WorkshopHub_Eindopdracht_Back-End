@@ -8,12 +8,15 @@ import java.util.List;
 
 public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
 
-//    List<Workshop> findByWorkshopOwner (User workshopOwner);
-
+    //open
+    List<Workshop> findByDateAfterAndWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate (LocalDate date, Long workshopOwnerId);
     List<Workshop> findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(LocalDate date);
+
+    //owner
+    List<Workshop> findByWorkshopOwnerId (Long workshopOwnerId);
+
+    //admin
     List<Workshop> findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(LocalDate date);
-    List<Workshop> findByDate(LocalDate date);
-    List<Workshop> findByTitleContainingIgnoreCase(String substring);
 
 
 }

@@ -28,7 +28,6 @@ public class WorkshopOutputDto {
     public Boolean workshopVerified;
     public String feedbackAdmin;
     public Boolean publishWorkshop;
-    public List<BookingOutputDto> workshopBookings;
     public List<ReviewOutputDto> workshopOwnerReviews;
     public String workshopOwnerCompanyName;
     public Double averageRatingWorkshopOwnerReviews;
