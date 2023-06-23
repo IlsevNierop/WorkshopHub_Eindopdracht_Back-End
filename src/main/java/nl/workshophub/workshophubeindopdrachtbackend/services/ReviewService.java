@@ -121,10 +121,11 @@ public class ReviewService {
     //check if user is customer
     public ReviewOutputDto updateReviewByCustomer(Long reviewId, ReviewInputDto reviewInputDto) throws RecordNotFoundException {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
+        // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original review. This could be prevented with a different inputdto for customer (excluding feedbackadmin and verifyreview) and for admin.
+        reviewInputDto.feedbackAdmin = review.getFeedbackAdmin();
         ReviewServiceTransferMethod.transferReviewInputDtoToReview(reviewInputDto, review);
-        // after update review by customer, reviewVerified and feedbackAdmin should get default values so admin can later verify and give feedback.
+        // after update review by customer, reviewVerified should get default value so admin can later verify.
         review.setReviewVerified(null);
-        review.setFeedbackAdmin(null);
         reviewRepository.save(review);
         return ReviewServiceTransferMethod.transferReviewToReviewOutputDto(review);
     }

@@ -1,9 +1,13 @@
 package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
+
+import java.util.Set;
 
 public class UserCustomerInputDto {
 
@@ -23,4 +27,12 @@ public class UserCustomerInputDto {
 
     @NotNull(message= "You should choose between workshop owner or customer.")
     public Boolean workshopOwner;
+
+    //security
+    public Boolean enabled;
+    public String apikey;
+
+    @JsonSerialize
+    public Set<Authority> authorities;
+
 }

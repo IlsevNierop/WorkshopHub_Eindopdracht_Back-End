@@ -35,6 +35,8 @@ public class User {
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
 
+    //relations
+
     @OneToMany (mappedBy = "customer")
     @JsonIgnore
     private List<Review> customerReviews;
@@ -55,6 +57,21 @@ public class User {
 
     )
     private  Set<Workshop> favouriteWorkshops = new HashSet<>();
+
+    //security
+    @Column(nullable = false)
+    private boolean enabled = true;
+
+    @Column
+    private String apikey;
+
+    @OneToMany(
+            targetEntity = Authority.class,
+            mappedBy = "username",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
+    private Set<Authority> authorities = new HashSet<>();
 
     public Double calculateAverageRatingWorkshopOwner() {
         if (this.getWorkshops() == null) {
