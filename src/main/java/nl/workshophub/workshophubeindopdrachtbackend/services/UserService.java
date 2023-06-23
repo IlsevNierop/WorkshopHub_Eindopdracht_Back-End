@@ -57,7 +57,7 @@ public class UserService {
     }
     public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) throws BadRequestException {
         if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
-            throw new BadRequestException("Invalid request: another user exists with the email: " + workshopOwnerInputDto.email);
+            throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
         User workshopOwner = new User();
         userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
@@ -69,12 +69,11 @@ public class UserService {
         if (workshopOwner.getWorkshopOwner() == false){
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
-//
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
         if (workshopOwnerVerified == true){
             // hier de rol toevoegen
         }
-//        if (workshopOwnerVerified == false && workshopOwner heeft de rol workshopowner - dan die verwijderen)
+//        if (workshopOwnerVerified == false && workshopOwner heeft de rol workshopowner - dan die rol verwijderen)
 
         userRepository.save(workshopOwner);
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
@@ -87,7 +86,7 @@ public class UserService {
         }
         if (!customer.getEmail().equals(customerInputDto.email)){
             if (userRepository.existsByEmail(customerInputDto.email)){
-                throw new BadRequestException("Invalid request: another user exists with the email: " + customerInputDto.email);
+                throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
             }
         }
         userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto));
@@ -101,12 +100,14 @@ public class UserService {
         }
         if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)){
             if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
-                throw new BadRequestException("Invalid request: another user exists with the email: " + workshopOwnerInputDto.email);
+                throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
             }
         }
         userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
+
+
 
     public void deleteUser(Long userId) throws RecordNotFoundException, BadRequestException {
         try {
