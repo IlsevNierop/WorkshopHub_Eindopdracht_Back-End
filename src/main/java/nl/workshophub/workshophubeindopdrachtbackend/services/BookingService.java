@@ -24,15 +24,11 @@ public class BookingService {
     private final WorkshopRepository workshopRepository;
     private final UserRepository userRepository;
 
-    //not sure if it's good practice / bad practice to inject the user service here, but using it to convert customer to customerdto (transfer method)
-    private final UserService userService;
 
-
-    public BookingService(BookingRepository bookingRepository, WorkshopRepository workshopRepository, UserRepository userRepository, UserService userService) {
+    public BookingService(BookingRepository bookingRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
     }
 
     public List<BookingOutputDto> getAllBookingsFromUser(Long userId) throws RecordNotFoundException {
@@ -115,9 +111,7 @@ public class BookingService {
         bookingOutputDto.totalPrice = booking.getTotalPrice();
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
-
-        // calling a service from another service might nog be best practice
-        bookingOutputDto.customerOutputDto = userService.transferUserToCustomerOutputDto(booking.getCustomer());
+        bookingOutputDto.customerOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(booking.getCustomer());
 
         return bookingOutputDto;
     }

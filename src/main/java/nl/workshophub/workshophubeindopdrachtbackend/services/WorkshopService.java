@@ -269,6 +269,7 @@ public class WorkshopService {
         if (workshopInputDto.workshopCategory2 != null) {
             workshop.setWorkshopCategory2(workshopInputDto.workshopCategory2);
         }
+        // this can be set (by admin) via de workshopinputdto, since the admin doesn't only verify, but can also update the whole workshop
         if (workshopInputDto.workshopVerified != null) {
             workshop.setWorkshopVerified(workshopInputDto.workshopVerified);
         }
