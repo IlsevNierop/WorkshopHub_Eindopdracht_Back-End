@@ -44,8 +44,8 @@ public class WorkshopController {
 
     //owner
     @GetMapping("/workshopOwner/{workshopOwnerId}/workshop/{workshopId}")
-    public ResponseEntity<WorkshopOutputDto> getWorkshopByWorkshopOwnerId(@PathVariable("workshopOwnerId") Long workshopId, @PathVariable("workshopId") Long workshopOwnerId) {
-        return new ResponseEntity<>(workshopService.getWorkshopByWorkshopOwnerId(workshopId, workshopOwnerId), HttpStatus.OK);
+    public ResponseEntity<WorkshopOutputDto> getWorkshopByWorkshopOwnerId(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId) {
+        return new ResponseEntity<>(workshopService.getWorkshopByWorkshopOwnerId(workshopOwnerId, workshopId), HttpStatus.OK);
     }
 
 
