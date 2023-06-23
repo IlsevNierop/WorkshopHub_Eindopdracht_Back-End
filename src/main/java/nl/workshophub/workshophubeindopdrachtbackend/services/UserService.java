@@ -27,7 +27,7 @@ public class UserService {
         if (customer.getWorkshopOwner() == true) {
             throw new RecordNotFoundException("The user with ID " + customerId + " is a workshop owner and not a customer.");
         }
-        return transferUserToCustomerOutputDto(customer);
+        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long workshopOwnerId) throws RecordNotFoundException {
@@ -35,14 +35,14 @@ public class UserService {
         if (workshopOwner.getWorkshopOwner() == false) {
             throw new RecordNotFoundException("The user with ID "  + workshopOwnerId + " is a customer and not a workshop owner.");
         }
-        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() {
         List<User> workshopOwners = userRepository.findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNullOrWorkshopOwnerVerifiedIsFalse();
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
         for (User workshopOwner : workshopOwners) {
-            workshopOwnerOutputDtos.add(transferUserToWorkshopOwnerOutputDto(workshopOwner));
+            workshopOwnerOutputDtos.add(UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner));
         }
         return workshopOwnerOutputDtos;
     }
@@ -52,16 +52,16 @@ public class UserService {
             throw new BadRequestException("Invalid request: another user exists with the email: " + customerInputDto.email);
         }
         User customer = new User();
-        userRepository.save(transferCustomerInputDtoToUser(customer, customerInputDto));
-        return transferUserToCustomerOutputDto(customer);
+        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto));
+        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
     public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) throws BadRequestException {
         if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
-            throw new BadRequestException("Invalid request: another user exists with the email: " + workshopOwnerInputDto.email);
+            throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
         User workshopOwner = new User();
-        userRepository.save(transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
-        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
+        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean workshopOwnerVerified) throws RecordNotFoundException, BadRequestException {
@@ -69,15 +69,14 @@ public class UserService {
         if (workshopOwner.getWorkshopOwner() == false){
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
-//
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
         if (workshopOwnerVerified == true){
             // hier de rol toevoegen
         }
-//        if (workshopOwnerVerified == false && workshopOwner heeft de rol workshopowner - dan die verwijderen)
+//        if (workshopOwnerVerified == false && workshopOwner heeft de rol workshopowner - dan die rol verwijderen)
 
         userRepository.save(workshopOwner);
-        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) throws RecordNotFoundException, BadRequestException {
@@ -87,11 +86,11 @@ public class UserService {
         }
         if (!customer.getEmail().equals(customerInputDto.email)){
             if (userRepository.existsByEmail(customerInputDto.email)){
-                throw new BadRequestException("Invalid request: another user exists with the email: " + customerInputDto.email);
+                throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
             }
         }
-        userRepository.save(transferCustomerInputDtoToUser(customer, customerInputDto));
-        return transferUserToCustomerOutputDto(customer);
+        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto));
+        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
     public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto workshopOwnerInputDto) throws RecordNotFoundException, BadRequestException {
@@ -101,12 +100,14 @@ public class UserService {
         }
         if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)){
             if (userRepository.existsByEmail(workshopOwnerInputDto.email)){
-                throw new BadRequestException("Invalid request: another user exists with the email: " + workshopOwnerInputDto.email);
+                throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
             }
         }
-        userRepository.save(transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
-        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto));
+        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
+
+
 
     public void deleteUser(Long userId) throws RecordNotFoundException, BadRequestException {
         try {
@@ -118,55 +119,5 @@ public class UserService {
         }
     }
 
-    public UserCustomerOutputDto transferUserToCustomerOutputDto(User customer) {
-        UserCustomerOutputDto customerOutputDto = new UserCustomerOutputDto();
-        customerOutputDto.id = customer.getId();
-        customerOutputDto.firstName = customer.getFirstName();
-        customerOutputDto.lastName = customer.getLastName();
-        customerOutputDto.email = customer.getEmail();
-        customerOutputDto.workshopOwner = customer.getWorkshopOwner();
 
-        return customerOutputDto;
-    }
-
-    public UserWorkshopOwnerOutputDto transferUserToWorkshopOwnerOutputDto(User workshopOwner) {
-        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = new UserWorkshopOwnerOutputDto();
-        workshopOwnerOutputDto.id = workshopOwner.getId();
-        workshopOwnerOutputDto.firstName = workshopOwner.getFirstName();
-        workshopOwnerOutputDto.lastName = workshopOwner.getLastName();
-        workshopOwnerOutputDto.email = workshopOwner.getEmail();
-        workshopOwnerOutputDto.companyName = workshopOwner.getCompanyName();
-        workshopOwnerOutputDto.kvkNumber = workshopOwner.getKvkNumber();
-        workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
-        workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
-        workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
-        workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingWorkshopOwner();
-
-
-        return workshopOwnerOutputDto;
-    }
-
-    public User transferWorkshopOwnerInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto) {
-        workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
-        workshopOwner.setLastName(workshopOwnerInputDto.lastName);
-        workshopOwner.setEmail(workshopOwnerInputDto.email);
-        workshopOwner.setPassword(workshopOwnerInputDto.password);
-        workshopOwner.setCompanyName(workshopOwnerInputDto.companyName);
-        workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
-        workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
-        workshopOwner.setWorkshopOwner(workshopOwnerInputDto.workshopOwner);
-        //bewust workshopverified hieruit gelaten, omdat het verifyen alleen via de put verify methode gaat als request parameter - en dat kan alleen de admin doen
-
-        return workshopOwner;
-    }
-
-    public User transferCustomerInputDtoToUser(User customer, UserCustomerInputDto customerInputDto) {
-        customer.setFirstName(customerInputDto.firstName);
-        customer.setLastName(customerInputDto.lastName);
-        customer.setEmail(customerInputDto.email);
-        customer.setPassword(customerInputDto.password);
-        customer.setWorkshopOwner(customerInputDto.workshopOwner);
-
-        return customer;
-    }
 }
