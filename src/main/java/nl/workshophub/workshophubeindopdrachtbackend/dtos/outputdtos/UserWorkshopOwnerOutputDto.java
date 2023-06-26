@@ -7,6 +7,9 @@ import java.util.Set;
 
 public class UserWorkshopOwnerOutputDto {
 
+    //later verwijderen als security goed aangepast is
+//    public String username;
+
     public Long id;
 
     public String firstName;

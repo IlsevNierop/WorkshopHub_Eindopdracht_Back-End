@@ -27,7 +27,11 @@ public class User {
     private String lastName;
 
     @Column(unique=true)
-    private String email;
+    private String email; //identifier
+
+
+//    @Column(nullable = false, unique = true)
+//    private String username;
     private String password;
     private String companyName;
     private Integer kvkNumber;
@@ -59,6 +63,8 @@ public class User {
     private  Set<Workshop> favouriteWorkshops = new HashSet<>();
 
     //security
+
+    //moet dit nog in een dto? Nodig?
     @Column(nullable = false)
     private boolean enabled = true;
 
@@ -67,11 +73,19 @@ public class User {
 
     @OneToMany(
             targetEntity = Authority.class,
-            mappedBy = "username",
+            mappedBy = "userId",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.EAGER)
     private Set<Authority> authorities = new HashSet<>();
+
+    public void addAuthority(Authority authority) {
+        this.authorities.add(authority);
+    }
+    public void removeAuthority(Authority authority) {
+        this.authorities.remove(authority);
+    }
+
 
     public Double calculateAverageRatingWorkshopOwner() {
         if (this.getWorkshops() == null) {

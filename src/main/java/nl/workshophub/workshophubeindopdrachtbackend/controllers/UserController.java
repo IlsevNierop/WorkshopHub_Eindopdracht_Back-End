@@ -16,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -37,6 +38,14 @@ public class UserController {
     public ResponseEntity<List<UserWorkshopOwnerOutputDto>> getWorkshopOwnersToVerify() {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
     }
+
+    // even kijken of evt moet met email ipv userid?
+    @GetMapping(value = "/{userId}/authorities")
+    public ResponseEntity<Object> getUserAuthorities(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok().body(userService.getUserAuthorities(userId));
+    }
+
+
 
     @PostMapping ("/customer")
     public ResponseEntity<Object> createCustomer(@Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
@@ -89,6 +98,7 @@ public class UserController {
         return new ResponseEntity<>(customerOutputDto, HttpStatus.OK);
     }
 
+
     @PutMapping ("/workshopowner/{workshopOwnerId}")
     public ResponseEntity <Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId,@RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()){
@@ -99,6 +109,22 @@ public class UserController {
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
+    }
+    @PostMapping(value = "/{email}/authorities")
+    public ResponseEntity<Object> addUserAuthority(@PathVariable("email") String email, @RequestParam String authority) throws BadRequestException {
+        try {
+            UserCustomerOutputDto userCustomerOutputDto= userService.addUserAuthority(email, authority);
+            return new ResponseEntity<>(userCustomerOutputDto, HttpStatus.CREATED);
+        }
+        catch (Exception ex) {
+            throw new BadRequestException("This user or authority is invalid");
+        }
+    }
+
+    @DeleteMapping(value = "/{email}/authorities")
+    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("email") String email, @RequestParam("authority") String authority) {
+        userService.removeAuthority(email, authority);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping ("admin/{userId}")
