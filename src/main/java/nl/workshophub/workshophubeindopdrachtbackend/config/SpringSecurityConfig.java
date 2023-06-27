@@ -73,16 +73,22 @@ public class SpringSecurityConfig {
                 //customer
                 .requestMatchers("/users/customer/**").authenticated() //get, put
                 .requestMatchers(HttpMethod.PUT,"/workshops/favourite/{userId}/{workshopId}").authenticated() //put
+                .requestMatchers(HttpMethod.GET, "/bookings/user/{userId}").authenticated() //get
+                .requestMatchers(HttpMethod.GET, "/bookings/{bookingId}").authenticated() //get
+                .requestMatchers(HttpMethod.PUT, "/bookings/{bookingId}").authenticated() //put
+                .requestMatchers(HttpMethod.POST, "/bookings/{customerId}/{workshopId}").authenticated() //get
 
 
                 //owner
                 .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
                 .requestMatchers("/workshops/workshopowner/**" ).hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
+                .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
 
                 //admin
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
                 .requestMatchers("/workshops/admin/**" ).hasRole("ADMIN") //get, get, get, put
+                .requestMatchers("/bookings/admin/**" ).hasRole("ADMIN") //delete
 
 
 
