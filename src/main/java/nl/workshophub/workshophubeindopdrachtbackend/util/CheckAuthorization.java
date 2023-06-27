@@ -11,6 +11,7 @@ public class CheckAuthorization {
 
     public static boolean isAuthorized(User user, Collection<GrantedAuthority> grantedAuthorityCollection, String loggedInUserEmail) {
 
+        //admin is allowed to do everything
         for (GrantedAuthority a : grantedAuthorityCollection) {
             if (a.getAuthority().equals("ROLE_ADMIN")) {
                 return true;

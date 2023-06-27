@@ -40,7 +40,7 @@ public class ReviewController {
     }
 
 //admin
-    @GetMapping("/admin")
+    @GetMapping("/admin/")
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
         return new ResponseEntity<>(reviewService.getAllReviews(), HttpStatus.OK);
 
@@ -79,7 +79,7 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.updateReviewByCustomer(reviewId, reviewInputDto), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/admin/{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<HttpStatus> deleteReview(@PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
