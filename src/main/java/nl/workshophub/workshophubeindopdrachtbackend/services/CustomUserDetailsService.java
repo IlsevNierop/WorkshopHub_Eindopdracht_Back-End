@@ -35,11 +35,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
         if (!optionalUser.isPresent()) {
-//            throw new UsernameNotFoundException("The user with " + email + "is not found.");
-            throw new UsernameNotFoundException("User not found with email: " + email);
+            throw new UsernameNotFoundException("The user with " + email + " doesn't exist.");
         }
         User user = optionalUser.get();
-//        UserCustomerOutputDto customerOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
 
         Set<Authority> authorities = user.getAuthorities();
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();

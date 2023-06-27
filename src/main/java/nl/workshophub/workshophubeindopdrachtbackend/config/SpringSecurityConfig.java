@@ -61,22 +61,28 @@ public class SpringSecurityConfig {
 //                .requestMatchers("/**").permitAll()
                 //authentication
                 .requestMatchers("/authenticated").authenticated()
-                .requestMatchers("/authenticate").permitAll()
+                .requestMatchers("/signin").permitAll()
                 //open
                 .requestMatchers(HttpMethod.POST, "/users/customer").permitAll() //everyone can register //post
                 .requestMatchers(HttpMethod.POST, "/users/workshopowner").permitAll() //everyone can register //post
+                .requestMatchers(HttpMethod.GET,"/workshops" ).permitAll() //everyone can see the workshop calendar //get
+                .requestMatchers(HttpMethod.GET,"/workshops/{workshopId}" ).permitAll() //everyone can see the workshop calendar //get
+                .requestMatchers(HttpMethod.GET,"/workshops/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see the workshop calendar //get
 
 
                 //customer
                 .requestMatchers("/users/customer/**").authenticated() //get, put
+                .requestMatchers(HttpMethod.PUT,"/workshops/favourite/{userId}/{workshopId}").authenticated() //put
 
 
                 //owner
                 .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
+                .requestMatchers("/workshops/workshopowner/**" ).hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
 
 
                 //admin
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
+                .requestMatchers("/workshops/admin/**" ).hasRole("ADMIN") //get, get, get, put
 
 
 

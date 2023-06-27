@@ -36,21 +36,21 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId, userId), HttpStatus.OK);
     }
 
-    @GetMapping("/workshopOwner/{workshopOwnerId}")
+    @GetMapping("/workshopowner/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>>  getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(@PathVariable Long workshopOwnerId,  @RequestParam(value="userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(workshopOwnerId, userId), HttpStatus.OK);
     }
 
 
     //owner
-    @GetMapping("/workshopOwner/{workshopOwnerId}/workshop/{workshopId}")
+    @GetMapping("/workshopowner/{workshopOwnerId}/workshop/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByWorkshopOwnerId(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId) {
         return new ResponseEntity<>(workshopService.getWorkshopByWorkshopOwnerId(workshopOwnerId, workshopId), HttpStatus.OK);
     }
 
 
     // filter at frontend on what to verify etc. show startdate today - but possibility to go back in time
-    @GetMapping("/workshopOwner/all/{workshopOwnerId}")
+    @GetMapping("/workshopowner/all/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>>  getAllWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
@@ -73,7 +73,7 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getWorkshopById(workshopId), HttpStatus.OK);
     }
 
-    @PostMapping("/{workshopOwnerId}")
+    @PostMapping("/workshopowner/{workshopOwnerId}")
     public ResponseEntity<Object> createWorkshop(@PathVariable Long workshopOwnerId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -89,7 +89,7 @@ public class WorkshopController {
     }
 
 
-    @PutMapping ("/{workshopOwnerId}/{workshopId}")
+    @PutMapping ("/workshopowner/{workshopOwnerId}/{workshopId}")
     public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId,  @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -98,13 +98,12 @@ public class WorkshopController {
     }
 
 
-    @PutMapping ("/verify/{workshopOwnerId}/{workshopId}")
+    @PutMapping ("/workshopowner/verify/{workshopOwnerId}/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
 
         return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopOwnerId, workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
-//    putmapping: favourites
 
     // admin:
     @PutMapping ("/admin/{workshopId}")
@@ -116,7 +115,7 @@ public class WorkshopController {
     }
 
     //owner mag ook eigenworkshop deleten - has role owner - check workshop.getWorkshopOwner().getId() != workshopOwner.getId()
-    @DeleteMapping("/{workshopId}")
+    @DeleteMapping("/workshopowner/{workshopId}")
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {
         workshopService.deleteWorkshop(workshopId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

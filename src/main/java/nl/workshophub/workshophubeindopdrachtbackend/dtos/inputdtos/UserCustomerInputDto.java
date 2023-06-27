@@ -10,10 +10,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
 import java.util.Set;
 
 public class UserCustomerInputDto {
-
-    //later verwijderen als security goed aangepast is
-//    public String username;
-
     @NotBlank(message = "Firstname field shouldn't be empty.")
     public String firstName;
     @NotBlank (message = "Lastname field shouldn't be empty.")

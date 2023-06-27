@@ -2,6 +2,9 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.AuthenticationInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.models.User;
+import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.services.CustomUserDetailsService;
 import nl.workshophub.workshophubeindopdrachtbackend.util.JwtUtil;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ public class AuthenticationController {
 
     /*inject authentionManager, userDetailsService en jwtUtil*/
     private final CustomUserDetailsService userDetailsService;
+
     private final JwtUtil jwtUtil;
     private AuthenticationManager authenticationManager;
 
@@ -31,21 +35,19 @@ public class AuthenticationController {
     }
 
 
-    /*
-         Deze methode geeft de principal (basis user gegevens) terug van de ingelogde gebruiker
-     */
-    //checken of iemand ingelogd is
+        // Deze methode geeft de principal (basis user gegevens) terug van de ingelogde gebruiker
+
     @GetMapping(value = "/authenticated")
     public ResponseEntity<Object> authenticated(Authentication authentication, Principal principal) {
         return ResponseEntity.ok().body(principal);
     }
 
     //om in te loggen
-    @PostMapping(value = "/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationInputDto authenticationRequest) throws BadCredentialsException {
+    @PostMapping(value = "/signin")
+    public ResponseEntity<?> signIn(@RequestBody AuthenticationInputDto authenticationInputDto) throws BadCredentialsException {
 
-        String email = authenticationRequest.getEmail();
-        String password = authenticationRequest.getPassword();
+        String email = authenticationInputDto.getEmail();
+        String password = authenticationInputDto.getPassword();
 
         try {
             authenticationManager.authenticate(
@@ -59,10 +61,10 @@ public class AuthenticationController {
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(email);
 
-
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        //hier meer info toevoegen? usercustomeroutputdto?
+        //hier meer info toevoegen? usercustomeroutputdto? of als iemand ingelogd is - deze redirecten overzicht (home) get all workshops
+        // of als iemand inlogt - dat hij/zij blijft op de pagina waar hij/zij is / heen wilde maar dan incl verificatie
 
         return ResponseEntity.ok(new AuthenticationOutputDto(jwt));
     }
