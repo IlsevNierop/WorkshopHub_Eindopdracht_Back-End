@@ -37,6 +37,7 @@ VALUES (109, 'Hugo', 'Bakker', 'hugo@example.com', '$2a$12$TSQEgutmtTWBa6tNrSYYb
 
 INSERT INTO authorities (user_id, authority)
 values (100, 'ROLE_CUSTOMER'),
+       (100, 'ROLE_ADMIN'),
        (101, 'ROLE_CUSTOMER'),
        (102, 'ROLE_CUSTOMER'),
        (103, 'ROLE_CUSTOMER'),

@@ -4,6 +4,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomer
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadCredentialsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
@@ -64,10 +65,11 @@ public class UserService {
         return workshopOwnerOutputDtos;
     }
 
-    public Set<Authority> getUserAuthorities(Long userId) {
-        if (!userRepository.existsById(userId)) throw new RecordNotFoundException("User not found with ID " + userId);
-        User user = userRepository.findById(userId).get();
+    public Set<Authority> getUserAuthorities(Long userId) throws RecordNotFoundException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID " + userId + " doesn't exist."));
         UserCustomerOutputDto userOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
+        // Don't want to communicate authorities with every outputdto - so only setting authorities in userOutputDto in this method.
+        userOutputDto.authorities = user.getAuthorities();
         return userOutputDto.authorities;
     }
 
@@ -131,7 +133,6 @@ public class UserService {
     }
 
 
-
     public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto workshopOwnerInputDto) throws RecordNotFoundException, BadRequestException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
         if (workshopOwner.getWorkshopOwner() == false) {
@@ -146,31 +147,32 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public UserCustomerOutputDto addUserAuthority(String email, String authority) {
+    public UserCustomerOutputDto addUserAuthority(String email, String authority) throws RecordNotFoundException, BadRequestException {
         if (!userRepository.existsByEmail(email)) {
-            throw new RecordNotFoundException("The user with email :" + email + " doesn't exist.");
+            throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
         User user = userRepository.findByEmail(email);
-        user.addAuthority(new Authority(user.getId(), authority));
+        for (Authority a : user.getAuthorities()) {
+            if (a.getAuthority().equals("ROLE_" + authority)) {
+                throw new BadRequestException("The user with email: " + email + " already has the authority: " + authority + ". You can't add an authority two times.");
+            }
+        }
+        try {
+            user.addAuthority(new Authority(user.getId(), "ROLE_" + authority));
+        } catch (Exception e) {
+            throw new BadRequestException("This authority can't be added");
+        }
         userRepository.save(user);
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
-
     }
 
-//    public void addAuthority(String email, String authority) {
-//
-//        if (!userRepository.existsByEmail(email)) throw new RecordNotFoundException("User not found with " + email);
-//        User user = userRepository.findByEmail(email);
-//        user.addAuthority(new Authority(user.getId(), authority));
-//        userRepository.save(user);
-//    }
-
-
-    public void removeAuthority(String email, String authority) {
-        if (!userRepository.existsByEmail(email)) throw new RecordNotFoundException("User not found with " + email);
-        User user = userRepository.findByEmail(email);
-        Authority authorityToRemove = user.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase(authority)).findAny().get();
-        user.removeAuthority(authorityToRemove);
+    public void removeAuthority(Long userId, String authority) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
+        for (Authority a : user.getAuthorities()) {
+            if (a.getAuthority().equals("ROLE_" + authority)) {
+                user.getAuthorities().remove(a);
+            }
+        }
         userRepository.save(user);
     }
 

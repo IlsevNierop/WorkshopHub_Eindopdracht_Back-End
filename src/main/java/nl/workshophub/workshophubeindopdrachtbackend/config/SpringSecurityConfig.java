@@ -58,15 +58,28 @@ public class SpringSecurityConfig {
                 .httpBasic().disable()
                 .cors().and()
                 .authorizeHttpRequests()
-                .requestMatchers("/**").permitAll()
-//                .requestMatchers("/users/*").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/users").permitAll()
-//                .requestMatchers(HttpMethod.GET,"/users").hasRole("ADMIN")
-//                .requestMatchers(HttpMethod.POST,"/users/**").hasRole("ADMIN")
-//                .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-//                /*voeg de antmatchers toe voor admin(post en delete) en user (overige)*/
-//                .requestMatchers("/authenticated").authenticated()
-                .requestMatchers("/authenticate").permitAll()/*allen dit punt mag toegankelijk zijn voor niet ingelogde gebruikers*/
+//                .requestMatchers("/**").permitAll()
+                //authentication
+                .requestMatchers("/authenticated").authenticated()
+                .requestMatchers("/authenticate").permitAll()
+                //open
+                .requestMatchers(HttpMethod.POST, "/users/customer").permitAll() //everyone can register //post
+                .requestMatchers(HttpMethod.POST, "/users/workshopowner").permitAll() //everyone can register //post
+
+
+                //customer
+                .requestMatchers("/users/customer/**").authenticated() //get, put
+
+
+                //owner
+                .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
+
+
+                //admin
+                .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
+
+
+
                 .anyRequest().denyAll()
                 .and()
                 .sessionManagement()
