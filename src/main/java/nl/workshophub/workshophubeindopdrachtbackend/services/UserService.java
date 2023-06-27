@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
@@ -20,6 +21,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +53,7 @@ public class UserService {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new BadRequestException("You're not allowed to view this profile.");
         }
         if (customer.getWorkshopOwner() == true) {
@@ -63,7 +66,7 @@ public class UserService {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new BadRequestException("You're not allowed to view this profile.");
         }
         if (workshopOwner.getWorkshopOwner() == false) {
@@ -140,7 +143,7 @@ public class UserService {
             RecordNotFoundException, BadRequestException {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + customerId + " doesn't exist"));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new BadRequestException("You're not allowed to update this profile.");
         }
         if (customer.getWorkshopOwner() == true) {
@@ -151,6 +154,7 @@ public class UserService {
                 throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
             }
         }
+        customerInputDto.password = null;
         userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder));
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
@@ -160,7 +164,7 @@ public class UserService {
             workshopOwnerInputDto) throws RecordNotFoundException, BadRequestException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new BadRequestException("You're not allowed to update this profile.");
         }
         if (workshopOwner.getWorkshopOwner() == false) {
@@ -173,6 +177,26 @@ public class UserService {
         }
         userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto, passwordEncoder));
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
+    }
+
+    public String updatePassword(String email, PasswordInputDto passwordInputDto) throws RecordNotFoundException, BadRequestException {
+        if (!userRepository.existsByEmail(email)) {
+            throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
+        }
+        User user = userRepository.findByEmail(email);
+
+        // in case of a logged in user that wants to change the password:
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+                throw new BadRequestException("You're not allowed to update the password for this account.");
+            }
+        }
+
+        //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
+        user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
+
+        return "The password has been updated sucessfully.";
     }
 
     public UserCustomerOutputDto addUserAuthority(String email, String authority) throws

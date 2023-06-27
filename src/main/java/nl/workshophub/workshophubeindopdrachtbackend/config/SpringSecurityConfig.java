@@ -70,6 +70,7 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET,"/workshops/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see the workshop calendar //get
                 .requestMatchers(HttpMethod.GET, "/reviews/{reviewId}").permitAll() //get
                 .requestMatchers(HttpMethod.GET,"/reviews/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see verified reviews //get
+                .requestMatchers(HttpMethod.PUT,"/users/passwordrequest/{email}" ).permitAll() //no verification when password is forgotten, see userservice comments
 
                 //...............................customer...............................
                 .requestMatchers("/users/customer/**").authenticated() //get, put

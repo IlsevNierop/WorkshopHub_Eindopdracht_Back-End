@@ -1,6 +1,7 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
 import jakarta.validation.Valid;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
@@ -111,6 +112,16 @@ public class UserController {
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
+    }
+
+    @PutMapping ("/passwordrequest/{email}")
+    public ResponseEntity<String> updatePassword(@PathVariable("email") String email, @Valid @RequestBody PasswordInputDto passwordInputDto, BindingResult bindingResult){
+        if (bindingResult.hasFieldErrors()) {
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+
+        return new ResponseEntity<>(userService.updatePassword(email, passwordInputDto), HttpStatus.ACCEPTED);
+
     }
 
     @PostMapping(value = "admin/{email}/authorities")

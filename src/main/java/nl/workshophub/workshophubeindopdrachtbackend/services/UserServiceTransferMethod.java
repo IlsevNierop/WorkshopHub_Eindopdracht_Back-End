@@ -39,9 +39,9 @@ public class UserServiceTransferMethod {
     }
 
     public static User transferWorkshopOwnerInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto, PasswordEncoder passwordEncoder) {
-        workshopOwner.setPassword(passwordEncoder.encode(workshopOwnerInputDto.password));
-        //ga geen gebruik maken van apikey
-//        workshopOwner.setApikey(workshopOwnerInputDto.apikey);
+        if (workshopOwnerInputDto.password != null) {
+            workshopOwner.setPassword(passwordEncoder.encode(workshopOwnerInputDto.password));
+        }
 
         workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
         workshopOwner.setLastName(workshopOwnerInputDto.lastName);
@@ -55,9 +55,10 @@ public class UserServiceTransferMethod {
     }
 
     public static User transferCustomerInputDtoToUser(User customer, UserCustomerInputDto customerInputDto, PasswordEncoder passwordEncoder) {
-        customer.setPassword(passwordEncoder.encode(customerInputDto.password));
-        //ga geen gebruik maken van apikey
-//        customer.setApikey(customerInputDto.apikey);
+        if (customerInputDto.password != null) {
+            customer.setPassword(passwordEncoder.encode(customerInputDto.password));
+        }
+
         customer.setFirstName(customerInputDto.firstName);
         customer.setLastName(customerInputDto.lastName);
         customer.setEmail(customerInputDto.email);
