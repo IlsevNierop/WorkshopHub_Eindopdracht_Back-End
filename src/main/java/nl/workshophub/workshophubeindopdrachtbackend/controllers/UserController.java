@@ -42,7 +42,6 @@ public class UserController {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
     }
 
-    // even kijken of evt moet met email ipv userid?
     @GetMapping(value = "admin/{userId}/authorities")
     public ResponseEntity<Object> getUserAuthorities(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok().body(userService.getUserAuthorities(userId));

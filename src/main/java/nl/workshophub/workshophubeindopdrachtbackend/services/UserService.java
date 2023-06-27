@@ -10,13 +10,19 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundEx
 import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.util.CheckAuthorization;
 import nl.workshophub.workshophubeindopdrachtbackend.util.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -40,8 +46,13 @@ public class UserService {
     }
 
 
-    public UserCustomerOutputDto getCustomerById(Long customerId) throws RecordNotFoundException {
+    public UserCustomerOutputDto getCustomerById(Long customerId) throws RecordNotFoundException, BadRequestException {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to view this profile.");
+        }
         if (customer.getWorkshopOwner() == true) {
             throw new RecordNotFoundException("The user with ID " + customerId + " is a workshop owner and not a customer.");
         }
@@ -50,6 +61,11 @@ public class UserService {
 
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long workshopOwnerId) throws RecordNotFoundException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to view this profile.");
+        }
         if (workshopOwner.getWorkshopOwner() == false) {
             throw new RecordNotFoundException("The user with ID " + workshopOwnerId + " is a customer and not a workshop owner.");
         }
@@ -87,7 +103,8 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
-    public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) throws BadRequestException {
+    public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) throws
+            BadRequestException {
         if (userRepository.existsByEmail(workshopOwnerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
@@ -101,7 +118,8 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean workshopOwnerVerified) throws RecordNotFoundException, BadRequestException {
+    public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean
+            workshopOwnerVerified) throws RecordNotFoundException, BadRequestException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist"));
         if (workshopOwner.getWorkshopOwner() == false) {
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
@@ -118,8 +136,13 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) throws RecordNotFoundException, BadRequestException {
+    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) throws
+            RecordNotFoundException, BadRequestException {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + customerId + " doesn't exist"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to update this profile.");
+        }
         if (customer.getWorkshopOwner() == true) {
             throw new BadRequestException("The account with ID " + customerId + " is a workshop owner and not a customer.");
         }
@@ -133,8 +156,13 @@ public class UserService {
     }
 
 
-    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto workshopOwnerInputDto) throws RecordNotFoundException, BadRequestException {
+    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto
+            workshopOwnerInputDto) throws RecordNotFoundException, BadRequestException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to update this profile.");
+        }
         if (workshopOwner.getWorkshopOwner() == false) {
             throw new BadRequestException("The account with ID " + workshopOwnerId + " is a customer and not a workshop owner.");
         }
@@ -147,7 +175,8 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public UserCustomerOutputDto addUserAuthority(String email, String authority) throws RecordNotFoundException, BadRequestException {
+    public UserCustomerOutputDto addUserAuthority(String email, String authority) throws
+            RecordNotFoundException, BadRequestException {
         if (!userRepository.existsByEmail(email)) {
             throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
