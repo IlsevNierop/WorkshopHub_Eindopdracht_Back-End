@@ -17,6 +17,7 @@ public class UserServiceTransferMethod {
         customerOutputDto.email = customer.getEmail();
         customerOutputDto.workshopOwner = customer.getWorkshopOwner();
         customerOutputDto.enabled = customer.isEnabled();
+        customerOutputDto.authorities = customer.getAuthorities();
 
         return customerOutputDto;
     }
@@ -33,6 +34,7 @@ public class UserServiceTransferMethod {
         workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
         workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
         workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingWorkshopOwner();
+        workshopOwnerOutputDto.authorities = workshopOwner.getAuthorities();
 
 
         return workshopOwnerOutputDto;
