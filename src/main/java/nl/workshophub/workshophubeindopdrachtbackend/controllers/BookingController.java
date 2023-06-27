@@ -63,7 +63,7 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.updateBooking(bookingId, bookingInputDto), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/admin/{bookingId}")
+    @DeleteMapping("/{bookingId}")
     public ResponseEntity<HttpStatus> deleteBooking(@PathVariable Long bookingId) {
         bookingService.deleteBooking(bookingId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

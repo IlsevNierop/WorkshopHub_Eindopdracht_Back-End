@@ -11,10 +11,15 @@ import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.util.CheckAuthorization;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -33,6 +38,11 @@ public class BookingService {
 
     public List<BookingOutputDto> getAllBookingsFromUser(Long userId) throws RecordNotFoundException {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to view bookings from this user.");
+        }
         List<Booking> userBookings = user.getBookings();
         List<BookingOutputDto> userBookingOutputDtos = new ArrayList<>();
         for (Booking b : userBookings) {
@@ -44,6 +54,11 @@ public class BookingService {
 
     public List<BookingOutputDto> getAllBookingsFromWorkshop(Long workshopId) throws RecordNotFoundException {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to view bookings from this workshop, since you're not the owner.");
+        }
         List<Booking> workshopBookings = workshop.getWorkshopBookings();
         List<BookingOutputDto> workshopBookingOutputDtos = new ArrayList<>();
         for (Booking b : workshopBookings) {
@@ -55,8 +70,12 @@ public class BookingService {
 
     public BookingOutputDto getOneBookingById(Long bookingId) throws RecordNotFoundException {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("The booking with ID  " + bookingId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        return transferBookingToBookingOutputDto(booking);
+        if (CheckAuthorization.isAuthorized(booking.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName()) || CheckAuthorization.isAuthorized(booking.getWorkshop().getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            return transferBookingToBookingOutputDto(booking);
+        }
+            throw new BadRequestException("You're not allowed to view bookings from this user.");
     }
 
     public BookingOutputDto createBooking(Long customerId, Long workshopId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException {
@@ -65,6 +84,10 @@ public class BookingService {
             throw new BadRequestException("This workshop takes place in the past, you can't book a workshop that has already taken place.");
         }
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to create a booking from this user account.");
+        }
         if (workshop.getAvailableSpotsWorkshop() < bookingInputDto.amount) {
             throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
         }
@@ -78,6 +101,10 @@ public class BookingService {
 
     public BookingOutputDto updateBooking(Long bookingId, BookingInputDto bookingInputDto) throws RecordNotFoundException, NoAvailableSpotsException, BadRequestException {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("The booking with ID  " + bookingId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(booking.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to update this booking.");
+        }
         if (bookingInputDto.workshopId == null) {
             throw new BadRequestException("You can't update a booking without connecting it to a workshop.");
         }
@@ -98,6 +125,10 @@ public class BookingService {
 
     public void deleteBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("The booking with ID  " + bookingId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(booking.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new BadRequestException("You're not allowed to delete a booking from this user account.");
+        }
         bookingRepository.delete(booking);
     }
 

@@ -70,7 +70,6 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET,"/workshops/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see the workshop calendar //get
                 .requestMatchers(HttpMethod.GET,"/reviews/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see verified reviews //get
 
-
                 //customer
                 .requestMatchers("/users/customer/**").authenticated() //get, put
                 .requestMatchers(HttpMethod.PUT,"/workshops/favourite/{userId}/{workshopId}").authenticated() //put
@@ -78,24 +77,21 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/bookings/{bookingId}").authenticated() //get
                 .requestMatchers(HttpMethod.PUT, "/bookings/{bookingId}").authenticated() //put
                 .requestMatchers(HttpMethod.POST, "/bookings/{customerId}/{workshopId}").authenticated() //post
+                .requestMatchers(HttpMethod.DELETE, "/bookings/{bookingId}").authenticated() //delete
                 .requestMatchers(HttpMethod.GET, "/reviews/{reviewId}").authenticated() //get
                 .requestMatchers(HttpMethod.GET, "/reviews/customer/{customerId}").authenticated() //get
                 .requestMatchers(HttpMethod.POST, "/reviews/{workshopId}/{customerId}").authenticated() //post
                 .requestMatchers(HttpMethod.PUT, "/reviews/{customerId}/{reviewId}").authenticated() //put
-
 
                 //owner
                 .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
                 .requestMatchers("/workshops/workshopowner/**" ).hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
                 .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
-
                 //admin
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
                 .requestMatchers("/workshops/admin/**" ).hasRole("ADMIN") //get, get, get, put
-                .requestMatchers("/bookings/admin/**" ).hasRole("ADMIN") //delete
                 .requestMatchers("/reviews/admin/**" ).hasRole("ADMIN") // get, get, put, delete
-
 
 
                 .anyRequest().denyAll()
