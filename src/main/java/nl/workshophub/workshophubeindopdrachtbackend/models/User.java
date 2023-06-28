@@ -29,9 +29,6 @@ public class User {
     @Column(unique=true)
     private String email; //identifier
 
-
-//    @Column(nullable = false, unique = true)
-//    private String username;
     private String password;
     private String companyName;
     private Integer kvkNumber;

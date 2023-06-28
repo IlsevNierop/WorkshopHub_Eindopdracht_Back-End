@@ -2,9 +2,6 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.AuthenticationInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.models.User;
-import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.services.CustomUserDetailsService;
 import nl.workshophub.workshophubeindopdrachtbackend.util.JwtUtil;
 import org.springframework.http.ResponseEntity;

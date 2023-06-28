@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import nl.workshophub.workshophubeindopdrachtbackend.models.User;
+import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,13 @@ import java.util.function.Function;
 @Service
 public class JwtUtil {
 
+    private final UserRepository userRepository;
+
     private final static String SECRET_KEY = "jkhetkhwuiHGKJsngduNIUHQTEHJ28797FHkhkjbmsdbfy";
+
+    public JwtUtil(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
@@ -48,6 +56,10 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("authorities", userDetails.getAuthorities());
+        User user = userRepository.findByEmail(userDetails.getUsername());
+        claims.put("id", user.getId());
+
         return createToken(claims, userDetails.getUsername());
     }
 

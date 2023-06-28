@@ -62,6 +62,21 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
+//    public UserCustomerOutputDto getUserByEmail(String email) throws RecordNotFoundException, BadRequestException {
+//        if (!userRepository.existsByEmail(email)) {
+//            throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
+//        }
+//        User user = userRepository.findByEmail(email);
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+//            throw new BadRequestException("You're not allowed to view this profile.");
+//        }
+//
+//        return UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
+//    }
+
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long workshopOwnerId) throws RecordNotFoundException {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -192,7 +207,7 @@ public class UserService {
                 throw new BadRequestException("You're not allowed to update the password for this account.");
             }
         }
-
+        // TODO: 28/06/2023 in documentatie toevoegen:
         //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
         user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
 
