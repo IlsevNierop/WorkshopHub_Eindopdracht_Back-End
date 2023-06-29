@@ -7,6 +7,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
 //created this seperate class for the transfermethod - so workshopservice doesn't need to inject the reviewservice, but it can call it directly.
 public class ReviewServiceTransferMethod {
 
+
     public static ReviewOutputDto transferReviewToReviewOutputDto(Review review) {
         ReviewOutputDto reviewOutputDto = new ReviewOutputDto();
         reviewOutputDto.id = review.getId();

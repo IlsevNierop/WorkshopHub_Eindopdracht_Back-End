@@ -14,6 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/reviews")
 public class ReviewController {
@@ -28,18 +29,19 @@ public class ReviewController {
     public ResponseEntity<ReviewOutputDto> getReviewById(@PathVariable Long reviewId) {
         return new ResponseEntity<>(reviewService.getReviewById(reviewId), HttpStatus.OK);
     }
-    @GetMapping("/workshopOwner/{workshopOwnerId}")
-    public ResponseEntity <List<ReviewOutputDto>> getReviewsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
-        return new ResponseEntity<>(reviewService.getReviewsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    @GetMapping("/workshopowner/{workshopOwnerId}")
+    public ResponseEntity <List<ReviewOutputDto>> getReviewsFromWorkshopOwnerVerified(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(reviewService.getReviewsFromWorkshopOwnerVerified(workshopOwnerId), HttpStatus.OK);
     }
 
+    //principal
     @GetMapping("/customer/{customerId}")
     public ResponseEntity <List<ReviewOutputDto>> getReviewsFromCustomer(@PathVariable Long customerId) {
         return new ResponseEntity<>(reviewService.getReviewsFromCustomer(customerId), HttpStatus.OK);
     }
 
 //admin
-    @GetMapping
+    @GetMapping("/admin/")
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
         return new ResponseEntity<>(reviewService.getAllReviews(), HttpStatus.OK);
 
@@ -78,7 +80,7 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.updateReviewByCustomer(reviewId, reviewInputDto), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/admin/{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<HttpStatus> deleteReview(@PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

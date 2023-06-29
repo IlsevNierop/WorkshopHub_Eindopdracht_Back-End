@@ -15,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
@@ -25,28 +26,28 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    @GetMapping ("/user/{userId}")
-    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromUser(@PathVariable Long userId){
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromUser(@PathVariable Long userId) {
         return new ResponseEntity<>(bookingService.getAllBookingsFromUser(userId), HttpStatus.OK);
     }
 
-    //nog checken of workshop van de specifieke owner is die ingelogd is / alleen door eerst naar workshop te gaan - dat is al de check / bookings ophalen - na authenticatie toevoeging
-    @GetMapping ("/workshop/{workshopId}")
-    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshop(@PathVariable Long workshopId){
+    @GetMapping("/workshop/{workshopId}")
+    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshop(@PathVariable Long workshopId) {
 
         return new ResponseEntity<>(bookingService.getAllBookingsFromWorkshop(workshopId), HttpStatus.OK);
 
     }
-    @GetMapping ("/{bookingId}")
-    public ResponseEntity<BookingOutputDto> getOneBookingById(@PathVariable Long bookingId){
+
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<BookingOutputDto> getOneBookingById(@PathVariable Long bookingId) {
 
         return new ResponseEntity<>(bookingService.getOneBookingById(bookingId), HttpStatus.OK);
 
     }
 
-    @PostMapping ("{customerId}/{workshopId}")
-    public ResponseEntity<Object> createBooking(@PathVariable("customerId") Long customerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
-        if (bindingResult.hasFieldErrors()){
+    @PostMapping("{customerId}/{workshopId}")
+    public ResponseEntity<Object> createBooking(@PathVariable("customerId") Long customerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         BookingOutputDto bookingOutputDto = bookingService.createBooking(customerId, workshopId, bookingInputDto);
@@ -55,20 +56,17 @@ public class BookingController {
     }
 
     @PutMapping("/{bookingId}")
-    public ResponseEntity<Object> updateBooking(@PathVariable Long bookingId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult){
-        if (bindingResult.hasFieldErrors()){
+    public ResponseEntity<Object> updateBooking(@PathVariable Long bookingId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(bookingService.updateBooking(bookingId, bookingInputDto), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/admin/{bookingId}")
+    @DeleteMapping("/{bookingId}")
     public ResponseEntity<HttpStatus> deleteBooking(@PathVariable Long bookingId) {
         bookingService.deleteBooking(bookingId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-
 
 }

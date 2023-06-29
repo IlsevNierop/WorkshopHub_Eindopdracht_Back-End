@@ -5,6 +5,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshop
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class UserServiceTransferMethod {
 
@@ -15,6 +16,8 @@ public class UserServiceTransferMethod {
         customerOutputDto.lastName = customer.getLastName();
         customerOutputDto.email = customer.getEmail();
         customerOutputDto.workshopOwner = customer.getWorkshopOwner();
+        customerOutputDto.enabled = customer.isEnabled();
+        customerOutputDto.authorities = customer.getAuthorities();
 
         return customerOutputDto;
     }
@@ -31,16 +34,20 @@ public class UserServiceTransferMethod {
         workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
         workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
         workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingWorkshopOwner();
+        workshopOwnerOutputDto.authorities = workshopOwner.getAuthorities();
 
 
         return workshopOwnerOutputDto;
     }
 
-    public static User transferWorkshopOwnerInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto) {
+    public static User transferWorkshopOwnerInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto, PasswordEncoder passwordEncoder) {
+        if (workshopOwnerInputDto.password != null) {
+            workshopOwner.setPassword(passwordEncoder.encode(workshopOwnerInputDto.password));
+        }
+
         workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
         workshopOwner.setLastName(workshopOwnerInputDto.lastName);
         workshopOwner.setEmail(workshopOwnerInputDto.email);
-        workshopOwner.setPassword(workshopOwnerInputDto.password);
         workshopOwner.setCompanyName(workshopOwnerInputDto.companyName);
         workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
         workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
@@ -49,11 +56,14 @@ public class UserServiceTransferMethod {
         return workshopOwner;
     }
 
-    public static User transferCustomerInputDtoToUser(User customer, UserCustomerInputDto customerInputDto) {
+    public static User transferCustomerInputDtoToUser(User customer, UserCustomerInputDto customerInputDto, PasswordEncoder passwordEncoder) {
+        if (customerInputDto.password != null) {
+            customer.setPassword(passwordEncoder.encode(customerInputDto.password));
+        }
+
         customer.setFirstName(customerInputDto.firstName);
         customer.setLastName(customerInputDto.lastName);
         customer.setEmail(customerInputDto.email);
-        customer.setPassword(customerInputDto.password);
         customer.setWorkshopOwner(customerInputDto.workshopOwner);
 
         return customer;
