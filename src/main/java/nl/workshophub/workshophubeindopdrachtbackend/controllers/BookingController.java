@@ -31,7 +31,6 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getAllBookingsFromUser(userId), HttpStatus.OK);
     }
 
-    //nog checken of workshop van de specifieke owner is die ingelogd is / alleen door eerst naar workshop te gaan - dat is al de check / bookings ophalen - na authenticatie toevoeging
     @GetMapping("/workshop/{workshopId}")
     public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshop(@PathVariable Long workshopId) {
 

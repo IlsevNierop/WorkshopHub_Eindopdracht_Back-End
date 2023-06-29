@@ -59,6 +59,7 @@ public class JwtUtil {
         claims.put("authorities", userDetails.getAuthorities());
         User user = userRepository.findByEmail(userDetails.getUsername());
         claims.put("id", user.getId());
+        claims.put("workshopowner", user.getWorkshopOwner());
 
         return createToken(claims, userDetails.getUsername());
     }
