@@ -22,6 +22,7 @@ public class UserWorkshopOwnerOutputDto {
 
     public Boolean workshopOwner;
     public Double averageRatingReviews;
+    public String profilePicUrl;
 
     //security
     public Boolean enabled;

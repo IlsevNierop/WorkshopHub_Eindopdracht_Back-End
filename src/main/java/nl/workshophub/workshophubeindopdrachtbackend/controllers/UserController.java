@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
@@ -30,11 +31,13 @@ public class UserController {
     }
 
     @GetMapping("/customer/{customerId}")
+    @Transactional
     public ResponseEntity<UserCustomerOutputDto> getCustomerById(@PathVariable Long customerId) {
         return new ResponseEntity<>(userService.getCustomerById(customerId), HttpStatus.OK);
     }
 
     @GetMapping("/workshopowner/{workshopOwnerId}")
+    @Transactional
     public ResponseEntity<UserWorkshopOwnerOutputDto> getWorkshopOwnerById(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(userService.getWorkshopOwnerById(workshopOwnerId), HttpStatus.OK);
     }
@@ -73,6 +76,7 @@ public class UserController {
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.createWorkshopOwner(workshopOwnerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
+
         return ResponseEntity.created(uri).body(workshopOwnerOutputDto);
     }
 

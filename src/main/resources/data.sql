@@ -1,9 +1,9 @@
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
 VALUES (100, 'Jan', 'Jansen', 'jan.jansen@example.com', '$2a$12$19R304zFbfJkTQZqeJN8d.UFM30GnxGMBzwVvIH1abajBdhz14e6y',
         false, true);
-INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
-VALUES (101, 'Lisa', 'de Vries', 'lisa.devries@example.com',
-        '$2a$12$IgGRCIAOFdiy81El5KPVw.3fUBFrQY7xqLbtPAgps3tKRkkXMWJiW', false, true);
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (101, 'Andrea', 'de Vries', 'lisa.devries@example.com',
+        '$2a$12$IgGRCIAOFdiy81El5KPVw.3fUBFrQY7xqLbtPAgps3tKRkkXMWJiW', false, true, 'pexels-andrea-piacquadio-774909.webp' ,'http://localhost:8080/downloadprofilepic/101');
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
 VALUES (102, 'Mohammed', 'Ali', 'mohammed.ali@example.com',
         '$2a$12$qG.eoYACpkSWOE3Yl0L2Suk8B0tdDsEqiLbgNAvNX61hUCF3gz.Sy', false, true);
