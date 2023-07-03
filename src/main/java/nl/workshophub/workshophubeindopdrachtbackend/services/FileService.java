@@ -122,9 +122,9 @@ public class FileService {
 
     // TODO: 30/06/2023 nu staat het op permit all
     public Resource downLoadFile(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("user niet gevonden"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
 
-        if (user.getProfilePicUrl() == null){
+        if (user.getProfilePicUrl() == null || user.getFileName() == null){
             throw new BadRequestException("The file doesn't exist.");
         }
 

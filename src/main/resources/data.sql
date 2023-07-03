@@ -1,53 +1,45 @@
-INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
-VALUES (100, 'Jan', 'Jansen', 'jan.jansen@example.com', '$2a$12$19R304zFbfJkTQZqeJN8d.UFM30GnxGMBzwVvIH1abajBdhz14e6y',
-        false, true);
+-- all users have the same password: password
+-- Melania (ID 100) is admin
+
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
-VALUES (101, 'Andrea', 'de Vries', 'lisa.devries@example.com',
-        '$2a$12$IgGRCIAOFdiy81El5KPVw.3fUBFrQY7xqLbtPAgps3tKRkkXMWJiW', false, true, 'pexels-andrea-piacquadio-774909.webp' ,'http://localhost:8080/downloadprofilepic/101');
-INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
-VALUES (102, 'Mohammed', 'Ali', 'mohammed.ali@example.com',
-        '$2a$12$qG.eoYACpkSWOE3Yl0L2Suk8B0tdDsEqiLbgNAvNX61hUCF3gz.Sy', false, true);
-INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
-VALUES (103, 'Sarah', 'van der Meer', 'sarah.vandermeer@example.com',
-        '$2a$12$Nb9ejLnfVGn/0CZUAuu/NeSI2gcR9/oshozGiNZ0B3t7iw6RhCK/K', false, true);
-INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled)
-VALUES (104, 'Eva', 'Bakker', 'eva.bakker@example.com', '$2a$12$W/RjkU2ESDyOyLhpc8TKn.8sh435gLxkBj/hYtg.9YUCt7eaUzTjO',
-        false, true);
+VALUES (100, 'Melania', 'Rossi', 'melania@example.com',
+        '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.', false, true, 'pexels-melania-piacquadio-774909.webp' ,'http://localhost:8080/downloadprofilepic/100');
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (101, 'Samuel', 'Smith', 'samuel.smith@example.com', '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.',
+        false, true, 'pexels-laker-5792641.webp', 'http://localhost:8080/downloadprofilepic/101');
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (102, 'Isabella', 'Janssen', 'isabella.janssen@example.com',
+        '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.', false, true, 'pexels-vinicius-wiesehofer-1130626.webp', 'http://localhost:8080/downloadprofilepic/102');
+
 
 INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
-                   workshop_owner_verified, workshop_owner, enabled)
-VALUES (105, 'Jan', 'Pietersen', 'jan@example.com', '$2a$12$jMmk9GNWWrB/jzPeO1idlexvJuH0JihdP7yHFIILGk/eOn7kkWtRW',
-        'Voorbeeld Bedrijf', 12345678, 'NL123456789B01', true, true, true);
+                   workshop_owner_verified, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (105, 'Andrea', 'Davis', 'andrea@example.com', '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.',
+        'Voorbeeld Bedrijf', 12345678, 'NL123456789B01', true, true, true, 'Profielfoto-Andrea.webp', 'http://localhost:8080/downloadprofilepic/105');
 INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
-                   workshop_owner_verified, workshop_owner, enabled)
-VALUES (106, 'Lisa', 'Jansen', 'lisa@example.com', '$2a$12$rHvH9sJSQhslh7mppohM.uPtSY1v3m2k7zu8Fyadyns10sokxgjXG',
-        'Test Bedrijf', 98765432, 'NL987654321B01', false, true, true);
+                   workshop_owner_verified, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (106, 'Stefan', 'Jansen', 'stefan@example.com', '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.',
+        'Test Bedrijf', 98765432, 'NL987654321B01', true, true, true, 'pexels-stefan-stefancik-91227.webp', 'http://localhost:8080/downloadprofilepic/106');
 INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
-                   workshop_owner_verified, workshop_owner, enabled)
-VALUES (107, 'Pieter', 'Hendriks', 'pieter@example.com', '$2a$12$PWIWfmb.dVFK3U2wDJxQMuq3ZsQwS6eLSbbyck.KhNo8vqYVGaxFa',
-        'Voorbeeld BV', 54321678, 'NL543216789B01', default, true, true);
+                   workshop_owner_verified, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (107, 'Dziana', 'Davis', 'dziana@example.com', '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.',
+        'Voorbeeld BV', 54321678, 'NL543216789B01', default, true, true, 'pexels-dziana-hasanbekava-7275385.webp', 'http://localhost:8080/downloadprofilepic/107');
 INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
-                   workshop_owner_verified, workshop_owner, enabled)
-VALUES (108, 'Emma', 'van der Meer', 'emma@example.com', '$2a$12$lo21vSAWE/4ll6tP.8fsve26LXVgqbmEf.V7Y3Jdbyi3GbBZfokWe',
-        'Test BV', 87654321, 'NL876543219B01', default, true, true);
-INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
-                   workshop_owner_verified, workshop_owner, enabled)
-VALUES (109, 'Hugo', 'Bakker', 'hugo@example.com', '$2a$12$TSQEgutmtTWBa6tNrSYYb.LtPlHTyQKvH7BFnAHIRBacJ.P.8hFhy',
-        'Voorbeeld VOF', 13579246, 'NL135792468B01', default, true, true);
+                   workshop_owner_verified, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (108, 'Emily', 'Brown', 'emily@example.com', '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.',
+        'Test BV', 87654321, 'NL876543219B01', default, true, true, 'pexels-monstera-5876695.webp', 'http://localhost:8080/downloadprofilepic/108');
 
 INSERT INTO authorities (user_id, authority)
 values (100, 'ROLE_CUSTOMER'),
        (100, 'ROLE_ADMIN'),
        (101, 'ROLE_CUSTOMER'),
        (102, 'ROLE_CUSTOMER'),
-       (103, 'ROLE_CUSTOMER'),
-       (104, 'ROLE_CUSTOMER'),
        (105, 'ROLE_WORKSHOPOWNER'),
        (105, 'ROLE_CUSTOMER'),
        (106, 'ROLE_CUSTOMER'),
+       (106, 'ROLE_WORKSHOPOWNER'),
        (107, 'ROLE_CUSTOMER'),
-       (108, 'ROLE_CUSTOMER'),
-       (109, 'ROLE_CUSTOMER');
+       (108, 'ROLE_CUSTOMER');
 
 
 --9 workshops
@@ -60,7 +52,7 @@ Onze ervaren chef-kok begroet je met een warm welkom en introduceert je in de ge
 Tijdens de workshop krijg je de kans om zelf actief de handen uit de mouwen te steken en te experimenteren met de smaken en texturen van de Indonesische keuken. De chef-kok begeleidt je stap voor stap en deelt zijn/haar kennis over de verschillende kruiden en specerijen die worden gebruikt in de Indonesische gerechten.
 Na afloop van de kookworkshop geniet je samen met de andere deelnemers van een heerlijke maaltijd die je zelf hebt bereid. Het is een geweldige gelegenheid om nieuwe mensen te ontmoeten, ervaringen uit te wisselen en te genieten van de verrukkelijke Indonesische gerechten die je hebt gemaakt.
 Kom en ontdek de magie van de Indonesische keuken tijdens onze boeiende kookworkshop. Laat je smaakpapillen verwennen en ga naar huis met nieuwe culinaire vaardigheden en een diepgaande waardering voor de rijke eetcultuur van Indonesië.',
-        10, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', true, 108);
+        10, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', true, 105);
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
                        description, amount_of_participants, workshop_category1, workshop_category2, workshop_verified,
@@ -72,12 +64,12 @@ Je leert verschillende technieken, zoals gieten, dompelen en vormen, om een vers
 Tijdens de workshop kun je ook meer te weten komen over de verschillende soorten was en lonten die gebruikt worden in het kaarsen maken. Je krijgt inzicht in de veiligheidsrichtlijnen en de juiste manier om kaarsen te branden en te onderhouden.
 Aan het einde van de workshop ga je naar huis met een set prachtige handgemaakte kaarsen, die je kunt gebruiken om je huis te verfraaien of als een uniek cadeau voor vrienden en familie.
 Kom en laat je creativiteit opvlammen tijdens onze boeiende workshop Kaarsen maken. Ontdek de magie van het creëren van je eigen kaarsen en geniet van de ontspannende en geurige ambiance die kaarsen brengen.',
-        14, 'Kaarsen', null, true, 'ziet er goed uit, mag online', true, 105);
+        14, 'Kaarsen', null, true, 'ziet er goed uit, mag online', true, 106);
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
                        description, amount_of_participants, workshop_category1, workshop_category2, workshop_verified,
                        feedback_admin, publish_workshop, workshop_owner_id)
-VALUES (102, 'Patisserie workshop', '2023-09-15', '11:00:00', '14:00:00', 55.0, 'INDOORS', 'Utrecht',
+VALUES (102, 'Patisserie workshop', '2023-06-15', '11:00:00', '14:00:00', 55.0, 'INDOORS', 'Utrecht',
         'Je krijg je eigengemaakte gebak mee naar huis', 'Welkom bij onze exclusieve 3 uur durende workshop Patisserie in het hart van Utrecht. Deze intieme workshop biedt een unieke gelegenheid voor maximaal 6 deelnemers om onder begeleiding van een ervaren patissier de geheimen van de patisserie te ontdekken.
 De workshop vindt plaats in een sfeervolle en goed uitgeruste patisseriekeuken, waar je wordt verwelkomd met een warme glimlach en een kopje koffie of thee. Onze professionele patissier zal je begeleiden bij elke stap van het proces en je voorzien van waardevolle tips en technieken om succesvolle patisseriecreaties te maken.
 Gedurende de 3 uur durende workshop leer je een verscheidenheid aan patisserievaardigheden, zoals het maken van perfect krokant deeg, het bereiden van smaakvolle vullingen en het decoreren van je creaties als een ware professional. Je gaat aan de slag met klassieke recepten en leert ook enkele moderne twisten aan te brengen.
@@ -95,7 +87,7 @@ De workshop wordt gehouden in een inspirerende locatie in het hart van Amsterdam
 Met een kleine groep van maximaal 12 deelnemers is er voldoende ruimte voor persoonlijke begeleiding en interactie. Of je nu een beginner bent of al ervaring hebt met macramé, deze workshop is geschikt voor alle niveaus. Je kunt je eigen creativiteit de vrije loop laten en je plantenhanger personaliseren met verschillende knooppatronen en versieringen.
 De kosten voor de workshop bedragen slechts 15 euro per persoon, inclusief alle materialen die nodig zijn om je eigen macramé plantenhanger te maken. Daarnaast krijg je waardevolle tips en tricks van de instructeur, zodat je ook thuis verder kunt gaan met je nieuwe vaardigheden.
 Laat je inspireren door de trendy wereld van macramé en ga naar huis met een prachtige handgemaakte plantenhanger om je huis mee op te fleuren. Schrijf je nu in voor deze 2 uur durende workshop in Amsterdam en geniet van een creatieve en ontspannende ervaring samen met gelijkgestemde deelnemers.
-', 12, 'Handwerk', 'Breien', false, 'De tekst graag aanpassen, te grof taalgebruik', default, 108);
+', 12, 'Handwerk', 'Breien', true, default, true, 105);
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
                        description, amount_of_participants, workshop_category1, workshop_category2, workshop_verified,
@@ -106,7 +98,7 @@ De workshop vindt plaats in een gezellige en inspirerende omgeving in het hart v
 Met een kleine groep van maximaal 10 deelnemers is er volop gelegenheid voor persoonlijke begeleiding en interactie. Je krijgt de kans om vragen te stellen, tips te krijgen en te leren van de ervaring van de instructeur. Bovendien is het een geweldige gelegenheid om nieuwe mensen te ontmoeten die dezelfde passie delen.
 De kosten voor de workshop bedragen slechts 30 euro per persoon, inclusief alle materialen die je nodig hebt om te haken. Naast de praktische vaardigheden ontvang je ook een handige handleiding met instructies en patronen, zodat je thuis verder kunt oefenen.
 Laat je creativiteit de vrije loop en ontdek de ontspannende wereld van haken tijdens deze 3 uur durende workshop. Schrijf je nu in en geniet van een gezellige en leerzame ervaring in Amsterdam. Of je nu een uniek cadeau wilt maken of gewoon wilt ontspannen met een creatieve bezigheid, haken biedt eindeloze mogelijkheden.',
-        10, 'Handwerk', 'Breien', false, 'dit past niet binnen de scope van deze website', default, 107);
+        10, 'Handwerk', 'Breien', true, 'Ziet er interessant uit', true, 106);
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
                        description, amount_of_participants, workshop_category1, workshop_category2, workshop_verified,
@@ -117,7 +109,7 @@ Met een kleine groep van maximaal 6 deelnemers is er voldoende ruimte voor perso
 De workshop biedt een unieke gelegenheid om je eigen keramiek te creëren, zoals kommen, mokken, vazen en meer. Je kunt experimenteren met verschillende vormen, texturen en decoratieve technieken om een persoonlijk en uniek stuk te maken.
 De kosten voor de workshop bedragen 65 euro per persoon, inclusief alle materialen en het bakken van je keramische creaties. Aan het einde van de workshop worden je werken gebakken en kun je ze op een later tijdstip ophalen om ze te glazuren en af te werken.
 Laat je creativiteit de vrije loop en geniet van een unieke ervaring met de workshop Keramiek: Draaien. Reserveer nu je plek in deze exclusieve workshop en laat je inspireren door de magie van het keramiekdraaien.',
-        8, 'Keramiek', null, true, 'ziet er goed uit, mag online', default, 109);
+        8, 'Keramiek', null, true, 'ziet er goed uit, mag online', true, 105);
 
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
@@ -129,7 +121,7 @@ De workshop vindt plaats in een sfeervolle buitenlocatie in Woerden, waar je wor
 Met een kleine groep van maximaal 8 deelnemers is er voldoende ruimte voor persoonlijke aandacht en interactie met de gids. Je krijgt waardevolle tips en technieken om veilig en verantwoord eetbare paddenstoelen te verzamelen, en je leert over de verschillende soorten paddenstoelen en hun culinaire toepassingen.
 De kosten voor de workshop bedragen slechts 25 euro per persoon, inclusief begeleiding door de paddenstoelenexpert en informatiemateriaal om mee naar huis te nemen. Het is een geweldige kans om je kennis over eetbare paddenstoelen uit te breiden en een nieuwe dimensie toe te voegen aan je culinaire avonturen.
 Kom en sluit je aan bij onze inspirerende workshop Eetbare Paddenstoelen in Woerden. Leer over de wonderen van de natuur, ontdek nieuwe smaken en laat je inspireren door de mogelijkheden van eetbare paddenstoelen. Reserveer nu je plek en maak deel uit van deze unieke en smakelijke ervaring.',
-        8, 'Wildplukken', 'Natuur', default, default, default, 107);
+        8, 'Wildplukken', 'Natuur', default, default, default, 106);
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
                        description, amount_of_participants, workshop_category1, workshop_category2, workshop_verified,
@@ -140,7 +132,7 @@ De workshop vindt plaats in een sfeervol atelier in Utrecht, waar je wordt verwe
 Met een kleine groep van maximaal 8 deelnemers is er volop ruimte voor persoonlijke begeleiding en interactie. Of je nu een beginnende kunstenaar bent of al wat ervaring hebt, deze workshop is geschikt voor alle niveaus. Je leert verschillende technieken, kleurenpaletten en compositieprincipes om expressieve en unieke schilderijen te creëren.
 De kosten voor de workshop bedragen slechts 35 euro per persoon, inclusief alle schildermaterialen en een canvas om je kunstwerk op te maken. Je krijgt ook waardevolle feedback en begeleiding van de kunstenaar om je te helpen je creatieve vaardigheden verder te ontwikkelen.
 Laat je verbeelding de vrije loop en geniet van een ontspannende en inspirerende schilderervaring tijdens deze 3 uur durende workshop. Schrijf je nu in en maak deel uit van een creatieve gemeenschap in Utrecht, waar je kunt ontdekken, leren en je eigen kunstwerken kunt creëren.',
-        8, 'Schilderen', null, true, 'ziet er goed uit, mag online', default, 108);
+        8, 'Schilderen', null, true, 'ziet er goed uit, mag online', default, 105);
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
                        description, amount_of_participants, workshop_category1, workshop_category2, workshop_verified,
@@ -150,28 +142,28 @@ De workshop wordt gehouden in een gezellige bakkerij in Amsterdam, waar je wordt
 Met een kleine groep van maximaal 8 deelnemers is er voldoende ruimte voor persoonlijke aandacht en interactie. Je leert verschillende technieken en krijgt waardevolle tips en trucs om je taarten naar een hoger niveau te tillen. Of je nu een beginner bent of al wat ervaring hebt, deze workshop is geschikt voor alle niveaus.
 De kosten voor de workshop bedragen 42,50 euro per persoon, inclusief alle ingrediënten en materialen die nodig zijn om je eigen taarten te maken. Je gaat naar huis met nieuwe vaardigheden, een schat aan kennis en natuurlijk je zelfgemaakte taarten om te delen en van te genieten.
 Laat je creativiteit en smaakpapillen de vrije loop tijdens deze 3 uur durende workshop Taarten Bakken. Schrijf je nu in en ontdek de geheimen van het maken van heerlijke taarten in een gezellige en leerzame omgeving.',
-        8, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', default, 109);
+        8, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', default, 105);
 
 INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
 VALUES (101, '2023-06-01', 'Geweldige workshop!', 2, 101, 102, 90.0);
 INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
 VALUES (102, '2023-05-29', 'Ik kijk ernaar uit! En ben vegetarier.', 1, 101, 102, 45.0);
 INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
-VALUES (103, '2023-05-30', 'Leuk concept!', 3, 103, 105, 45.0);
+VALUES (103, '2023-05-30', 'Leuk concept!', 3, 103, 100, 45.0);
 INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
-VALUES (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 107, 100, 105.0);
+VALUES (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 102, 101, 105.0);
 INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
-VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 106, 100, 50.0);
+VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 104, 100, 50.0);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (100, 4.5,
         'De workshop was echt geweldig! Ik heb zoveel geleerd en de docent was zeer behulpzaam. Een aanrader!', default,
-        'Bedankt voor je positieve feedback!', 107, 101);
+        'Bedankt voor je positieve feedback!', 102, 101);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (101, 3.2,
         'De workshop was redelijk, maar ik had verwacht dat het interactiever zou zijn. De inhoud was wel interessant.',
-        true, 'Dank je wel voor je feedback. We zullen je opmerkingen in overweging nemen.', 101, 103);
+        true, 'Dank je wel voor je feedback. We zullen je opmerkingen in overweging nemen.', 102, 102);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (102, 5.0,
@@ -181,12 +173,12 @@ VALUES (102, 5.0,
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (103, 2.8,
         'Helaas voldeed de workshop niet aan mijn verwachtingen. De inhoud was te oppervlakkig en ik vond de organisatie slecht.',
-        false, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.', 105,
-        104);
+        false, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.', 102,
+        107);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (104, 4.7,
         'De workshop was fantastisch! Ik heb zoveel geleerd en het heeft mijn creatieve vaardigheden echt verbeterd. Een geweldige ervaring!',
-        default, 'Bedankt voor je geweldige feedback. We zijn blij dat je tevreden bent met de workshop!', 103, 101);
+        default, 'Bedankt voor je geweldige feedback. We zijn blij dat je tevreden bent met de workshop!', 102, 100);
 
 

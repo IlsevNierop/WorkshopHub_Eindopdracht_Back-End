@@ -85,6 +85,8 @@ public class SpringSecurityConfig {
                 .requestMatchers("/deleteprofilepic/{userId}").authenticated() //delete
 
                 .requestMatchers("/users/customer/**").authenticated() //get, put
+                .requestMatchers(HttpMethod.GET,"/users/workshopowner/{workshopOwnerId}").authenticated() //get workshopowner
+                .requestMatchers(HttpMethod.PUT,"/users/workshopowner/{workshopOwnerId}").authenticated() //get workshopowner
                 .requestMatchers(HttpMethod.PUT,"/workshops/favourite/{userId}/{workshopId}").authenticated() //put
                 .requestMatchers(HttpMethod.GET, "/bookings/user/{userId}").authenticated() //get
                 .requestMatchers(HttpMethod.GET, "/bookings/{bookingId}").authenticated() //get

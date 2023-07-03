@@ -75,7 +75,7 @@ public class FileController {
 
 
     @GetMapping("/downloadprofilepic/{userId}")
-    public ResponseEntity<Object> downLoadSingleFile(@PathVariable Long userId, HttpServletRequest request) {
+    public ResponseEntity<Object> downloadProfilePic(@PathVariable Long userId, HttpServletRequest request) {
 
         Resource resource = fileService.downLoadFile(userId);
 
