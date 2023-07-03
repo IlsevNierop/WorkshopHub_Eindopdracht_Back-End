@@ -4,6 +4,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestExcept
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.util.CheckAuthorization;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -11,6 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,9 +29,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.function.ToDoubleBiFunction;
 
 @Service
 public class FileService {
@@ -51,11 +54,14 @@ public class FileService {
 
     public String storeFile(MultipartFile file, String url, Long userId) throws RecordNotFoundException, IOException {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new BadRequestException("You're not allowed to add a photo to this profile.");
+        }
 
-        // TODO: 02/07/2023 when filenames have the same name, they get overwritten?
 
 //        String fileNameAddition = StringUtils.cleanPath(Objects.requireNonNull(String.valueOf(Date.from(Instant.now()).getTime()))); // to prevent that files can have the same name
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime())));
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
 
         Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
 //
@@ -78,6 +84,10 @@ public class FileService {
 
     public String updateProfilePic(MultipartFile file, String url, Long userId) throws RecordNotFoundException, IOException {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new BadRequestException("You're not allowed to update a photo to this profile.");
+        }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
 
@@ -110,7 +120,7 @@ public class FileService {
     }
 
 
-    // TODO: 30/06/2023 werkt nog niet
+    // TODO: 30/06/2023 nu staat het op permit all
     public Resource downLoadFile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("user niet gevonden"));
 
@@ -139,6 +149,10 @@ public class FileService {
 
     public boolean deleteProfilePic(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new BadRequestException("You're not allowed to delete the photo of this profile.");
+        }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
 

@@ -74,10 +74,15 @@ public class SpringSecurityConfig {
 
                 //...............................customer...............................
 
-                .requestMatchers("/uploadprofilepic/{userId}").permitAll() //post
-                .requestMatchers("/updateprofilepic/{userId}").permitAll() //put
+//                .requestMatchers("/uploadprofilepic/{userId}").permitAll() //post
+//                .requestMatchers("/updateprofilepic/{userId}").permitAll() //put
+//                .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get
+//                .requestMatchers("/deleteprofilepic/{userId}").permitAll() //get
+                .requestMatchers("/uploadprofilepic/{userId}").authenticated() //post
+                .requestMatchers("/updateprofilepic/{userId}").authenticated() //put
+                // get profile pic is visible for everyone (??) // TODO: 03/07/2023 check if this is best practice 
                 .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get
-                .requestMatchers("/deleteprofilepic/{userId}").permitAll() //get
+                .requestMatchers("/deleteprofilepic/{userId}").authenticated() //delete
 
                 .requestMatchers("/users/customer/**").authenticated() //get, put
                 .requestMatchers(HttpMethod.PUT,"/workshops/favourite/{userId}/{workshopId}").authenticated() //put

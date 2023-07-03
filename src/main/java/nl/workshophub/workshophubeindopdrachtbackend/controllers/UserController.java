@@ -24,6 +24,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    // TODO: 03/07/2023 all post and put mappings that have a user dto as return value, have @transactional - if the return value changes, that can be removed
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -43,6 +45,7 @@ public class UserController {
     }
 
     @GetMapping("/admin/workshopowners/")
+    @Transactional
     public ResponseEntity<List<UserWorkshopOwnerOutputDto>> getWorkshopOwnersToVerify() {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
     }
@@ -67,6 +70,7 @@ public class UserController {
     }
 
     @PostMapping("/workshopowner")
+    @Transactional
     public ResponseEntity<Object> createWorkshopOwner(@Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -81,6 +85,7 @@ public class UserController {
     }
 
     @PutMapping("/admin/{workshopOwnerId}")
+    @Transactional
     public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) throws BadRequestException {
 //        //how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
 //        if (workshopOwnerVerified != true || workshopOwnerVerified != false){
@@ -94,6 +99,7 @@ public class UserController {
     }
 
     @PutMapping("/customer/{customerId}")
+    @Transactional
     public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -108,6 +114,7 @@ public class UserController {
 
 
     @PutMapping("/workshopowner/{workshopOwnerId}")
+    @Transactional
     public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -130,6 +137,7 @@ public class UserController {
     }
 
     @PostMapping(value = "admin/{email}/authorities")
+    @Transactional
     public ResponseEntity<UserCustomerOutputDto> addUserAuthority(@PathVariable("email") String email, @RequestParam("authority") String authority) {
         UserCustomerOutputDto userCustomerOutputDto = userService.addUserAuthority(email, authority.toUpperCase());
         return new ResponseEntity<>(userCustomerOutputDto, HttpStatus.CREATED);
