@@ -36,6 +36,10 @@ public class User {
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
 
+    private String profilePicUrl;
+
+    private String fileName;
+
     //relations
 
     @OneToMany (mappedBy = "customer")

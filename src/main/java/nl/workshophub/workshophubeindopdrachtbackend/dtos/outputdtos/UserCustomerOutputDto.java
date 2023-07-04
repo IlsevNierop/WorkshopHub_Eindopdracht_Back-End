@@ -14,6 +14,8 @@ public class UserCustomerOutputDto {
 
     public Boolean workshopOwner;
 
+    public String profilePicUrl;
+
     //security
     public Boolean enabled;
 //    public String apikey;
