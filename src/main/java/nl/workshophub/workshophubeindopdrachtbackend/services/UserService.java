@@ -145,9 +145,6 @@ public class UserService {
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
         }
-        if (customer.getWorkshopOwner() == true) {
-            throw new BadRequestException("The account with ID " + customerId + " is a workshop owner and not a customer.");
-        }
         if (!customer.getEmail().equals(customerInputDto.email)) {
             if (userRepository.existsByEmail(customerInputDto.email)) {
                 throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
@@ -165,9 +162,6 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
-        }
-        if (workshopOwner.getWorkshopOwner() == false) {
-            throw new BadRequestException("The account with ID " + workshopOwnerId + " is a customer and not a workshop owner.");
         }
         if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)) {
             if (userRepository.existsByEmail(workshopOwnerInputDto.email)) {

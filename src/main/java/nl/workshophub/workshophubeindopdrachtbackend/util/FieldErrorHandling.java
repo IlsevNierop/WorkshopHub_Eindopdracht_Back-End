@@ -9,7 +9,7 @@ public class FieldErrorHandling {
     public static String getErrorToStringHandling (BindingResult bindingResult){
         StringBuilder sb = new StringBuilder();
         for (FieldError fe : bindingResult.getFieldErrors()){
-            sb.append(fe.getField() + ": ");
+            sb.append("Field error: " + fe.getField() + ": ");
             sb.append(fe.getDefaultMessage());
             sb.append("\n");
         }
