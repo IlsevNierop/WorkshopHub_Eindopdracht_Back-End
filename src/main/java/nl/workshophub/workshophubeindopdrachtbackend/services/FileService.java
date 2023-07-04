@@ -1,6 +1,7 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ForbiddenException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
@@ -52,7 +53,7 @@ public class FileService {
 
     }
 
-    public String storeFile(MultipartFile file, String url, Long userId) throws RecordNotFoundException, IOException {
+    public String storeFile(MultipartFile file, String url, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
@@ -82,11 +83,11 @@ public class FileService {
         return fileName;
     }
 
-    public String updateProfilePic(MultipartFile file, String url, Long userId) throws RecordNotFoundException, IOException {
+    public String updateProfilePic(MultipartFile file, String url, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-            throw new BadRequestException("You're not allowed to update a photo to this profile.");
+            throw new ForbiddenException("You're not allowed to update a photo to this profile.");
         }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
@@ -125,7 +126,7 @@ public class FileService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
 
         if (user.getProfilePicUrl() == null || user.getFileName() == null){
-            throw new BadRequestException("The file doesn't exist.");
+            throw new RecordNotFoundException("The file doesn't exist.");
         }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
@@ -151,7 +152,7 @@ public class FileService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-            throw new BadRequestException("You're not allowed to delete the photo of this profile.");
+            throw new ForbiddenException("You're not allowed to delete the photo of this profile.");
         }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());

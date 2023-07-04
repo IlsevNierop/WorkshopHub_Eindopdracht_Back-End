@@ -86,8 +86,8 @@ public class UserController {
 
     @PutMapping("/admin/{workshopOwnerId}")
     @Transactional
-    public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) throws BadRequestException {
-//        //how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
+    public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) {
+//        //TODO how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
 //        if (workshopOwnerVerified != true || workshopOwnerVerified != false){
 //            throw new BadRequestException("You should either verify (set workshopOwnerVerified to true) this workshop owner or disapprove (set workshopOwnerVerified to false) this workshop owner.");
 //        }
