@@ -57,7 +57,7 @@ public class FileService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-            throw new BadRequestException("You're not allowed to add a photo to this profile.");
+            throw new ForbiddenException("You're not allowed to add a photo to this profile.");
         }
 
 

@@ -100,7 +100,7 @@ public class UserController {
 
     @PutMapping("/customer/{customerId}")
     @Transactional
-    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
@@ -115,7 +115,7 @@ public class UserController {
 
     @PutMapping("/workshopowner/{workshopOwnerId}")
     @Transactional
-    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }

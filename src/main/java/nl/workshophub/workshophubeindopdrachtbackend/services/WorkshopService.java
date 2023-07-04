@@ -141,7 +141,7 @@ public class WorkshopService {
             throw new ForbiddenException("You're not allowed to create a workshops from this workshopowner's account.");
         }
         if (workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || !workshopOwner.getWorkshopOwner()) {
-            throw new ForbiddenException("You're not allowed to create a new workshop.");
+            throw new ForbiddenException("You're not allowed to create a new workshop, only a verified owner can publish.");
         }
         Workshop workshop = new Workshop();
         workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
@@ -247,10 +247,10 @@ public class WorkshopService {
         }
 
         if (!workshop.getWorkshopBookings().isEmpty()) {
-            throw new BadRequestException("This workshop can't be removed, since it already has bookings.");
+            throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with bookings.");
         }
         if (!workshop.getWorkshopReviews().isEmpty()) {
-            throw new BadRequestException("This workshop can't be removed, since it already has reviews.");
+            throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with reviews.");
         }
         //can't remove workshop, if owner has set publish on true. Then owner needs to verify delete - by setting publish workshop on false.
         if (workshop.getPublishWorkshop() == Boolean.TRUE) {

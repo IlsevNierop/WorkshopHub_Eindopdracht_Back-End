@@ -128,7 +128,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("The booking with ID  " + bookingId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(booking.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to delete a booking from this user account.");
+            throw new ForbiddenException("You're not allowed to delete a booking from this user account.");
         }
         bookingRepository.delete(booking);
     }
