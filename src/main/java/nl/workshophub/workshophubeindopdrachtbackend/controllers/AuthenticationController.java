@@ -41,7 +41,7 @@ public class AuthenticationController {
 
     //om in te loggen
     @PostMapping(value = "/signin")
-    public ResponseEntity<?> signIn(@RequestBody AuthenticationInputDto authenticationInputDto) throws BadCredentialsException {
+    public ResponseEntity<?> signIn(@RequestBody AuthenticationInputDto authenticationInputDto) {
 
         String email = authenticationInputDto.getEmail();
         String password = authenticationInputDto.getPassword();

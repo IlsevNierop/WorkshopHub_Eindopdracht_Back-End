@@ -26,7 +26,7 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    //    post for single upload
+    //TODO cleanup this controller
 
 
     @PostMapping("/uploadprofilepic/{userId}")

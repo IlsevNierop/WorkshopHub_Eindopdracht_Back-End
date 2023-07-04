@@ -86,8 +86,8 @@ public class UserController {
 
     @PutMapping("/admin/{workshopOwnerId}")
     @Transactional
-    public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) throws BadRequestException {
-//        //how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
+    public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) {
+//        //TODO how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
 //        if (workshopOwnerVerified != true || workshopOwnerVerified != false){
 //            throw new BadRequestException("You should either verify (set workshopOwnerVerified to true) this workshop owner or disapprove (set workshopOwnerVerified to false) this workshop owner.");
 //        }
@@ -100,7 +100,7 @@ public class UserController {
 
     @PutMapping("/customer/{customerId}")
     @Transactional
-    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
@@ -115,7 +115,7 @@ public class UserController {
 
     @PutMapping("/workshopowner/{workshopOwnerId}")
     @Transactional
-    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }

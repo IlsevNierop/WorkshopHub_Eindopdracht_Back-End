@@ -4,6 +4,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInpu
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ForbiddenException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
@@ -47,11 +48,11 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    public WorkshopOutputDto getWorkshopByIdVerifiedAndPublish(Long workshopId, Long userId) throws RecordNotFoundException, BadRequestException {
+    public WorkshopOutputDto getWorkshopByIdVerifiedAndPublish(Long workshopId, Long userId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         // using Boolean.TRUE because != true gives errors when the variable is null.
         if (workshop.getWorkshopVerified() != Boolean.TRUE || workshop.getPublishWorkshop() != Boolean.TRUE){
-            throw new BadRequestException("You're not allowed to view this workshop.");
+            throw new ForbiddenException("You're not allowed to view this workshop.");
         }
         WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(workshop);
         if (userId != null) {
@@ -76,15 +77,15 @@ public class WorkshopService {
     }
 
 
-    public WorkshopOutputDto getWorkshopByIdForWorkshopOwner( Long workshopId) throws RecordNotFoundException, BadRequestException {
+    public WorkshopOutputDto getWorkshopByIdForWorkshopOwner( Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to view the workshop from this workshopowner.");
+            throw new ForbiddenException("You're not allowed to view the workshop from this workshopowner.");
         }
         if (!workshop.getWorkshopOwner().getWorkshopOwner() || workshop.getWorkshopOwner().getWorkshopOwnerVerified() != Boolean.TRUE || workshop.getWorkshopOwner().getId() != workshop.getWorkshopOwner().getId()) {
-            throw new BadRequestException("You're not allowed to view this workshop.");
+            throw new ForbiddenException("You're not allowed to view this workshop.");
         }
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
@@ -96,7 +97,7 @@ public class WorkshopService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to view the workshops from this workshopowner.");
+            throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
         for (Workshop w : workshops) {
@@ -127,20 +128,20 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    public WorkshopOutputDto getWorkshopById(Long workshopId) throws RecordNotFoundException, BadRequestException {
+    public WorkshopOutputDto getWorkshopById(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException, BadRequestException {
+    public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to create a workshops from this workshopowner's account.");
+            throw new ForbiddenException("You're not allowed to create a workshops from this workshopowner's account.");
         }
         if (workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || !workshopOwner.getWorkshopOwner()) {
-            throw new BadRequestException("You're not allowed to create a new workshop.");
+            throw new ForbiddenException("You're not allowed to create a new workshop, only a verified owner can publish.");
         }
         Workshop workshop = new Workshop();
         workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
@@ -159,10 +160,10 @@ public class WorkshopService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to add favourites to this user's account.");
+            throw new ForbiddenException("You're not allowed to add favourites to this user's account.");
         }
         if (workshop.getWorkshopVerified() != Boolean.TRUE || workshop.getPublishWorkshop() != Boolean.TRUE) {
-            throw new BadRequestException("You're not allowed to view this workshop and add it to your favourites.");
+            throw new ForbiddenException("You're not allowed to view this workshop and add it to your favourites.");
         }
         if (favourite) {
             user.getFavouriteWorkshops().add(workshop);
@@ -181,18 +182,18 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    public WorkshopOutputDto updateWorkshopByOwner(Long workshopOwnerId, Long workshopId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
+    public WorkshopOutputDto updateWorkshopByOwner(Long workshopOwnerId, Long workshopId, WorkshopInputDto workshopInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to update this workshop.");
+            throw new ForbiddenException("You're not allowed to update this workshop.");
         }
 
         if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
-            throw new BadRequestException("You're not allowed to update this workshop.");
+            throw new ForbiddenException("You're not allowed to update this workshop.");
         }
         // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original workshop. This could be prevented with a different inputdto for workshopowner (excluding feedbackadmin and verifyworkshop) and for admin.
         workshopInputDto.feedbackAdmin = workshop.getFeedbackAdmin();
@@ -206,28 +207,28 @@ public class WorkshopService {
     }
 
     @PutMapping
-    public WorkshopOutputDto verifyWorkshopByOwner(Long workshopOwnerId, Long workshopId, Boolean publishWorkshop) throws RecordNotFoundException, BadRequestException {
+    public WorkshopOutputDto verifyWorkshopByOwner(Long workshopOwnerId, Long workshopId, Boolean publishWorkshop) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to publish this workshop.");
+            throw new ForbiddenException("You're not allowed to publish this workshop.");
         }
 
         if (workshop.getWorkshopVerified() != Boolean.TRUE) {
             throw new BadRequestException("This workshop is not yet approved by the administrator, therefore it can't be published.");
         }
         if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
-            throw new BadRequestException("You're not allowed to publish this workshop, only the verified owner can publish.");
+            throw new ForbiddenException("You're not allowed to publish this workshop, only the verified owner can publish.");
         }
         workshop.setPublishWorkshop(publishWorkshop);
         workshopRepository.save(workshop);
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) throws RecordNotFoundException {
+    public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopId + " doesn't exist."));
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         // After verifying / disapproving the workshop by admin, publish workshop will automatically get a default value.
@@ -237,19 +238,19 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public void deleteWorkshop(Long workshopId) throws BadRequestException, RecordNotFoundException {
+    public void deleteWorkshop(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
-            throw new BadRequestException("You're not allowed to delete this workshop.");
+            throw new ForbiddenException("You're not allowed to delete this workshop.");
         }
 
         if (!workshop.getWorkshopBookings().isEmpty()) {
-            throw new BadRequestException("This workshop can't be removed, since it already has bookings.");
+            throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with bookings.");
         }
         if (!workshop.getWorkshopReviews().isEmpty()) {
-            throw new BadRequestException("This workshop can't be removed, since it already has reviews.");
+            throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with reviews.");
         }
         //can't remove workshop, if owner has set publish on true. Then owner needs to verify delete - by setting publish workshop on false.
         if (workshop.getPublishWorkshop() == Boolean.TRUE) {

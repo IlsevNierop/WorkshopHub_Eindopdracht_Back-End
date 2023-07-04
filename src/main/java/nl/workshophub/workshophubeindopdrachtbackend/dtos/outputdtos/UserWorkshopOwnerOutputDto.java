@@ -16,7 +16,7 @@ public class UserWorkshopOwnerOutputDto {
     public String lastName;
     public String email;
     public String companyName;
-    public int kvkNumber;
+    public String kvkNumber;
     public String vatNumber;
     public Boolean workshopOwnerVerified;
 

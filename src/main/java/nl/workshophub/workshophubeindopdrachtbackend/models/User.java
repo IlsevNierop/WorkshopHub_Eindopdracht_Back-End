@@ -31,7 +31,7 @@ public class User {
 
     private String password;
     private String companyName;
-    private Integer kvkNumber;
+    private String kvkNumber;
     private String vatNumber;
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;

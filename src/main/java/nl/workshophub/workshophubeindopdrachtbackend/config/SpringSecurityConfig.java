@@ -72,7 +72,7 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET,"/reviews/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see verified reviews //get
                 .requestMatchers(HttpMethod.PUT,"/users/passwordrequest/{email}" ).permitAll() //no verification when password is forgotten, see userservice comments
 
-                //...............................customer...............................
+                //...............................authority: customer...............................
 
 //                .requestMatchers("/uploadprofilepic/{userId}").permitAll() //post
 //                .requestMatchers("/updateprofilepic/{userId}").permitAll() //put
@@ -86,7 +86,7 @@ public class SpringSecurityConfig {
 
                 .requestMatchers("/users/customer/**").authenticated() //get, put
                 .requestMatchers(HttpMethod.GET,"/users/workshopowner/{workshopOwnerId}").authenticated() //get workshopowner
-                .requestMatchers(HttpMethod.PUT,"/users/workshopowner/{workshopOwnerId}").authenticated() //get workshopowner
+                .requestMatchers(HttpMethod.PUT,"/users/workshopowner/{workshopOwnerId}").authenticated() //put workshopowner
                 .requestMatchers(HttpMethod.PUT,"/workshops/favourite/{userId}/{workshopId}").authenticated() //put
                 .requestMatchers(HttpMethod.GET, "/bookings/user/{userId}").authenticated() //get
                 .requestMatchers(HttpMethod.GET, "/bookings/{bookingId}").authenticated() //get
@@ -99,13 +99,13 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/reviews/{reviewId}" ).authenticated() //delete
 
 
-                //.................................owner.................................
+                //.................................authority: owner.................................
                 .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
                 .requestMatchers("/workshops/workshopowner/**" ).hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
                 .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
 
-                //..............................only-admin...............................
+                //..............................authority: only-admin...............................
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
                 .requestMatchers("/workshops/admin/**" ).hasRole("ADMIN") //get, get, get, put
                 .requestMatchers("/reviews/admin/**" ).hasRole("ADMIN") // get, get, put, delete

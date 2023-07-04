@@ -1,9 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.UsernameNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,13 +30,17 @@ public class ExceptionController {
 
     @ExceptionHandler(value = UsernameNotFoundException.class)
     public ResponseEntity<Object> exception(UsernameNotFoundException exception) {
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNAUTHORIZED);
 
     }
 
-
     @ExceptionHandler(value = BadCredentialsException.class)
     public ResponseEntity<Object> exception(BadCredentialsException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNAUTHORIZED);
+
+    }
+    @ExceptionHandler(value = ForbiddenException.class)
+    public ResponseEntity<Object> exception(ForbiddenException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
 
     }

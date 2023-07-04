@@ -3,6 +3,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.*;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
+import org.springframework.format.annotation.NumberFormat;
 
 import java.util.Set;
 
@@ -23,8 +24,8 @@ public class UserWorkshopOwnerInputDto {
     public String password;
     @NotBlank (message = "Companyname field shouldn't be empty.")
     public String companyName;
-    @Positive(message = "KvK number shouldn't be empty.")
-    public int kvkNumber;
+    @Digits(integer = 10, fraction = 0, message = "Please enter a valid number")
+    public String kvkNumber;
     @NotBlank (message = "BTW number shouldn't be empty.")
     public String vatNumber;
 
