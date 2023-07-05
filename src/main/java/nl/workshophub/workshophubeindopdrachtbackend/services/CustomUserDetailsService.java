@@ -33,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) {
 
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmailIgnoreCase(email));
         if (!optionalUser.isPresent()) {
             throw new UsernameNotFoundException("The user with " + email + " doesn't exist.");
         }

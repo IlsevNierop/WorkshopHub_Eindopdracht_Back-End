@@ -8,6 +8,7 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNullOrWorkshopOwnerVerifiedIsFalse();
-    Boolean existsByEmail(String email);
-    User findByEmail(String email);
+    Boolean existsByEmailIgnoreCase(String email);
+    User findByEmailIgnoreCase(String email);
+
 }

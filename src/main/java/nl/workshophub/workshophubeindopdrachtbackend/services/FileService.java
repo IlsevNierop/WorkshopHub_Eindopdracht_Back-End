@@ -60,6 +60,18 @@ public class FileService {
             throw new ForbiddenException("You're not allowed to add a photo to this profile.");
         }
 
+        // delete old profilepic if it exists, otherwise the server/folder gets filled up with a lot of unnecessary pictures
+        if (user.getProfilePicUrl() != null) {
+
+            Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
+
+            try {
+                Files.deleteIfExists(path);
+            } catch (IOException e) {
+                throw new RuntimeException("A problem occurred with deleting: " + user.getFileName());
+            }
+        }
+
 
 //        String fileNameAddition = StringUtils.cleanPath(Objects.requireNonNull(String.valueOf(Date.from(Instant.now()).getTime()))); // to prevent that files can have the same name
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
@@ -69,43 +81,6 @@ public class FileService {
 //        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 //
 //        Path filePath = Paths.get(fileStoragePath + "/" + fileName);
-
-        try {
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException("Issue in storing the file", e);
-        }
-
-        user.setProfilePicUrl(url);
-        user.setFileName(fileName);
-        userRepository.save(user);
-
-        return fileName;
-    }
-
-    public String updateProfilePic(MultipartFile file, String url, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-            throw new ForbiddenException("You're not allowed to update a photo to this profile.");
-        }
-
-        Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
-
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            throw new RuntimeException("A problem occurred with deleting: " + user.getFileName());
-        }
-
-
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-
-        Path filePath = Paths.get(fileStoragePath + "/" + fileName);
-
-//        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-//
-//        Path filePath = Paths.get(fileStoragePath + "/" + fileName + String.valueOf(Date.from(Instant.now()).getTime()));
 
         try {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
