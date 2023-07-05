@@ -71,13 +71,11 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/reviews/{reviewId}").permitAll() //get
                 .requestMatchers(HttpMethod.GET,"/reviews/workshopowner/{workshopOwnerId}" ).permitAll() //everyone can see verified reviews //get
                 .requestMatchers(HttpMethod.PUT,"/users/passwordrequest/{email}" ).permitAll() //no verification when password is forgotten, see userservice comments
+                .requestMatchers(HttpMethod.GET, "/downloadworkshoppic/{workshopId}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/uploadworkshoppic/{workshopId}").permitAll()
 
                 //...............................authority: customer...............................
 
-//                .requestMatchers("/uploadprofilepic/{userId}").permitAll() //post
-//                .requestMatchers("/updateprofilepic/{userId}").permitAll() //put
-//                .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get
-//                .requestMatchers("/deleteprofilepic/{userId}").permitAll() //get
                 .requestMatchers("/uploadprofilepic/{userId}").authenticated() //post
                 // get profile pic is visible for everyone (??) // TODO: 03/07/2023 check if this is best practice 
                 .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get

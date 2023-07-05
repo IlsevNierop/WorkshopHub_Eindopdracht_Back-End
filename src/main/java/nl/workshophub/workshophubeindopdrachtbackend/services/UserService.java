@@ -3,6 +3,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.services;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
@@ -15,10 +16,12 @@ import nl.workshophub.workshophubeindopdrachtbackend.util.CheckAuthorization;
 import nl.workshophub.workshophubeindopdrachtbackend.util.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -101,6 +104,8 @@ public class UserService {
         userRepository.save(customer);
         customer.addAuthority(new Authority(customer.getId(), "ROLE_CUSTOMER"));
         userRepository.save(customer);
+
+
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 

@@ -36,6 +36,8 @@ public class WorkshopOutputDto {
 
     public int amountOfFavsAndBookings;
 
+    public String workshopPicUrl;
+
 
 
 

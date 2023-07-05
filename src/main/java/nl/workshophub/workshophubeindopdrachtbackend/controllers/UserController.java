@@ -5,20 +5,22 @@ import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.services.UserService;
 import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
+import nl.workshophub.workshophubeindopdrachtbackend.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -27,9 +29,13 @@ public class UserController {
 
     // TODO: 03/07/2023 all post and put mappings that have a user dto as return value, have @transactional - if the return value changes, that can be removed
     private final UserService userService;
+    private final UserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserDetailsService userDetailsService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.userDetailsService = userDetailsService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/customer/{customerId}")
@@ -65,12 +71,19 @@ public class UserController {
             return ResponseEntity.badRequest().body("To create a new account for a workshopowner you need to use a different link and more details are required.");
         }
         UserCustomerOutputDto customerOutputDto = userService.createCustomer(customerInputDto);
+
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + customerOutputDto.id).toUriString());
-        return ResponseEntity.created(uri).body(customerOutputDto);
+
+        //also return a token, so a user can be logged in directly on front-end side
+        final UserDetails userDetails = userDetailsService
+                .loadUserByUsername(customerOutputDto.email);
+
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        return ResponseEntity.created(uri).body(new AuthenticationOutputDto(jwt));
     }
 
     @PostMapping("/workshopowner")
-    @Transactional
     public ResponseEntity<Object> createWorkshopOwner(@Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
@@ -81,7 +94,13 @@ public class UserController {
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.createWorkshopOwner(workshopOwnerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
 
-        return ResponseEntity.created(uri).body(workshopOwnerOutputDto);
+        //also return a token, so a user can be logged in directly on front-end side
+        final UserDetails userDetails = userDetailsService
+                .loadUserByUsername(workshopOwnerOutputDto.email);
+
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        return ResponseEntity.created(uri).body(new AuthenticationOutputDto(jwt));
     }
 
     @PutMapping("/admin/{workshopOwnerId}")

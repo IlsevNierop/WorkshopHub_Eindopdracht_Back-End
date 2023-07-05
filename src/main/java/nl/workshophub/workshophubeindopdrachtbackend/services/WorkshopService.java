@@ -289,6 +289,7 @@ public class WorkshopService {
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingWorkshopOwner();
         workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
+        workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
         return workshopOutputDto;
 
