@@ -5,7 +5,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomer
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadCredentialsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ForbiddenException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
@@ -22,8 +21,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,7 +43,7 @@ public class UserService {
 
     public boolean userExists(String email) {
 
-        return userRepository.existsByEmail(email);
+        return userRepository.existsByEmailIgnoreCase(email);
     }
 
 
@@ -94,7 +91,7 @@ public class UserService {
     }
 
     public UserCustomerOutputDto createCustomer(UserCustomerInputDto customerInputDto) {
-        if (userRepository.existsByEmail(customerInputDto.email)) {
+        if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
         User customer = new User();
@@ -108,7 +105,7 @@ public class UserService {
     }
 
     public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) {
-        if (userRepository.existsByEmail(workshopOwnerInputDto.email)) {
+        if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
         User workshopOwner = new User();
@@ -146,7 +143,7 @@ public class UserService {
             throw new ForbiddenException("You're not allowed to update this profile.");
         }
         if (!customer.getEmail().equals(customerInputDto.email)) {
-            if (userRepository.existsByEmail(customerInputDto.email)) {
+            if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
                 throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
             }
         }
@@ -164,7 +161,7 @@ public class UserService {
             throw new ForbiddenException("You're not allowed to update this profile.");
         }
         if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)) {
-            if (userRepository.existsByEmail(workshopOwnerInputDto.email)) {
+            if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
                 throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
             }
         }
@@ -173,10 +170,10 @@ public class UserService {
     }
 
     public String updatePassword(String email, PasswordInputDto passwordInputDto) {
-        if (!userRepository.existsByEmail(email)) {
+        if (!userRepository.existsByEmailIgnoreCase(email)) {
             throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailIgnoreCase(email);
 
         // in case of a logged in user that wants to change the password:
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -188,15 +185,16 @@ public class UserService {
         // TODO: 28/06/2023 in documentatie toevoegen:
         //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
         user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
+        userRepository.save(user);
 
         return "The password has been updated sucessfully.";
     }
 
     public UserCustomerOutputDto addUserAuthority(String email, String authority) {
-        if (!userRepository.existsByEmail(email)) {
+        if (!userRepository.existsByEmailIgnoreCase(email)) {
             throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailIgnoreCase(email);
         for (Authority a : user.getAuthorities()) {
             if (a.getAuthority().equals("ROLE_" + authority)) {
                 throw new BadRequestException("The user with email: " + email + " already has the authority: " + authority + ". You can't add an authority two times.");

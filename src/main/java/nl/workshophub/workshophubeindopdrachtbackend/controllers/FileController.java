@@ -48,29 +48,7 @@ public class FileController {
 //
 //        String fileName = fileService.storeFile(file, url);
 
-        return ResponseEntity.ok("File uploaded" );
-    }
-
-    @PutMapping("/updateprofilepic/{userId}")
-    public ResponseEntity<Object> updateProfilePic(@PathVariable Long userId, @RequestParam("file") MultipartFile file) throws IOException {
-
-        // next line makes url. example "http://localhost:8080/downloadprofilepic/userId"
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadprofilepic/").path(Objects.requireNonNull(userId.toString())).toUriString();
-
-        String fileName = fileService.updateProfilePic(file, url, userId);
-
-//        String fileName = fileManagerService.storeFile(file);
-//        URI uri = StringGenerator.uriGenerator(env.getProperty("apiPrefix") + "/files/" + fileName);
-//        return ResponseEntity.created(uri).body("File stored");
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
-
-
-
-//        String contentType = file.getContentType();
-//
-//        String fileName = fileService.storeFile(file, url);
-
-        return ResponseEntity.ok("File uploaded" );
+        return ResponseEntity.ok(url );
     }
 
 

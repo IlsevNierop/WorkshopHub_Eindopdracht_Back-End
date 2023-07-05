@@ -10,6 +10,9 @@ VALUES (101, 'Samuel', 'Smith', 'samuel.smith@example.com', '$2a$12$Ai87GDYBJJ.U
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
 VALUES (102, 'Isabella', 'Janssen', 'isabella.janssen@example.com',
         '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.', false, true, 'pexels-vinicius-wiesehofer-1130626.webp', 'http://localhost:8080/downloadprofilepic/102');
+INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
+VALUES (103, 'Kees', 'Janssen', 'kees@example.com',
+        '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.', false, true, null, null);
 
 
 INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
