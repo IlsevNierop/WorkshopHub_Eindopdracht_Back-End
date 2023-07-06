@@ -57,9 +57,6 @@ public class UserService {
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view this profile.");
         }
-        if (customer.getWorkshopOwner() == true) {
-            throw new RecordNotFoundException("The user with ID " + customerId + " is a workshop owner and not a customer.");
-        }
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
@@ -86,7 +83,7 @@ public class UserService {
     }
 
     public Set<Authority> getUserAuthorities(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID " + userId + " doesn't exist."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         UserCustomerOutputDto userOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
         // Don't want to communicate authorities with every outputdto - so only setting authorities in userOutputDto in this method.
         userOutputDto.authorities = user.getAuthorities();
@@ -125,7 +122,7 @@ public class UserService {
 
     public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean
             workshopOwnerVerified) {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist"));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist"));
         if (workshopOwner.getWorkshopOwner() == false) {
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
@@ -142,7 +139,7 @@ public class UserService {
     }
 
     public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) {
-        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + customerId + " doesn't exist"));
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist"));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
@@ -152,7 +149,6 @@ public class UserService {
                 throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
             }
         }
-        customerInputDto.password = null;
         userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder));
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
@@ -160,7 +156,7 @@ public class UserService {
 
     public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto
             workshopOwnerInputDto) {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
@@ -215,7 +211,7 @@ public class UserService {
     }
 
     public void removeAuthority(Long userId, String authority) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID: " + userId + " doesn't exist."));
         for (Authority a : user.getAuthorities()) {
             if (a.getAuthority().equals("ROLE_" + authority)) {
                 user.getAuthorities().remove(a);
