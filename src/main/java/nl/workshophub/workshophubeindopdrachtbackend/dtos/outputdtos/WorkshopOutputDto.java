@@ -32,6 +32,8 @@ public class WorkshopOutputDto {
     public String workshopOwnerCompanyName;
     public Double averageRatingWorkshopOwnerReviews;
 
+    public Double numberOfReviews;
+
     public Boolean isFavourite;
 
     public int amountOfFavsAndBookings;

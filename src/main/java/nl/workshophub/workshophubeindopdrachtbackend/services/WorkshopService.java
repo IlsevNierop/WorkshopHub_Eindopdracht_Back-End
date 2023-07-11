@@ -287,7 +287,10 @@ public class WorkshopService {
         workshopOutputDto.workshopOwnerReviews = createReviewOutPutDtosFromWorkshopOwner(workshop);
         workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
-        workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingWorkshopOwner();
+        if (workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
+            workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
+            workshopOutputDto.numberOfReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(1);
+        }
         workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
         workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 

@@ -233,7 +233,7 @@ VALUES (102, 5.0,
         true, 'We zijn blij dat je ervan genoten hebt. Bedankt voor je positieve woorden!', 101, 101);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
-VALUES (103, 2.8,
+VALUES (103, 2.3,
         'Helaas voldeed de workshop niet aan mijn verwachtingen. De inhoud was te oppervlakkig en ik vond de organisatie slecht.',
         false, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.', 102,
         107);

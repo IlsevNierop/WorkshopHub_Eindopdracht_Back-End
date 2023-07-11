@@ -34,7 +34,10 @@ public class UserServiceTransferMethod {
         workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
         workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
         workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
-        workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingWorkshopOwner();
+        if (workshopOwner.calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
+            workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
+        }
+
         workshopOwnerOutputDto.authorities = workshopOwner.getAuthorities();
         workshopOwnerOutputDto.profilePicUrl = workshopOwner.getProfilePicUrl();
 
