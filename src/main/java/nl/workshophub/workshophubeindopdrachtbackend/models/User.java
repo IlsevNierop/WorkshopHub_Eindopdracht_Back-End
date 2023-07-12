@@ -98,8 +98,10 @@ public class User {
         for (Workshop w : this.getWorkshops()) {
             if (w.getWorkshopReviews() != null) {
                 for (Review r : w.getWorkshopReviews()) {
-                    sumRatings += r.getRating();
-                    numberReviews++;
+                    if (r.getReviewVerified() == Boolean.TRUE) {
+                        sumRatings += r.getRating();
+                        numberReviews++;
+                    }
                 }
             }
         }
