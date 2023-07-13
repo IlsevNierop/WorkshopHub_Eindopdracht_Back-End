@@ -6,11 +6,14 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOut
 import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -20,9 +23,11 @@ import java.util.List;
 public class WorkshopController {
 
     private final WorkshopService workshopService;
+    private final FileController fileController;
 
-    public WorkshopController(WorkshopService workshopService) {
+    public WorkshopController(WorkshopService workshopService, FileController fileController) {
         this.workshopService = workshopService;
+        this.fileController = fileController;
     }
 
     //open
@@ -74,12 +79,26 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getWorkshopById(workshopId), HttpStatus.OK);
     }
 
-    @PostMapping("/workshopowner/{workshopOwnerId}")
-    public ResponseEntity<Object> createWorkshop(@PathVariable Long workshopOwnerId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+//    @PostMapping("/workshopowner/{workshopOwnerId}")
+//    public ResponseEntity<Object> createWorkshop(@PathVariable Long workshopOwnerId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+//        if (bindingResult.hasFieldErrors()){
+//            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+//        }
+//        WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
+//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
+//        return ResponseEntity.created(uri).body(workshopOutputDto);
+//    }
+
+    //werkt en kan afbeelding uploaden, maar de validatie werkt niet meer, omdat er een string ontvangen wordt en niet een inputdto
+    @PostMapping(value= "/workshopowner/{workshopOwnerId}", consumes = { MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Object> createWorkshop(@PathVariable Long workshopOwnerId, @RequestPart("workshopInputDto") String workshopInputDto, @RequestPart("file") MultipartFile file, BindingResult bindingResult) throws IOException {
         if (bindingResult.hasFieldErrors()){
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
+
+//        WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
+        fileController.uploadWorkshopPic(workshopOutputDto.id, file);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }

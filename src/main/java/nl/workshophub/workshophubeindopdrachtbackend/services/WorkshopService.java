@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
@@ -17,7 +18,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -133,7 +137,27 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) {
+//    public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) {
+//        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+//            throw new ForbiddenException("You're not allowed to create a workshops from this workshopowner's account.");
+//        }
+//        if (workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || !workshopOwner.getWorkshopOwner()) {
+//            throw new ForbiddenException("You're not allowed to create a new workshop, only a verified owner can publish.");
+//        }
+//        Workshop workshop = new Workshop();
+//        workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
+//        workshop.setWorkshopOwner(workshopOwner);
+//        // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin need to get default values.
+//        workshop.setPublishWorkshop(null);
+//        workshop.setWorkshopVerified(null);
+//        workshop.setFeedbackAdmin(null);
+//        workshopRepository.save(workshop);
+//        return transferWorkshopToWorkshopOutputDto(workshop);
+//    }
+    public WorkshopOutputDto createWorkshop(Long workshopOwnerId, String workshopInputDto) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -143,8 +167,19 @@ public class WorkshopService {
         if (workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || !workshopOwner.getWorkshopOwner()) {
             throw new ForbiddenException("You're not allowed to create a new workshop, only a verified owner can publish.");
         }
+
+        WorkshopInputDto workshopInputDto1 = new WorkshopInputDto();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            workshopInputDto1 = objectMapper.readValue(workshopInputDto, WorkshopInputDto.class);
+        }
+        catch (IOException err) {
+            System.out.println("Error " + err.toString());
+        }
+
+
         Workshop workshop = new Workshop();
-        workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
+        workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto1, workshop);
         workshop.setWorkshopOwner(workshopOwner);
         // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin need to get default values.
         workshop.setPublishWorkshop(null);
