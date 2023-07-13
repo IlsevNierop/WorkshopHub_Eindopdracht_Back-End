@@ -145,7 +145,7 @@ public class FileService {
     public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
 
-        //TODO check authentication? Check if file can be part of inputdto
+        //TODO check authentication? already checked in the workshopservice
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
 //            throw new ForbiddenException("You're not allowed to add a photo to this profile.");

@@ -111,7 +111,6 @@ public class WorkshopController {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
 
-//        WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         fileController.uploadWorkshopPic(workshopOutputDto.id, file);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());

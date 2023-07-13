@@ -137,7 +137,6 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    // original
     public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
