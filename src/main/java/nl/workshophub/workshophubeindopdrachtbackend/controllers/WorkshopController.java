@@ -34,17 +34,17 @@ public class WorkshopController {
     //open
 
     @GetMapping
-    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(@RequestParam(value="userId", required = false) Long userId) {
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(@RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(userId), HttpStatus.OK);
     }
 
     @GetMapping("/{workshopId}")
-    public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable("workshopId") Long workshopId, @RequestParam(value="userId", required = false) Long userId) {
+    public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable("workshopId") Long workshopId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId, userId), HttpStatus.OK);
     }
 
     @GetMapping("/workshopowner/{workshopOwnerId}")
-    public ResponseEntity<List<WorkshopOutputDto>>  getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(@PathVariable Long workshopOwnerId,  @RequestParam(value="userId", required = false) Long userId) {
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(@PathVariable Long workshopOwnerId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(workshopOwnerId, userId), HttpStatus.OK);
     }
 
@@ -58,10 +58,9 @@ public class WorkshopController {
 
     // filter at frontend on what to verify etc. show startdate today - but possibility to go back in time
     @GetMapping("/workshopowner/all/{workshopOwnerId}")
-    public ResponseEntity<List<WorkshopOutputDto>>  getAllWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
-
 
 
     // admin getmappings:
@@ -104,45 +103,54 @@ public class WorkshopController {
 //        return ResponseEntity.created(uri).body(workshopOutputDto);
 //    }
 //
+//    (name = "workshopInputDto", required = false)
 
-    @PostMapping(value= "/workshopowner/{workshopOwnerId}", consumes = { "multipart/form-data" }, produces = "application/json")
-    public ResponseEntity<Object> createWorkshop(@PathVariable Long workshopOwnerId, @Valid @RequestPart(name = "workshopInputDto", required = true) WorkshopInputDto workshopInputDto, BindingResult bindingResult, @RequestPart("file") MultipartFile file) throws IOException {
-        if (bindingResult.hasFieldErrors()) {
-            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+    @PostMapping(value = "/workshopowner/{workshopOwnerId}", consumes = {"multipart/form-data"}, produces = "application/json")
+    public ResponseEntity<Object> createWorkshop(
+            @PathVariable Long workshopOwnerId,
+            @RequestPart @Valid WorkshopInputDto workshopInputDto,
+            BindingResult bindingResultWorkshopInputDto,
+            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+        if (bindingResultWorkshopInputDto.hasFieldErrors()) {
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResultWorkshopInputDto));
         }
 
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
-        fileController.uploadWorkshopPic(workshopOutputDto.id, file);
+        if (file != null) {
+            fileController.uploadWorkshopPic(workshopOutputDto.id, file);
+        }
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }
 
-    @PutMapping ("/favourite/{userId}/{workshopId}")
-    public ResponseEntity <List<WorkshopOutputDto>> addOrRemoveWorkshopFavourites(@PathVariable("userId") Long userId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean favourite){
+    //TODO add pic to putmapping
+
+    @PutMapping("/favourite/{userId}/{workshopId}")
+    public ResponseEntity<List<WorkshopOutputDto>> addOrRemoveWorkshopFavourites(@PathVariable("userId") Long userId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean favourite) {
         return new ResponseEntity<>(workshopService.addOrRemoveWorkshopFavourites(userId, workshopId, favourite), HttpStatus.ACCEPTED);
     }
 
 
-    @PutMapping ("/workshopowner/{workshopOwnerId}/{workshopId}")
-    public ResponseEntity<Object> updateWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId,  @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
-        if (bindingResult.hasFieldErrors()){
+    @PutMapping("/workshopowner/{workshopOwnerId}/{workshopId}")
+    public ResponseEntity<Object> updateWorkshopByOwner(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto), HttpStatus.ACCEPTED);
     }
 
 
-    @PutMapping ("/workshopowner/verify/{workshopOwnerId}/{workshopId}")
-    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner (@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
+    @PutMapping("/workshopowner/verify/{workshopOwnerId}/{workshopId}")
+    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
 
         return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopOwnerId, workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
 
     // admin:
-    @PutMapping ("/admin/{workshopId}")
-    public ResponseEntity<Object> verifyWorkshopByAdmin (@PathVariable Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
-        if (bindingResult.hasFieldErrors()){
+    @PutMapping("/admin/{workshopId}")
+    public ResponseEntity<Object> verifyWorkshopByAdmin(@PathVariable Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto), HttpStatus.ACCEPTED);
