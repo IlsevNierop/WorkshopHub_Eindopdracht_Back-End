@@ -3,13 +3,12 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.services.FileService;
 import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -17,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin
 @RestController
@@ -24,11 +24,11 @@ import java.util.List;
 public class WorkshopController {
 
     private final WorkshopService workshopService;
-    private final FileController fileController;
+    private final FileService fileService;
 
-    public WorkshopController(WorkshopService workshopService, FileController fileController) {
+    public WorkshopController(WorkshopService workshopService, FileService fileService) {
         this.workshopService = workshopService;
-        this.fileController = fileController;
+        this.fileService = fileService;
     }
 
     //open
@@ -117,7 +117,11 @@ public class WorkshopController {
 
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         if (file != null) {
-            fileController.uploadWorkshopPic(workshopOutputDto.id, file);
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+
+            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+
+//            fileController.uploadWorkshopPic(workshopOutputDto.id, file);
         }
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
@@ -131,12 +135,26 @@ public class WorkshopController {
     }
 
 
-    @PutMapping("/workshopowner/{workshopOwnerId}/{workshopId}")
-    public ResponseEntity<Object> updateWorkshopByOwner(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+    @PutMapping(value= "/workshopowner/{workshopOwnerId}/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
+    public ResponseEntity<Object> updateWorkshopByOwner(
+            @PathVariable("workshopOwnerId") Long workshopOwnerId,
+            @PathVariable("workshopId") Long workshopId,
+            @RequestPart @Valid WorkshopInputDto workshopInputDto,
+            BindingResult bindingResult,
+            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        return new ResponseEntity<>(workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto), HttpStatus.ACCEPTED);
+
+        WorkshopOutputDto workshopOutputDto = workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto);
+        if (file != null) {
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+
+            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+
+        }
+
+        return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
     }
 
 
@@ -148,13 +166,26 @@ public class WorkshopController {
 
 
     // admin:
-    @PutMapping("/admin/{workshopId}")
-    public ResponseEntity<Object> verifyWorkshopByAdmin(@PathVariable Long workshopId, @Valid @RequestBody WorkshopInputDto workshopInputDto, BindingResult bindingResult) {
+    @PutMapping(value="/admin/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
+    public ResponseEntity<Object> verifyWorkshopByAdmin(
+            @PathVariable Long workshopId,
+            @RequestPart @Valid WorkshopInputDto workshopInputDto,
+            BindingResult bindingResult,
+            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        return new ResponseEntity<>(workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto), HttpStatus.ACCEPTED);
+        WorkshopOutputDto workshopOutputDto = workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto);
+        if (file != null) {
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+
+            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+
+        }
+        return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
     }
+
+
 
     //owner mag ook eigenworkshop deleten - has role owner - check workshop.getWorkshopOwner().getId() != workshopOwner.getId()
     @DeleteMapping("/workshopowner/{workshopId}")

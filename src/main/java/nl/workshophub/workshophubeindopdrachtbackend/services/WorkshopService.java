@@ -266,7 +266,7 @@ public class WorkshopService {
     }
 
     public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopId + " doesn't exist."));
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         // After verifying / disapproving the workshop by admin, publish workshop will automatically get a default value.
         workshop.setPublishWorkshop(null);

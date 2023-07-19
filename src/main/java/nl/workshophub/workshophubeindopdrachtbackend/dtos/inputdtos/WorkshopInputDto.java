@@ -32,7 +32,7 @@ public class WorkshopInputDto {
     public String location;
     public String highlightedInfo;
     @NotBlank(message = "Description can't be empty.")
-    @Size(min = 50, max = 1500, message = "Description needs to have a minimum of 50 characters and maximum of 1500.")
+    @Size(min = 50, max = 2000, message = "Description needs to have a minimum of 50 characters and maximum of 2000.")
     public String description;
     @Positive(message = "Amount of participants can't be empty.")
     public int amountOfParticipants;
