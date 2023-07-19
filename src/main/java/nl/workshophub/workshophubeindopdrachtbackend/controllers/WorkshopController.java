@@ -38,6 +38,11 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(userId), HttpStatus.OK);
     }
 
+    @GetMapping("/favourites/{userId}")
+    public ResponseEntity<List<WorkshopOutputDto>> getAllFavouriteWorkshopsUser(@PathVariable(value = "userId") Long userId) {
+        return new ResponseEntity<>(workshopService.getAllFavouriteWorkshopsUser(userId), HttpStatus.OK);
+    }
+
     @GetMapping("/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable("workshopId") Long workshopId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId, userId), HttpStatus.OK);

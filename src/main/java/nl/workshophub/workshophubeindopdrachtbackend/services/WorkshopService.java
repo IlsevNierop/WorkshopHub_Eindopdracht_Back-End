@@ -52,6 +52,25 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
+    public List<WorkshopOutputDto> getAllFavouriteWorkshopsUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+            throw new ForbiddenException("You're not allowed to view the favourite workshops for this user.");
+        }
+
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        //TODO nu ook workshops uit het verleden? In documentatie noemen?
+        for (Workshop w : user.getFavouriteWorkshops()) {
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
+            workshopOutputDto.isFavourite = true;
+            workshopOutputDtos.add(workshopOutputDto);
+        }
+        return workshopOutputDtos;
+    }
+
     public WorkshopOutputDto getWorkshopByIdVerifiedAndPublish(Long workshopId, Long userId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         // using Boolean.TRUE because != true gives errors when the variable is null.
