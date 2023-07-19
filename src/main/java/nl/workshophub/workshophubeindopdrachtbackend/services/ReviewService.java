@@ -50,7 +50,7 @@ public class ReviewService {
     }
 
     public List<ReviewOutputDto> getReviewsFromWorkshopOwnerVerified(Long workshopOwnerId) {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         if (workshopOwner.getWorkshopOwner() != true) {
             throw new BadRequestException("This user is a customer, and not a workshop owner.");
         }

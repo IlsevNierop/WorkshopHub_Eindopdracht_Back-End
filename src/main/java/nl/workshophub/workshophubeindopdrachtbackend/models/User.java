@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +89,7 @@ public class User {
     }
 
 
-    public Double calculateAverageRatingWorkshopOwner() {
+    public ArrayList<Double> calculateAverageRatingAndNumberReviewsWorkshopOwner() {
         if (this.getWorkshops() == null) {
             return null;
         }
@@ -97,8 +98,10 @@ public class User {
         for (Workshop w : this.getWorkshops()) {
             if (w.getWorkshopReviews() != null) {
                 for (Review r : w.getWorkshopReviews()) {
-                    sumRatings += r.getRating();
-                    numberReviews++;
+                    if (r.getReviewVerified() == Boolean.TRUE) {
+                        sumRatings += r.getRating();
+                        numberReviews++;
+                    }
                 }
             }
         }
@@ -106,7 +109,11 @@ public class User {
             return null;
         }
 
-        return sumRatings / numberReviews;
+        ArrayList<Double> avgRatingAndNumberReviews = new ArrayList<>();
+        avgRatingAndNumberReviews.add(sumRatings / numberReviews);
+        avgRatingAndNumberReviews.add(numberReviews);
+
+        return avgRatingAndNumberReviews;
 
     }
 

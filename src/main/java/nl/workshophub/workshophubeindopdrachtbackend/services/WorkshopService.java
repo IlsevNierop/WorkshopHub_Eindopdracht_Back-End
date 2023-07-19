@@ -1,5 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
@@ -17,7 +18,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +44,7 @@ public class WorkshopService {
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
             if (userId != null) {
-                User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + userId + " doesn't exist."));
+                User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
                 workshopOutputDto.isFavourite = customer.getFavouriteWorkshops().contains(w);
             }
             workshopOutputDtos.add(workshopOutputDto);
@@ -56,7 +60,7 @@ public class WorkshopService {
         }
         WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(workshop);
         if (userId != null) {
-            User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + userId + " doesn't exist."));
+            User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
                 workshopOutputDto.isFavourite = customer.getFavouriteWorkshops().contains(workshop);
                 }
         return workshopOutputDto;
@@ -68,7 +72,7 @@ public class WorkshopService {
         for (Workshop w : workshops) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
             if (userId != null) {
-                User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The customer with ID " + userId + " doesn't exist."));
+                User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
                 workshopOutputDto.isFavourite = customer.getFavouriteWorkshops().contains(w);
             }
             workshopOutputDtos.add(workshopOutputDto);
@@ -93,7 +97,7 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsFromWorkshopOwner(Long workshopOwnerId) {
         List<Workshop> workshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshopowner with ID " + workshopOwnerId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
@@ -134,7 +138,7 @@ public class WorkshopService {
     }
 
     public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) {
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
@@ -153,6 +157,39 @@ public class WorkshopService {
         workshopRepository.save(workshop);
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
+
+    // incl file and string
+//    public WorkshopOutputDto createWorkshop(Long workshopOwnerId, String workshopInputDto) {
+//        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())){
+//            throw new ForbiddenException("You're not allowed to create a workshops from this workshopowner's account.");
+//        }
+//        if (workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || !workshopOwner.getWorkshopOwner()) {
+//            throw new ForbiddenException("You're not allowed to create a new workshop, only a verified owner can publish.");
+//        }
+//
+//        WorkshopInputDto workshopInputDto1 = new WorkshopInputDto();
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            workshopInputDto1 = objectMapper.readValue(workshopInputDto, WorkshopInputDto.class);
+//        }
+//        catch (IOException err) {
+//            System.out.println("Error " + err.toString());
+//        }
+//
+//
+//        Workshop workshop = new Workshop();
+//        workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto1, workshop);
+//        workshop.setWorkshopOwner(workshopOwner);
+//        // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin need to get default values.
+//        workshop.setPublishWorkshop(null);
+//        workshop.setWorkshopVerified(null);
+//        workshop.setFeedbackAdmin(null);
+//        workshopRepository.save(workshop);
+//        return transferWorkshopToWorkshopOutputDto(workshop);
+//    }
 
     public List<WorkshopOutputDto> addOrRemoveWorkshopFavourites(Long userId, Long workshopId, Boolean favourite) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
@@ -184,7 +221,7 @@ public class WorkshopService {
 
     public WorkshopOutputDto updateWorkshopByOwner(Long workshopOwnerId, Long workshopId, WorkshopInputDto workshopInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -209,7 +246,7 @@ public class WorkshopService {
     @PutMapping
     public WorkshopOutputDto verifyWorkshopByOwner(Long workshopOwnerId, Long workshopId, Boolean publishWorkshop) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopOwnerId + " doesn't exist."));
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -229,7 +266,7 @@ public class WorkshopService {
     }
 
     public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop owner with ID " + workshopId + " doesn't exist."));
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         // After verifying / disapproving the workshop by admin, publish workshop will automatically get a default value.
         workshop.setPublishWorkshop(null);
@@ -287,8 +324,12 @@ public class WorkshopService {
         workshopOutputDto.workshopOwnerReviews = createReviewOutPutDtosFromWorkshopOwner(workshop);
         workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
-        workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingWorkshopOwner();
+        if (workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
+            workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
+            workshopOutputDto.numberOfReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(1);
+        }
         workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
+        workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
         return workshopOutputDto;
 

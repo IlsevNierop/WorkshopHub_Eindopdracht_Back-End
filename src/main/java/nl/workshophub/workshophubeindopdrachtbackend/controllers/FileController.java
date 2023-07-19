@@ -1,4 +1,5 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
+
 import jakarta.transaction.Transactional;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
@@ -30,12 +31,12 @@ public class FileController {
 
 
     @PostMapping("/uploadprofilepic/{userId}")
-    public ResponseEntity<Object> singleFileUpload(@PathVariable Long userId, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<Object> uploadProfilePic(@PathVariable Long userId, @RequestParam("file") MultipartFile file) throws IOException {
 
         // next line makes url. example "http://localhost:8080/downloadprofilepic/userId"
         String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadprofilepic/").path(Objects.requireNonNull(userId.toString())).toUriString();
 
-        String fileName = fileService.storeFile(file, url, userId);
+        String fileName = fileService.uploadProfilePic(file, url, userId);
 
 //        String fileName = fileManagerService.storeFile(file);
 //        URI uri = StringGenerator.uriGenerator(env.getProperty("apiPrefix") + "/files/" + fileName);
@@ -43,19 +44,17 @@ public class FileController {
 //        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
 
 
-
 //        String contentType = file.getContentType();
 //
 //        String fileName = fileService.storeFile(file, url);
 
-        return ResponseEntity.ok(url );
+        return ResponseEntity.ok(url);
     }
-
 
     @GetMapping("/downloadprofilepic/{userId}")
     public ResponseEntity<Object> downloadProfilePic(@PathVariable Long userId, HttpServletRequest request) {
 
-        Resource resource = fileService.downLoadFile(userId);
+        Resource resource = fileService.downloadProfilePic(userId);
 
 //        this mediaType decides witch type you accept if you only accept 1 type
         MediaType contentType = MediaType.IMAGE_JPEG;
@@ -76,16 +75,11 @@ public class FileController {
         return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + resource.getFilename()).body(resource);
     }
 
-
     @DeleteMapping("/deleteprofilepic/{userId}")
     public ResponseEntity<Object> deleteProfilePic(@PathVariable Long userId) {
 
         if (fileService.deleteProfilePic(userId)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-        }
-        if (fileService.deleteProfilePic(userId)) {
-            return ResponseEntity.ok("Profile picture of user with ID : " + userId + " is deleted");
         } else {
             throw new BadRequestException("file does not exist in the system");
         }
@@ -94,8 +88,40 @@ public class FileController {
     }
 
 
+    //TODO check of het tegelijk met aanmaken workshop kan (in requestbody van volledige workshop?)
+    @PostMapping("/uploadworkshoppic/{workshopId}")
+    public ResponseEntity<Object> uploadWorkshopPic(@PathVariable Long workshopId, @RequestParam("file") MultipartFile file) throws IOException {
+
+        // next line makes url. example "http://localhost:8080/downloadworkshoppic/workshopId"
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopId.toString())).toUriString();
+
+        String fileName = fileService.uploadWorkshopPic(file, url, workshopId);
+
+        return ResponseEntity.ok(url);
+    }
+
+    @GetMapping("/downloadworkshoppic/{workshopId}")
+    public ResponseEntity<Object> downloadWorkshopPic(@PathVariable Long workshopId, HttpServletRequest request) {
+
+        Resource resource = fileService.downloadWorkshopPic(workshopId);
+
+        MediaType contentType = MediaType.IMAGE_JPEG;
+        return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + resource.getFilename()).body(resource);
+    }
+
+    // TODO: 05/07/2023 Delete nog testen met postman
+
+    @DeleteMapping("/deleteworkshoppic/{workshopId}")
+    public ResponseEntity<Object> deleteWorkshopPic(@PathVariable Long workshopId) {
+
+        if (fileService.deleteWorkshopPic(workshopId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            throw new BadRequestException("file does not exist in the system");
+        }
 
 
+    }
 
 
 }

@@ -52,8 +52,10 @@ public class Workshop {
     private Boolean publishWorkshop;
 
 
-    // check of byte het juiste type variabele is voor image - even checken hoe dit verwerkt wordt - lijst of niet?
-//    private ArrayList<byte> workshopImage;
+    // TODO make this several pictures
+    private String workshopPicUrl;
+
+    private String fileName;
 
     @ManyToOne
     @JsonIgnore
@@ -81,6 +83,7 @@ public class Workshop {
         return (this.getAmountOfParticipants() - spotsBooked);
     }
 
+    // TODO: 12/07/2023 doesn't take into account reviews 
     public int calculateAmountOfFavsAndBookingsWorkshop(){
         int popularityNumber = 0;
         popularityNumber += this.getFavsUser().size();
