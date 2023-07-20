@@ -29,6 +29,8 @@ public class WorkshopOutputDto {
     public String feedbackAdmin;
     public Boolean publishWorkshop;
     public List<ReviewOutputDto> workshopOwnerReviews;
+
+    public Long workshopOwnerId;
     public String workshopOwnerCompanyName;
     public Double averageRatingWorkshopOwnerReviews;
 

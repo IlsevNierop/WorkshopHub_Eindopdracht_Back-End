@@ -342,6 +342,7 @@ public class WorkshopService {
         workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
         workshopOutputDto.workshopOwnerReviews = createReviewOutPutDtosFromWorkshopOwner(workshop);
         workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
+        workshopOutputDto.workshopOwnerId = workshop.getWorkshopOwner().getId();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         if (workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
             workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
