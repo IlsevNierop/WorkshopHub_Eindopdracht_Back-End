@@ -63,8 +63,8 @@ public class WorkshopController {
 
     // filter at frontend on what to verify etc. show startdate today - but possibility to go back in time
     @GetMapping("/workshopowner/all/{workshopOwnerId}")
-    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
-        return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
 
@@ -126,7 +126,7 @@ public class WorkshopController {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
 
-        WorkshopOutputDto workshopOutputDto = workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto);
+        WorkshopOutputDto workshopOutputDto = workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto);
         if (file != null) {
             String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
 
