@@ -90,7 +90,7 @@ public class WorkshopController {
             @PathVariable Long workshopOwnerId,
             @RequestPart @Valid WorkshopInputDto workshopInputDto,
             BindingResult bindingResultWorkshopInputDto,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+            @RequestPart(name = "file", required = false) MultipartFile file) {
         if (bindingResultWorkshopInputDto.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResultWorkshopInputDto));
         }
@@ -107,8 +107,6 @@ public class WorkshopController {
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }
 
-    //TODO add pic to putmapping
-
     @PutMapping("/favourite/{userId}/{workshopId}")
     public ResponseEntity<List<WorkshopOutputDto>> addOrRemoveWorkshopFavourites(@PathVariable("userId") Long userId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean favourite) {
         return new ResponseEntity<>(workshopService.addOrRemoveWorkshopFavourites(userId, workshopId, favourite), HttpStatus.ACCEPTED);
@@ -121,7 +119,7 @@ public class WorkshopController {
             @PathVariable("workshopId") Long workshopId,
             @RequestPart @Valid WorkshopInputDto workshopInputDto,
             BindingResult bindingResult,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+            @RequestPart(name = "file", required = false) MultipartFile file) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }

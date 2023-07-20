@@ -317,10 +317,6 @@ public class WorkshopService {
         if (!workshop.getWorkshopReviews().isEmpty()) {
             throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with reviews.");
         }
-        //can't remove workshop, if owner has set publish on true. Then owner needs to verify delete - by setting publish workshop on false.
-        if (workshop.getPublishWorkshop() == Boolean.TRUE) {
-            throw new BadRequestException("This workshop can't be removed, because the workshop owner has verified the workshop for publishing.");
-        }
         // workshop is referencing entity in manytomany relation with user, regarding favourites, the workshop should be able to be deleted, even if users have it listed as favourite, therefore delete all those associations first:
         if (!workshop.getFavsUser().isEmpty()) {
             for (User user : workshop.getFavsUser()) {
