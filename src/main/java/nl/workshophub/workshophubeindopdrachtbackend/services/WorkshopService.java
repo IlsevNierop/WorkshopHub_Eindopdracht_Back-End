@@ -138,6 +138,22 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
+    public List<WorkshopOutputDto> getAllWorkshopsToVerifyFromWorkshopOwner(Long workshopOwnerId) {
+        List<Workshop> workshops = workshopRepository.findByWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsNullOrPublishWorkshopIsFalseOrderByDate(workshopOwnerId);
+        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
+        }
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        for (Workshop w : workshops) {
+            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, workshopOwner);
+            workshopOutputDtos.add(workshopOutputDto);
+        }
+        return workshopOutputDtos;
+    }
+
 
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(java.time.LocalDate.now());
@@ -272,20 +288,19 @@ public class WorkshopService {
     }
 
     @PutMapping
-    public WorkshopOutputDto verifyWorkshopByOwner(Long workshopOwnerId, Long workshopId, Boolean publishWorkshop) {
+    public WorkshopOutputDto verifyWorkshopByOwner(Long workshopId, Boolean publishWorkshop) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+        if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to publish this workshop.");
         }
 
         if (workshop.getWorkshopVerified() != Boolean.TRUE) {
             throw new BadRequestException("This workshop is not yet approved by the administrator, therefore it can't be published.");
         }
-        if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
+        if (!workshop.getWorkshopOwner().getWorkshopOwner() || workshop.getWorkshopOwner().getWorkshopOwnerVerified() != Boolean.TRUE) {
             throw new ForbiddenException("You're not allowed to publish this workshop, only the verified owner can publish.");
         }
         workshop.setPublishWorkshop(publishWorkshop);
@@ -359,7 +374,10 @@ public class WorkshopService {
         return workshopOutputDto;
     }
 
+    //Overloading, in case there is a user the variable isfavourite is made.
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop, User user) {
+        //Could also call the other transfer method in stead of having duplicated code, but this is officially 'better' practice.
+        //TODO check met Paul
         WorkshopOutputDto workshopOutputDto = new WorkshopOutputDto();
         workshopOutputDto.id = workshop.getId();
         workshopOutputDto.title = workshop.getTitle();

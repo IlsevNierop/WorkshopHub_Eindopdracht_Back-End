@@ -94,6 +94,8 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
+
+        //TODO check if I can make this: User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
         User customer = new User();
         String randomString = RandomStringGenerator.generateAlphaNumeric(20);
         customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder);

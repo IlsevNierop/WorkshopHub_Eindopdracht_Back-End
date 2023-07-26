@@ -67,6 +67,11 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
+    @GetMapping("/workshopowner/verify/{workshopOwnerId}")
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerifyFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsToVerifyFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    }
+
 
     // admin getmappings:
     @GetMapping("/admin/verify")
@@ -136,10 +141,10 @@ public class WorkshopController {
     }
 
 
-    @PutMapping("/workshopowner/verify/{workshopOwnerId}/{workshopId}")
-    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
+    @PutMapping("/workshopowner/verify/{workshopId}")
+    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner(@PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
 
-        return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopOwnerId, workshopId, publishWorkshop), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
 
