@@ -14,6 +14,7 @@ public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
 
     //owner
     List<Workshop> findByWorkshopOwnerId (Long workshopOwnerId);
+    List<Workshop> findByWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsNullOrPublishWorkshopIsFalseOrderByDate(Long workshopOwnerId);
 
     //admin
     List<Workshop> findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(LocalDate date);

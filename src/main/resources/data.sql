@@ -1,9 +1,10 @@
 -- all users have the same password: password
 -- Melania (ID 100) is admin
 
-INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
+INSERT INTO users (id, first_name, last_name, email, password, company_name, kvk_number, vat_number,
+                   workshop_owner_verified, workshop_owner, enabled, file_name, profile_pic_url)
 VALUES (100, 'Melania', 'Rossi', 'melania@example.com',
-        '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.', false, true, 'pexels-melania-piacquadio-774909.webp' ,'http://localhost:8080/downloadprofilepic/100');
+        '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.', 'Admin Bedrijf', 12345678, 'NL123456789B01', true, true, true, 'pexels-melania-piacquadio-774909.webp' ,'http://localhost:8080/downloadprofilepic/100');
 INSERT INTO users (id, first_name, last_name, email, password, workshop_owner, enabled, file_name, profile_pic_url)
 VALUES (101, 'Samuel', 'Smith', 'samuel.smith@example.com', '$2a$12$Ai87GDYBJJ.UFqsat7Fhve7Gz40wOBhKMFuuWYQ4icThJLc2ET4E.',
         false, true, 'pexels-laker-5792641.webp', 'http://localhost:8080/downloadprofilepic/101');

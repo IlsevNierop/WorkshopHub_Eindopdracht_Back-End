@@ -38,6 +38,11 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(userId), HttpStatus.OK);
     }
 
+    @GetMapping("/favourites/{userId}")
+    public ResponseEntity<List<WorkshopOutputDto>> getAllFavouriteWorkshopsUser(@PathVariable(value = "userId") Long userId) {
+        return new ResponseEntity<>(workshopService.getAllFavouriteWorkshopsUser(userId), HttpStatus.OK);
+    }
+
     @GetMapping("/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable("workshopId") Long workshopId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId, userId), HttpStatus.OK);
@@ -58,8 +63,13 @@ public class WorkshopController {
 
     // filter at frontend on what to verify etc. show startdate today - but possibility to go back in time
     @GetMapping("/workshopowner/all/{workshopOwnerId}")
-    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
-        return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    }
+
+    @GetMapping("/workshopowner/verify/{workshopOwnerId}")
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerifyFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsToVerifyFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
 
@@ -85,7 +95,7 @@ public class WorkshopController {
             @PathVariable Long workshopOwnerId,
             @RequestPart @Valid WorkshopInputDto workshopInputDto,
             BindingResult bindingResultWorkshopInputDto,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+            @RequestPart(name = "file", required = false) MultipartFile file) {
         if (bindingResultWorkshopInputDto.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResultWorkshopInputDto));
         }
@@ -102,8 +112,6 @@ public class WorkshopController {
         return ResponseEntity.created(uri).body(workshopOutputDto);
     }
 
-    //TODO add pic to putmapping
-
     @PutMapping("/favourite/{userId}/{workshopId}")
     public ResponseEntity<List<WorkshopOutputDto>> addOrRemoveWorkshopFavourites(@PathVariable("userId") Long userId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean favourite) {
         return new ResponseEntity<>(workshopService.addOrRemoveWorkshopFavourites(userId, workshopId, favourite), HttpStatus.ACCEPTED);
@@ -116,12 +124,12 @@ public class WorkshopController {
             @PathVariable("workshopId") Long workshopId,
             @RequestPart @Valid WorkshopInputDto workshopInputDto,
             BindingResult bindingResult,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+            @RequestPart(name = "file", required = false) MultipartFile file) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
 
-        WorkshopOutputDto workshopOutputDto = workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto);
+        WorkshopOutputDto workshopOutputDto = workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto);
         if (file != null) {
             String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
 
@@ -133,10 +141,10 @@ public class WorkshopController {
     }
 
 
-    @PutMapping("/workshopowner/verify/{workshopOwnerId}/{workshopId}")
-    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner(@PathVariable("workshopOwnerId") Long workshopOwnerId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
+    @PutMapping("/workshopowner/verify/{workshopId}")
+    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner(@PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
 
-        return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopOwnerId, workshopId, publishWorkshop), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
 
