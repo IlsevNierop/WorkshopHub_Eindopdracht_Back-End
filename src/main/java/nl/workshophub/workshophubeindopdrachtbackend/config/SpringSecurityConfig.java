@@ -102,9 +102,11 @@ public class SpringSecurityConfig {
                 .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
                 .requestMatchers("/workshops/workshopowner/**" ).hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
                 .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
+                .requestMatchers(HttpMethod.GET,"/bookings/{workshopOwnerId}").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
 
                 //..............................authority: only-admin...............................
+                .requestMatchers(HttpMethod.GET, "/bookings").hasAnyRole("ADMIN") //get
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
                 .requestMatchers("/workshops/admin/**" ).hasRole("ADMIN") //get, get, get, put
                 .requestMatchers("/reviews/admin/**" ).hasRole("ADMIN") // get, get, put, delete
