@@ -57,15 +57,15 @@ public class Workshop {
 
     private String fileName;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne
     @JsonIgnore
     private User workshopOwner;
 
-    @OneToMany(mappedBy = "workshop", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Booking> workshopBookings;
 
-    @OneToMany(mappedBy = "workshop", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Review> workshopReviews;
 

@@ -43,14 +43,14 @@ public class User {
 
     //relations
 
-    @OneToMany (mappedBy = "customer", fetch = FetchType.LAZY)
+    @OneToMany (mappedBy = "customer")
     @JsonIgnore
     private List<Review> customerReviews;
-    @OneToMany (mappedBy = "workshopOwner", fetch = FetchType.LAZY)
+    @OneToMany (mappedBy = "workshopOwner")
     @JsonIgnore
     private List<Workshop> workshops;
 
-    @OneToMany (mappedBy = "customer", fetch = FetchType.LAZY)
+    @OneToMany (mappedBy = "customer")
     @JsonIgnore
     private List<Booking> bookings;
 
@@ -78,7 +78,8 @@ public class User {
             mappedBy = "userId",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER)
+            fetch = FetchType.EAGER
+    )
     private Set<Authority> authorities = new HashSet<>();
 
     public void addAuthority(Authority authority) {

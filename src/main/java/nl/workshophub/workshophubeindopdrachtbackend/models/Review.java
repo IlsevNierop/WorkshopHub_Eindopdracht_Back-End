@@ -30,7 +30,7 @@ public class Review {
     @JoinColumn(name = "workshop_id")
     private Workshop workshop;
 
-    @ManyToOne (fetch = FetchType.LAZY)
+    @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "customer_id")
     private User customer;
