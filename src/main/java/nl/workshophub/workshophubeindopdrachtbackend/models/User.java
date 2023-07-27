@@ -78,7 +78,8 @@ public class User {
             mappedBy = "userId",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER)
+            fetch = FetchType.EAGER
+    )
     private Set<Authority> authorities = new HashSet<>();
 
     public void addAuthority(Authority authority) {

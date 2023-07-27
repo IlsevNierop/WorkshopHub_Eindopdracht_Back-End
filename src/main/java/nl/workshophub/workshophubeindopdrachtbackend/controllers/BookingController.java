@@ -35,7 +35,16 @@ public class BookingController {
     public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshop(@PathVariable Long workshopId) {
 
         return new ResponseEntity<>(bookingService.getAllBookingsFromWorkshop(workshopId), HttpStatus.OK);
+    }
+    @GetMapping("/workshopowner/{workshopOwnerId}")
+    public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
 
+        return new ResponseEntity<>(bookingService.getAllBookingsFromWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    }
+    @GetMapping
+    public ResponseEntity<List<BookingOutputDto>> getAllBookings() {
+
+        return new ResponseEntity<>(bookingService.getAllBookings(), HttpStatus.OK);
     }
 
     @GetMapping("/{bookingId}")
