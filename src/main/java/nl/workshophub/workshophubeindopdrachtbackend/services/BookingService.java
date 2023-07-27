@@ -117,6 +117,93 @@ public class BookingService {
         throw new ForbiddenException("You're not allowed to view bookings from this user.");
     }
 
+    public ByteArrayResource generateAndDownloadCsvWorkshopOwner(Long workshopOwnerId) {
+        User user = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new ForbiddenException("You're not allowed to view bookings from this user.");
+        }
+        List<Booking> workshopOwnerBookings = new ArrayList<>();
+        List<Workshop> workshopOwnerWorkshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
+        for (Workshop w : workshopOwnerWorkshops) {
+            List<Booking> workshopBookings = w.getWorkshopBookings();
+            for (Booking b : workshopBookings) {
+                workshopOwnerBookings.add(b);
+            }
+        }
+        StringBuilder csvContent = new StringBuilder();
+        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+
+        for (Booking booking : workshopOwnerBookings) {
+            csvContent.append(System.lineSeparator())
+                    .append(booking.getId()).append(",")
+                    .append(booking.getDateOrder()).append(",")
+                    .append(booking.getAmount()).append(",")
+                    .append(booking.getCustomer().getFirstName()).append(",")
+                    .append(booking.getCustomer().getLastName()).append(",")
+                    .append(booking.getCustomer().getEmail()).append(",")
+                    .append(booking.getCommentsCustomer()).append(",")
+                    .append(booking.getTotalPrice()).append(",")
+                    .append(booking.getWorkshop().getId()).append(",")
+                    .append(booking.getWorkshop().getTitle()).append(",")
+                    .append(booking.getWorkshop().getDate()).append(",");
+
+        }
+
+        try {
+            FileWriter writer = new FileWriter("bookings.csv");
+            writer.write(csvContent.toString());
+            writer.close();
+
+            byte[] content = csvContent.toString().getBytes();
+            return new ByteArrayResource(content);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public ByteArrayResource generateAndDownloadCsvWorkshop(Long workshopId) {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new ForbiddenException("You're not allowed to view bookings from this workshop, since you're not the owner.");
+        }
+        List<Booking> workshopBookings = workshop.getWorkshopBookings();
+        StringBuilder csvContent = new StringBuilder();
+        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+
+        for (Booking booking : workshopBookings) {
+            csvContent.append(System.lineSeparator())
+                    .append(booking.getId()).append(",")
+                    .append(booking.getDateOrder()).append(",")
+                    .append(booking.getAmount()).append(",")
+                    .append(booking.getCustomer().getFirstName()).append(",")
+                    .append(booking.getCustomer().getLastName()).append(",")
+                    .append(booking.getCustomer().getEmail()).append(",")
+                    .append(booking.getCommentsCustomer()).append(",")
+                    .append(booking.getTotalPrice()).append(",")
+                    .append(booking.getWorkshop().getId()).append(",")
+                    .append(booking.getWorkshop().getTitle()).append(",")
+                    .append(booking.getWorkshop().getDate()).append(",");
+
+        }
+
+        try {
+            FileWriter writer = new FileWriter("bookings.csv");
+            writer.write(csvContent.toString());
+            writer.close();
+
+            byte[] content = csvContent.toString().getBytes();
+            return new ByteArrayResource(content);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public ByteArrayResource generateAndDownloadCsv() {
         List<Booking> bookings = bookingRepository.findAll();
         StringBuilder csvContent = new StringBuilder();

@@ -54,12 +54,37 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<BookingOutputDto> getOneBookingById(@PathVariable Long bookingId) {
-
         return new ResponseEntity<>(bookingService.getOneBookingById(bookingId), HttpStatus.OK);
-
     }
 
-    @GetMapping(value = "/generateanddownloadcsv", produces = "text/csv")
+    @GetMapping(value = "workshopowner/generateanddownloadcsv/{workshopOwnerId}", produces = "text/csv")
+    public ResponseEntity<byte[]> generateAndDownloadCsvWorkshopOwner(HttpServletRequest response, @PathVariable Long workshopOwnerId) {
+
+        ByteArrayResource resource = bookingService.generateAndDownloadCsvWorkshopOwner(workshopOwnerId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData("attachment", "bookings.csv");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource.getByteArray());
+    }
+
+    @GetMapping(value = "workshopowner/generateanddownloadcsv/workshop/{workshopId}", produces = "text/csv")
+    public ResponseEntity<byte[]> generateAndDownloadCsvWorkshop(HttpServletRequest response, @PathVariable Long workshopId) {
+
+        ByteArrayResource resource = bookingService.generateAndDownloadCsvWorkshop(workshopId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData("attachment", "bookings.csv");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource.getByteArray());
+    }
+    @GetMapping(value = "admin/generateanddownloadcsv", produces = "text/csv")
     public ResponseEntity<byte[]> generateAndDownloadCsv(HttpServletRequest response) {
 
         ByteArrayResource resource = bookingService.generateAndDownloadCsv();
@@ -73,10 +98,6 @@ public class BookingController {
                 .body(resource.getByteArray());
     }
 
-//        MediaType contentType = MediaType.parseMediaType("text/csv");
-//
-//        return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "attachment;fileName=" + resource.getFilename()).body(resource);
-//    }
 
     @PostMapping("{customerId}/{workshopId}")
     public ResponseEntity<Object> createBooking(@PathVariable("customerId") Long customerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult) {
