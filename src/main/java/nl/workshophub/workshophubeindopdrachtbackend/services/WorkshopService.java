@@ -376,36 +376,9 @@ public class WorkshopService {
 
     //Overloading, in case there is a user the variable isfavourite is made.
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop, User user) {
-        //Could also call the other transfer method in stead of having duplicated code, but this is officially 'better' practice.
-        //TODO check met Paul
-        WorkshopOutputDto workshopOutputDto = new WorkshopOutputDto();
-        workshopOutputDto.id = workshop.getId();
-        workshopOutputDto.title = workshop.getTitle();
-        workshopOutputDto.date = workshop.getDate();
-        workshopOutputDto.startTime = workshop.getStartTime();
-        workshopOutputDto.endTime = workshop.getEndTime();
-        workshopOutputDto.price = workshop.getPrice();
-        workshopOutputDto.inOrOutdoors = workshop.getInOrOutdoors();
-        workshopOutputDto.location = workshop.getLocation();
-        workshopOutputDto.highlightedInfo = workshop.getHighlightedInfo();
-        workshopOutputDto.description = workshop.getDescription();
-        workshopOutputDto.amountOfParticipants = workshop.getAmountOfParticipants();
-        workshopOutputDto.workshopCategory1 = workshop.getWorkshopCategory1();
-        workshopOutputDto.workshopCategory2 = workshop.getWorkshopCategory2();
-        workshopOutputDto.workshopVerified = workshop.getWorkshopVerified();
-        workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
-        workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
-        workshopOutputDto.workshopOwnerReviews = createReviewOutPutDtosFromWorkshopOwner(workshop);
-        workshopOutputDto.spotsAvailable = workshop.getAvailableSpotsWorkshop();
-        workshopOutputDto.workshopOwnerId = workshop.getWorkshopOwner().getId();
-        workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
-        if (workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
-            workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
-            workshopOutputDto.numberOfReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(1);
-        }
-        workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
+
+        WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(workshop);
         workshopOutputDto.isFavourite = user.getFavouriteWorkshops().contains(workshop);
-        workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
         return workshopOutputDto;
     }

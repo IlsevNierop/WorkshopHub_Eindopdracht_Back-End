@@ -36,7 +36,7 @@ public class BookingController {
 
         return new ResponseEntity<>(bookingService.getAllBookingsFromWorkshop(workshopId), HttpStatus.OK);
     }
-    @GetMapping("/{workshopOwnerId}")
+    @GetMapping("/workshopowner/{workshopOwnerId}")
     public ResponseEntity<List<BookingOutputDto>> getAllBookingsFromWorkshopsFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
 
         return new ResponseEntity<>(bookingService.getAllBookingsFromWorkshopsFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);

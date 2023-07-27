@@ -43,14 +43,14 @@ public class User {
 
     //relations
 
-    @OneToMany (mappedBy = "customer")
+    @OneToMany (mappedBy = "customer", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Review> customerReviews;
-    @OneToMany (mappedBy = "workshopOwner")
+    @OneToMany (mappedBy = "workshopOwner", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Workshop> workshops;
 
-    @OneToMany (mappedBy = "customer")
+    @OneToMany (mappedBy = "customer", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Booking> bookings;
 

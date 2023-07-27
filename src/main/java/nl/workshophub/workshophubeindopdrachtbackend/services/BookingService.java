@@ -177,7 +177,13 @@ public class BookingService {
         bookingOutputDto.totalPrice = booking.getTotalPrice();
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
-        bookingOutputDto.customerOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(booking.getCustomer());
+        bookingOutputDto.sppotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
+
+        bookingOutputDto.customerId = booking.getCustomer().getId();
+        bookingOutputDto.firstNameCustomer = booking.getCustomer().getFirstName();
+        bookingOutputDto.lastNameCustomer = booking.getCustomer().getLastName();
+        bookingOutputDto.emailCustomer = booking.getCustomer().getEmail();
+
 
         return bookingOutputDto;
     }
