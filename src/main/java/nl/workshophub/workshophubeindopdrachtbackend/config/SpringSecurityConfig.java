@@ -73,6 +73,7 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.PUT,"/users/passwordrequest/{email}" ).permitAll() //no verification when password is forgotten, see userservice comments
                 .requestMatchers(HttpMethod.GET, "/downloadworkshoppic/{workshopId}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/uploadworkshoppic/{workshopId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/bookings/generateanddownloadcsv").permitAll()
 
                 //...............................authority: customer...............................
 

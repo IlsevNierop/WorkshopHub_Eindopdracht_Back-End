@@ -1,12 +1,17 @@
 package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.BookingService;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +58,25 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getOneBookingById(bookingId), HttpStatus.OK);
 
     }
+
+    @GetMapping(value = "/generateanddownloadcsv", produces = "text/csv")
+    public ResponseEntity<byte[]> generateAndDownloadCsv(HttpServletRequest response) {
+
+        ByteArrayResource resource = bookingService.generateAndDownloadCsv();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv"));
+        headers.setContentDispositionFormData("attachment", "bookings.csv");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource.getByteArray());
+    }
+
+//        MediaType contentType = MediaType.parseMediaType("text/csv");
+//
+//        return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "attachment;fileName=" + resource.getFilename()).body(resource);
+//    }
 
     @PostMapping("{customerId}/{workshopId}")
     public ResponseEntity<Object> createBooking(@PathVariable("customerId") Long customerId, @PathVariable("workshopId") Long workshopId, @Valid @RequestBody BookingInputDto bookingInputDto, BindingResult bindingResult) {

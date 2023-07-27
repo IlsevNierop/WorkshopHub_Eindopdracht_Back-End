@@ -56,22 +56,7 @@ public class FileController {
 
         Resource resource = fileService.downloadProfilePic(userId);
 
-//        this mediaType decides witch type you accept if you only accept 1 type
         MediaType contentType = MediaType.IMAGE_JPEG;
-//        this is going to accept multiple types
-
-//        String mimeType;
-//
-//        try{
-//            mimeType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-//        } catch (IOException e) {
-//            mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-//        }
-
-
-//        for download attachment use next line
-//        return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "attachment;fileName=" + resource.getFilename()).body(resource);
-//        for showing image in browser
         return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + resource.getFilename()).body(resource);
     }
 
