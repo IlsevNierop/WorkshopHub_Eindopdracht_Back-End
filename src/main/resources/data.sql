@@ -221,7 +221,7 @@ VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje ee
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (100, 4.5,
         'De workshop was echt geweldig! Ik heb zoveel geleerd en de docent was zeer behulpzaam. Een aanrader!', default,
-        'Bedankt voor je positieve feedback!', 102, 101);
+        default, 102, 101);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (101, 3.2,
@@ -242,7 +242,7 @@ VALUES (103, 2.3,
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (104, 4.7,
         'De workshop was fantastisch! Ik heb zoveel geleerd en het heeft mijn creatieve vaardigheden echt verbeterd. Een geweldige ervaring!',
-        default, 'Bedankt voor je geweldige feedback. We zijn blij dat je tevreden bent met de workshop!', 102, 100);
+        default, default, 102, 100);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (105, 4.3,

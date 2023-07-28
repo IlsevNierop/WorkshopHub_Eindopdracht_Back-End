@@ -1,0 +1,2 @@
+Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date
+104,2023-06-01,3,Samuel,Smith,samuel.smith@example.com,Ik breng twee vrienden mee!,105.0,102,Patisserie workshop,2023-06-15,

@@ -73,6 +73,7 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.PUT,"/users/passwordrequest/{email}" ).permitAll() //no verification when password is forgotten, see userservice comments
                 .requestMatchers(HttpMethod.GET, "/downloadworkshoppic/{workshopId}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/uploadworkshoppic/{workshopId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "admin/bookings/generateanddownloadcsv").permitAll()
 
                 //...............................authority: customer...............................
 
@@ -103,6 +104,7 @@ public class SpringSecurityConfig {
                 .requestMatchers("/workshops/workshopowner/**" ).hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
                 .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
                 .requestMatchers(HttpMethod.GET,"/bookings/workshopowner/{workshopOwnerId}").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
+                .requestMatchers(HttpMethod.GET,"/bookings/workshopowner/generateanddownloadcsv/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
 
                 //..............................authority: only-admin...............................
@@ -110,6 +112,7 @@ public class SpringSecurityConfig {
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
                 .requestMatchers("/workshops/admin/**" ).hasRole("ADMIN") //get, get, get, put
                 .requestMatchers("/reviews/admin/**" ).hasRole("ADMIN") // get, get, put, delete
+                .requestMatchers(HttpMethod.GET, "/bookings/admin/generateanddownloadcsv").hasRole("ADMIN") //get
 
 
                 .anyRequest().denyAll()
