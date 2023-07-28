@@ -12,9 +12,9 @@ public class BookingOutputDto {
     public double totalPrice;
 
     public Long workshopId;
-
     public int sppotsAvailableWorkshop;
     public String workshopTitle;
+    public LocalDate workshopDate;
 
     public Long customerId;
 

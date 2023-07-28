@@ -303,6 +303,7 @@ public class BookingService {
         bookingOutputDto.totalPrice = booking.getTotalPrice();
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
+        bookingOutputDto.workshopDate = booking.getWorkshop().getDate();
         bookingOutputDto.sppotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
 
         bookingOutputDto.customerId = booking.getCustomer().getId();
