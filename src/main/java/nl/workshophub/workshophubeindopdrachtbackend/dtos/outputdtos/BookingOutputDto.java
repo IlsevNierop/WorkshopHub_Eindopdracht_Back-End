@@ -17,12 +17,13 @@ public class BookingOutputDto {
     public LocalDate workshopDate;
 
     public Long customerId;
-
     public String firstNameCustomer;
 
     public String lastNameCustomer;
 
     public String emailCustomer;
+
+    public  Boolean reviewCustomerWritten;
 
 
 }
