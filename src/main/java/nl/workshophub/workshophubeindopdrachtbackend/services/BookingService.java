@@ -6,6 +6,7 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestExcept
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ForbiddenException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.RecordNotFoundException;
+import nl.workshophub.workshophubeindopdrachtbackend.models.Review;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Booking;
@@ -303,12 +304,14 @@ public class BookingService {
         bookingOutputDto.totalPrice = booking.getTotalPrice();
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
+        bookingOutputDto.workshopDate = booking.getWorkshop().getDate();
         bookingOutputDto.sppotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
 
         bookingOutputDto.customerId = booking.getCustomer().getId();
         bookingOutputDto.firstNameCustomer = booking.getCustomer().getFirstName();
         bookingOutputDto.lastNameCustomer = booking.getCustomer().getLastName();
         bookingOutputDto.emailCustomer = booking.getCustomer().getEmail();
+        bookingOutputDto.reviewCustomerWritten = getReviewCustomerWritten(booking);
 
 
         return bookingOutputDto;
@@ -322,6 +325,15 @@ public class BookingService {
         booking.setAmount(bookingInputDto.amount);
 
         return booking;
+    }
+
+    public Boolean getReviewCustomerWritten(Booking booking) {
+        for (Review r : booking.getCustomer().getCustomerReviews()) {
+            if (r.getWorkshop().getId() == booking.getWorkshop().getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -12,17 +12,18 @@ public class BookingOutputDto {
     public double totalPrice;
 
     public Long workshopId;
-
     public int sppotsAvailableWorkshop;
     public String workshopTitle;
+    public LocalDate workshopDate;
 
     public Long customerId;
-
     public String firstNameCustomer;
 
     public String lastNameCustomer;
 
     public String emailCustomer;
+
+    public  Boolean reviewCustomerWritten;
 
 
 }
