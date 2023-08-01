@@ -25,10 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -78,6 +75,16 @@ public class UserService {
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
         for (User workshopOwner : workshopOwners) {
             workshopOwnerOutputDtos.add(UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner));
+        }
+        return workshopOwnerOutputDtos;
+    }
+
+    public List<UserWorkshopOwnerOutputDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        // will create a combination of customers and workshopowners - using workshopOwnerOutputDto's for all, since that contains more information.
+        List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
+        for (User user : users) {
+            workshopOwnerOutputDtos.add(UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(user));
         }
         return workshopOwnerOutputDtos;
     }
@@ -133,8 +140,11 @@ public class UserService {
             workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
         }
         if (workshopOwnerVerified == false) {
-            Authority authorityToRemove = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny().get();
-            workshopOwner.removeAuthority(authorityToRemove);
+            Optional authority = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny();
+            if (authority.isPresent()) {
+                Authority authorityToRemove = (Authority) authority.get();
+                workshopOwner.removeAuthority(authorityToRemove);
+            }
         }
         userRepository.save(workshopOwner);
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);

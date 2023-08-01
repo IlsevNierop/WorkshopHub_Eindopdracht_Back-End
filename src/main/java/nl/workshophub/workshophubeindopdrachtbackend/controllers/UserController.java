@@ -56,6 +56,12 @@ public class UserController {
         return new ResponseEntity<>(userService.getWorkshopOwnersToVerify(), HttpStatus.OK);
     }
 
+    @GetMapping("/admin/")
+    @Transactional
+    public ResponseEntity<List<UserWorkshopOwnerOutputDto>> getAllUsers() {
+        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    }
+
     @GetMapping(value = "admin/{userId}/authorities")
     public ResponseEntity<Object> getUserAuthorities(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok().body(userService.getUserAuthorities(userId));
@@ -106,13 +112,6 @@ public class UserController {
     @PutMapping("/admin/{workshopOwnerId}")
     @Transactional
     public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) {
-//        //TODO how to check if incoming parameter is correct? Now getting a 400 error if boolean is not true or false. Seems like the error is being created even before it hits the controller. Below code is not working:
-//        if (workshopOwnerVerified != true || workshopOwnerVerified != false){
-//            throw new BadRequestException("You should either verify (set workshopOwnerVerified to true) this workshop owner or disapprove (set workshopOwnerVerified to false) this workshop owner.");
-//        }
-//        if (bindingResult.hasFieldErrors()){
-//            return ResponseEntity.badRequest().body(fieldErrorHandling.getErrorToStringHandling(bindingResult));
-//        }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.verifyWorkshopOwnerByAdmin(workshopOwnerId, workshopOwnerVerified);
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
     }

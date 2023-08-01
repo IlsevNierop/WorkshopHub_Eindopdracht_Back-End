@@ -36,10 +36,4 @@ public class Review {
     private User customer;
 
 
-    //private Boolean attendedWorkshop? --> methode om bookings te checken van de workshop?
-
-
-
-
-
 }
