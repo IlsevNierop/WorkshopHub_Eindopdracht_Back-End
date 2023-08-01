@@ -65,8 +65,6 @@ public class User {
     private  Set<Workshop> favouriteWorkshops = new HashSet<>();
 
     //security
-
-    //moet dit nog in een dto? Nodig?
     @Column(nullable = false)
     private boolean enabled = true;
 
