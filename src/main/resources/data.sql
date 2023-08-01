@@ -217,6 +217,8 @@ INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, cu
 VALUES (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 102, 101, 105.0);
 INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
 VALUES (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 104, 100, 50.0);
+INSERT INTO bookings (id, date_order, comments_customer, amount, workshop_id, customer_id, total_price)
+VALUES (106, '2023-05-31', default, 3, 102, 102, 50.0);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (100, 4.5,
