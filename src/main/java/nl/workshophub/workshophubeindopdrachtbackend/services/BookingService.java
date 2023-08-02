@@ -304,7 +304,7 @@ public class BookingService {
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
         bookingOutputDto.workshopDate = booking.getWorkshop().getDate();
-        bookingOutputDto.sppotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
+        bookingOutputDto.spotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
 
         bookingOutputDto.customerId = booking.getCustomer().getId();
         bookingOutputDto.firstNameCustomer = booking.getCustomer().getFirstName();
