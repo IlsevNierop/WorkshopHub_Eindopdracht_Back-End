@@ -15,7 +15,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingReposit
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.util.CheckAuthorization;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -195,7 +195,6 @@ public class UserService {
                 throw new ForbiddenException("You're not allowed to update the password for this account.");
             }
         }
-        // TODO: 28/06/2023 in documentatie toevoegen:
         //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
         user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
         userRepository.save(user);
@@ -241,6 +240,4 @@ public class UserService {
             throw new BadRequestException("This user has a relation with either one or more workshop(s), review(s) and/or booking(s). You can't remove this user before removing the other items.");
         }
     }
-
-
 }

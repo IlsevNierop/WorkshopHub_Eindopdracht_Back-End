@@ -74,10 +74,6 @@ public class FileService {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
 
         Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
-//
-//        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-//
-//        Path filePath = Paths.get(fileStoragePath + "/" + fileName);
 
         try {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -92,8 +88,6 @@ public class FileService {
         return fileName;
     }
 
-
-    // TODO: 30/06/2023 nu staat het op permit all
     public Resource downloadProfilePic(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
 
@@ -102,8 +96,6 @@ public class FileService {
         }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
-
-//        Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(fileName);
 
         Resource resource;
 
@@ -145,13 +137,6 @@ public class FileService {
     public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
 
-        //TODO check authentication? already checked in the workshopservice
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-//            throw new ForbiddenException("You're not allowed to add a photo to this profile.");
-//        }
-
-
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
 
         Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
@@ -169,8 +154,6 @@ public class FileService {
         return fileName;
     }
 
-
-    // TODO: 30/06/2023 nu staat het op permit all
     public Resource downloadWorkshopPic(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID: " + workshopId + " doesn't exist."));
 
@@ -179,8 +162,6 @@ public class FileService {
         }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(workshop.getFileName());
-
-//        Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(fileName);
 
         Resource resource;
 

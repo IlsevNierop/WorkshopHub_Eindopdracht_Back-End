@@ -68,7 +68,6 @@ public class WorkshopService {
         }
 
         List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        //TODO nu ook workshops uit het verleden? In documentatie noemen?
         for (Workshop w : user.getFavouriteWorkshops()) {
             WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, user);
             workshopOutputDtos.add(workshopOutputDto);
