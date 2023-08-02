@@ -27,9 +27,6 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    //TODO cleanup this controller
-
-
     @PostMapping("/uploadprofilepic/{userId}")
     public ResponseEntity<Object> uploadProfilePic(@PathVariable Long userId, @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -37,16 +34,6 @@ public class FileController {
         String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadprofilepic/").path(Objects.requireNonNull(userId.toString())).toUriString();
 
         String fileName = fileService.uploadProfilePic(file, url, userId);
-
-//        String fileName = fileManagerService.storeFile(file);
-//        URI uri = StringGenerator.uriGenerator(env.getProperty("apiPrefix") + "/files/" + fileName);
-//        return ResponseEntity.created(uri).body("File stored");
-//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
-
-
-//        String contentType = file.getContentType();
-//
-//        String fileName = fileService.storeFile(file, url);
 
         return ResponseEntity.ok(url);
     }
@@ -72,8 +59,6 @@ public class FileController {
 
     }
 
-
-    //TODO check of het tegelijk met aanmaken workshop kan (in requestbody van volledige workshop?)
     @PostMapping("/uploadworkshoppic/{workshopId}")
     public ResponseEntity<Object> uploadWorkshopPic(@PathVariable Long workshopId, @RequestParam("file") MultipartFile file) throws IOException {
 

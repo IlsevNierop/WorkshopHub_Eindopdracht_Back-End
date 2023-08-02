@@ -78,7 +78,6 @@ public class SpringSecurityConfig {
                 //...............................authority: customer...............................
 
                 .requestMatchers("/uploadprofilepic/{userId}").authenticated() //post
-                // get profile pic is visible for everyone (??) // TODO: 03/07/2023 explain
                 .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get
                 .requestMatchers("/deleteprofilepic/{userId}").authenticated() //delete
 

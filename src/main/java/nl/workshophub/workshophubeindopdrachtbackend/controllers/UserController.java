@@ -26,8 +26,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
-    // TODO: 03/07/2023 all post and put mappings that have a user dto as return value, have @transactional - if the return value changes, that can be removed
     private final UserService userService;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;

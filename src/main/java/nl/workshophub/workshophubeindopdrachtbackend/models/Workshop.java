@@ -51,8 +51,6 @@ public class Workshop {
 
     private Boolean publishWorkshop;
 
-
-    // TODO make this several pictures
     private String workshopPicUrl;
 
     private String fileName;
@@ -83,7 +81,6 @@ public class Workshop {
         return (this.getAmountOfParticipants() - spotsBooked);
     }
 
-    // TODO: 12/07/2023 doesn't take into account reviews 
     public int calculateAmountOfFavsAndBookingsWorkshop(){
         int popularityNumber = 0;
         popularityNumber += this.getFavsUser().size();
