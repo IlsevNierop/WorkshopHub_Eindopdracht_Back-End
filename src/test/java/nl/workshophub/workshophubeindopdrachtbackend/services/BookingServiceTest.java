@@ -361,21 +361,6 @@ class BookingServiceTest {
         assertEquals(bookingOutputDtos.get(1).totalPrice, getAllBookingsFromWorkshopOwnerCustomer2.get(1).totalPrice);
     }
 
-    //    @Test
-//    void shouldReturnRecordNotFoundExceptionWhenUserIsNotFoundInGetAllBookingsFromWorkshopsFromWorkshopOwner() {
-//        //        Arrange
-//        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
-//
-//        when(authentication.getName()).thenReturn(customer1.getEmail());
-//
-//        //        Act
-//        ForbiddenException exception = assertThrows(ForbiddenException.class,
-//                () -> bookingService.getAllBookingsFromWorkshop(workshop1.getId()));
-//
-//        //        Assert
-//        assertEquals("You're not allowed to view bookings from this workshop, since you're not the owner.", exception.getMessage());
-//
-//    }
     @Test
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectInGetAllBookingsFromWorkshopsFromWorkshopOwner() {
         //        Arrange
@@ -472,7 +457,7 @@ class BookingServiceTest {
     @Test
     void shouldGenerateAndDownloadCsvWorkshopOwner() {
         //        Arrange
-        List<Booking> workshop1Bookings = new ArrayList<>(List.of(booking2, booking4));
+        List<Booking> workshopOwner1Bookings = new ArrayList<>(List.of(booking2, booking4));
         when(userRepository.findById(workshopOwner1.getId())).thenReturn(Optional.of(workshopOwner1));
         when(workshopRepository.findByWorkshopOwnerId(workshopOwner1.getId())).thenReturn(List.of(workshop2));
 
@@ -481,7 +466,7 @@ class BookingServiceTest {
         StringBuilder csvContent = new StringBuilder();
         csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
 
-        for (Booking booking : workshop1Bookings) {
+        for (Booking booking : workshopOwner1Bookings) {
             csvContent.append(System.lineSeparator())
                     .append(booking.getId()).append(",")
                     .append(booking.getDateOrder()).append(",")
@@ -519,38 +504,11 @@ class BookingServiceTest {
         assertEquals("You're not allowed to view bookings from this user.", exception.getMessage());
     }
 
-//    @Test
-//    void shouldReturnIOExceptionWhenIssueInFileWriterInGenerateAndDownloadCsvWorkshopOwner() throws IOException {
-//        //        Arrange
-//        when(userRepository.findById(workshopOwner1.getId())).thenReturn(Optional.of(workshopOwner1));
-//        when(authentication.getName()).thenReturn(workshopOwner1.getEmail());
-//
-//        // Mock the FileWriter to throw IOException when writing the file
-//        FileWriter fileWriter = org.mockito.Mockito.mock(FileWriter.class);
-//        try {
-//            org.mockito.Mockito.doThrow(new IOException("Test IOException")).when(fileWriter).write(anyString());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // Use reflection to set the mocked FileWriter in the bookingService
-//        try {
-//            java.lang.reflect.Field field = bookingService.getClass().getDeclaredField("writer");
-//            field.setAccessible(true);
-//            field.set(bookingService, fileWriter);
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // Act & Assert
-//        assertThrows(RuntimeException.class, () -> bookingService.generateAndDownloadCsvWorkshopOwner(workshopOwner1.getId()));
-//    }
 
 
     @Test
     void shouldGenerateAndDownloadCsvWorkshop() {
         //        Arrange
-        //booking 1 en 3 workshop 1
         List<Booking> workshop1Bookings = new ArrayList<>(List.of(booking1, booking3));
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(authentication.getName()).thenReturn(customer2.getEmail());
@@ -581,17 +539,58 @@ class BookingServiceTest {
 //        Assert
         assertEquals(byteArrayResourceExpected, getCsvContent);
         assertEquals(byteArrayResourceExpected.contentLength(), getCsvContent.contentLength());
-
     }
 
     @Test
-    @Disabled
-    void generateAndDownloadCsv() {
+    void shouldReturnForbiddenExceptionWhenUserIsIncorrectInGenerateAndDownloadCsvWorkshop() {
+        //        Arrange
+        when(workshopRepository.findById(workshop1.getWorkshopOwner().getId())).thenReturn(Optional.of(workshop1));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+
+        //        Act
+        //        Assert
+        ForbiddenException exception = assertThrows(ForbiddenException.class,
+                () -> bookingService.generateAndDownloadCsvWorkshop(workshop1.getWorkshopOwner().getId()));
+        assertEquals("You're not allowed to view bookings from this workshop, since you're not the owner.", exception.getMessage());
     }
 
     @Test
-    @Disabled
+    void shouldGenerateAndDownloadCsvForAllBookings() {
+        //        Arrange
+        List<Booking> allBookings = new ArrayList<>(List.of(booking1, booking2, booking3, booking4));
+        when(bookingRepository.findAll()).thenReturn(List.of(booking1, booking2, booking3, booking4));
+
+        StringBuilder csvContent = new StringBuilder();
+        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+
+        for (Booking booking : allBookings) {
+            csvContent.append(System.lineSeparator())
+                    .append(booking.getId()).append(",")
+                    .append(booking.getDateOrder()).append(",")
+                    .append(booking.getAmount()).append(",")
+                    .append(booking.getCustomer().getFirstName()).append(",")
+                    .append(booking.getCustomer().getLastName()).append(",")
+                    .append(booking.getCustomer().getEmail()).append(",")
+                    .append(booking.getCommentsCustomer()).append(",")
+                    .append(booking.getTotalPrice()).append(",")
+                    .append(booking.getWorkshop().getId()).append(",")
+                    .append(booking.getWorkshop().getTitle()).append(",")
+                    .append(booking.getWorkshop().getDate()).append(",");
+        }
+        byte[] content = csvContent.toString().getBytes();
+        ByteArrayResource byteArrayResourceExpected = new ByteArrayResource(content);
+
+//        Act
+        ByteArrayResource getCsvContent = bookingService.generateAndDownloadCsv();
+
+//        Assert
+        assertEquals(byteArrayResourceExpected, getCsvContent);
+        assertEquals(byteArrayResourceExpected.contentLength(), getCsvContent.contentLength());
+    }
+
+    @Test
     void createBooking() {
+
     }
 
     @Test
