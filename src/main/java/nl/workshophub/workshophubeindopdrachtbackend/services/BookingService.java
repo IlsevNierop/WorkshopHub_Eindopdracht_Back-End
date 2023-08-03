@@ -151,17 +151,17 @@ public class BookingService {
 
         }
 
-        try {
-            FileWriter writer = new FileWriter("bookings.csv");
-            writer.write(csvContent.toString());
-            writer.close();
+//        try {
+//            FileWriter writer = new FileWriter("bookings.csv");
+//            writer.write(csvContent.toString());
+//            writer.close();
 
             byte[] content = csvContent.toString().getBytes();
             return new ByteArrayResource(content);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 
@@ -191,17 +191,17 @@ public class BookingService {
                     .append(booking.getWorkshop().getDate()).append(",");
         }
 
-        try {
-            FileWriter writer = new FileWriter("bookings.csv");
-            writer.write(csvContent.toString());
-            writer.close();
+//        try {
+//            FileWriter writer = new FileWriter("bookings.csv");
+//            writer.write(csvContent.toString());
+//            writer.close();
 
             byte[] content = csvContent.toString().getBytes();
             return new ByteArrayResource(content);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
     public ByteArrayResource generateAndDownloadCsv() {
         List<Booking> bookings = bookingRepository.findAll();
@@ -224,17 +224,17 @@ public class BookingService {
 
         }
 
-        try {
-            FileWriter writer = new FileWriter("bookings.csv");
-            writer.write(csvContent.toString());
-            writer.close();
+//        try {
+//            FileWriter writer = new FileWriter("bookings.csv");
+//            writer.write(csvContent.toString());
+//            writer.close();
 
             byte[] content = csvContent.toString().getBytes();
             return new ByteArrayResource(content);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 
