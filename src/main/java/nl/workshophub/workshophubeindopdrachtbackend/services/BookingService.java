@@ -189,7 +189,6 @@ public class BookingService {
                     .append(booking.getWorkshop().getId()).append(",")
                     .append(booking.getWorkshop().getTitle()).append(",")
                     .append(booking.getWorkshop().getDate()).append(",");
-
         }
 
         try {
@@ -327,9 +326,11 @@ public class BookingService {
     }
 
     public Boolean getReviewCustomerWritten(Booking booking) {
-        for (Review r : booking.getCustomer().getCustomerReviews()) {
-            if (r.getWorkshop().getId() == booking.getWorkshop().getId()) {
-                return true;
+        if (booking.getCustomer().getCustomerReviews() != null) {
+            for (Review r : booking.getCustomer().getCustomerReviews()) {
+                if (r.getWorkshop().getId() == booking.getWorkshop().getId()) {
+                    return true;
+                }
             }
         }
         return false;
