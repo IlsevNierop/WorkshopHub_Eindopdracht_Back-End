@@ -26,7 +26,7 @@ public class UserWorkshopOwnerInputDto {
     public String companyName;
     @Digits(integer = 10, fraction = 0, message = "Please enter a valid number")
     public String kvkNumber;
-    @NotBlank (message = "BTW number shouldn't be empty.")
+
     public String vatNumber;
 
     // deze kan alleen geset worden via verify put methode met request param

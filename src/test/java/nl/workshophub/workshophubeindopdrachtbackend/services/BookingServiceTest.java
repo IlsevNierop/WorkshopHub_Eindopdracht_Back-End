@@ -589,6 +589,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Disabled
     void createBooking() {
 
     }
