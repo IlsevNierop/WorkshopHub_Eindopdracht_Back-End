@@ -240,7 +240,7 @@ VALUES (102, 5.0,
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (103, 2.3,
         'Helaas voldeed de workshop niet aan mijn verwachtingen. De inhoud was te oppervlakkig en ik vond de organisatie slecht.',
-        true, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.', 102,
+        true, 'Review mag online', 102,
         107);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
@@ -256,7 +256,12 @@ VALUES (105, 4.3,
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (106, 4.8,
         'Ik heb een geweldige tijd gehad op de workshop. De inhoud was goed gestructureerd en de instructeur was vriendelijk en behulpzaam. Een echte aanrader!',
-        true, 'We waarderen je uitstekende feedback. Het is fijn om te horen dat je van de workshop hebt genoten!', 102, 107);
+        true, default, 102, 106);
+
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
+VALUES (107, 3.5,
+        'Prima workshop',
+        true, default, 102, 108);
 
 INSERT INTO user_favourite_workshop (user_id, workshop_id)
 values (100, 100),
