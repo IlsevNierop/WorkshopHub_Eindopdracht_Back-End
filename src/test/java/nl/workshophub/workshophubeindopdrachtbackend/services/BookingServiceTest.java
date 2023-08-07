@@ -2,7 +2,9 @@ package nl.workshophub.workshophubeindopdrachtbackend.services;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.BookingInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.BookingOutputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ForbiddenException;
+import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.*;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.ReviewRepository;
@@ -10,18 +12,15 @@ import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -46,6 +45,12 @@ class BookingServiceTest {
 
     @InjectMocks
     BookingService bookingService;
+
+    @Captor
+    ArgumentCaptor<Booking> bookingCaptor;
+
+    BookingInputDto bookingInputDto1;
+    BookingInputDto bookingInputDto2;
     BookingOutputDto bookingOutputDto1;
     BookingOutputDto bookingOutputDto2;
     BookingOutputDto bookingOutputDto3;
@@ -121,17 +126,6 @@ class BookingServiceTest {
 
         review1 = new Review(1L, 4.3D, "test", true, "mag online", workshop1, customer1);
         review2 = new Review(2L, 4.3D, "test2", false, "mag online", workshop2, customer1);
-
-        workshopRepository.save(workshop1);
-        workshopRepository.save(workshop2);
-        userRepository.save(customer1);
-        userRepository.save(customer2);
-        bookingRepository.save(booking1);
-        bookingRepository.save(booking2);
-        bookingRepository.save(booking3);
-        bookingRepository.save(booking4);
-        reviewRepository.save(review1);
-        reviewRepository.save(review2);
 
         List<Booking> customer1BookingsList = new ArrayList<>(List.of(booking1, booking2));
         customer1.setBookings(customer1BookingsList);
@@ -217,6 +211,16 @@ class BookingServiceTest {
         bookingOutputDto4.lastNameCustomer = "Rossi";
         bookingOutputDto4.emailCustomer = "isabella.rossi@gmail.com";
         bookingOutputDto4.reviewCustomerWritten = false;
+
+        bookingInputDto1 = new BookingInputDto();
+        bookingInputDto1.commentsCustomer = "Test bookinginputdto1 comment";
+        bookingInputDto1.amount = 3;
+
+        bookingInputDto2 = new BookingInputDto();
+        bookingInputDto2.commentsCustomer = "Test bookinginputdto2 update";
+        bookingInputDto2.amount = 1;
+        bookingInputDto2.workshopId = 2L;
+
 
         authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -544,13 +548,13 @@ class BookingServiceTest {
     @Test
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectInGenerateAndDownloadCsvWorkshop() {
         //        Arrange
-        when(workshopRepository.findById(workshop1.getWorkshopOwner().getId())).thenReturn(Optional.of(workshop1));
+        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(authentication.getName()).thenReturn(customer1.getEmail());
 
         //        Act
         //        Assert
         ForbiddenException exception = assertThrows(ForbiddenException.class,
-                () -> bookingService.generateAndDownloadCsvWorkshop(workshop1.getWorkshopOwner().getId()));
+                () -> bookingService.generateAndDownloadCsvWorkshop(workshop1.getId()));
         assertEquals("You're not allowed to view bookings from this workshop, since you're not the owner.", exception.getMessage());
     }
 
@@ -589,33 +593,187 @@ class BookingServiceTest {
     }
 
     @Test
-    @Disabled
-    void createBooking() {
+    void shouldCreateBookingAndReturnBookingOutputDto() {
 
+        //        Arrange
+        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
+        when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+
+//        Act
+        BookingOutputDto bookingOutputDto = bookingService.createBooking(customer1.getId(), workshop1.getId(), bookingInputDto1);
+
+//        Assert
+        verify(bookingRepository, times(1)).save(bookingCaptor.capture());
+        Booking savedBooking = bookingCaptor.getValue();
+
+        assertEquals(bookingInputDto1.amount, savedBooking.getAmount());
+        assertEquals(bookingInputDto1.commentsCustomer, savedBooking.getCommentsCustomer());
+        assertEquals(1L, savedBooking.getWorkshop().getId());
+        assertEquals(1L, savedBooking.getCustomer().getId());
+        assertEquals(customer1, savedBooking.getCustomer());
+        assertEquals(workshop1, savedBooking.getWorkshop());
+        assertEquals(bookingInputDto1.commentsCustomer, bookingOutputDto.commentsCustomer);
+        assertEquals(bookingInputDto1.amount, bookingOutputDto.amount);
+        assertEquals(1L, bookingOutputDto.workshopId);
+        assertEquals(1L, bookingOutputDto.customerId);
     }
 
     @Test
-    @Disabled
-    void updateBooking() {
+    void shouldReturnBadRequestExceptionWhenWorkshopDateIsInThePastInCreateBooking() {
+        //        Arrange
+        workshop1.setDate(LocalDate.of(2023, 4, 15));
+
+        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
+
+        //        Act
+        //        Assert
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> bookingService.createBooking(customer1.getId(), workshop1.getId(), bookingInputDto1));
+        assertEquals("This workshop takes place in the past, you can't book a workshop that has already taken place.", exception.getMessage());
     }
 
     @Test
-    @Disabled
-    void deleteBooking() {
+    void shouldReturnForbiddenExceptionWhenUserIsIncorrectInCreateBooking() {
+        //        Arrange
+        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
+        when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
+        when(authentication.getName()).thenReturn(customer2.getEmail());
+
+        //        Act
+        //        Assert
+        ForbiddenException exception = assertThrows(ForbiddenException.class,
+                () -> bookingService.createBooking(customer1.getId(), workshop1.getId(), bookingInputDto1));
+        assertEquals("You're not allowed to create a booking from this user account.", exception.getMessage());
     }
 
     @Test
-    @Disabled
-    void transferBookingToBookingOutputDto() {
+    void shouldReturnNoAvailableSpotsExceptionWhenBookingAmountIsTooHighInCreateBooking() {
+        //        Arrange
+        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
+        when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        bookingInputDto1.amount = 4;
+
+        //        Act
+        //        Assert
+        NoAvailableSpotsException exception = assertThrows(NoAvailableSpotsException.class,
+                () -> bookingService.createBooking(customer1.getId(), workshop1.getId(), bookingInputDto1));
+        assertEquals("Only 3 spots are available for this workshop on this date and you're trying to book 4 spots.", exception.getMessage());
+    }
+
+
+    @Test
+    void shouldUpdateBooking() {
+
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(workshopRepository.findById(workshop2.getId())).thenReturn(Optional.of(workshop2));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+//        Act
+        BookingOutputDto bookingOutputDto = bookingService.updateBooking(customer1.getId(), bookingInputDto2);
+
+//        Assert
+        verify(bookingRepository, times(1)).save(bookingCaptor.capture());
+        Booking updatedBooking = bookingCaptor.getValue();
+
+        assertEquals(bookingInputDto2.amount, updatedBooking.getAmount());
+        assertEquals(bookingInputDto2.commentsCustomer, updatedBooking.getCommentsCustomer());
+        assertEquals(2L, updatedBooking.getWorkshop().getId());
+        assertEquals(1L, updatedBooking.getCustomer().getId());
+        assertEquals(customer1, updatedBooking.getCustomer());
+        assertEquals(workshop2, updatedBooking.getWorkshop());
+        assertEquals(bookingInputDto2.commentsCustomer, bookingOutputDto.commentsCustomer);
+        assertEquals(bookingInputDto2.amount, bookingOutputDto.amount);
+        assertEquals(2L, bookingOutputDto.workshopId);
+        assertEquals(1L, bookingOutputDto.customerId);
     }
 
     @Test
-    @Disabled
-    void transferBookingInputDtoToBooking() {
+    void shouldReturnForbiddenExceptionWhenUserIsIncorrectInUpdateBooking() {
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(authentication.getName()).thenReturn(customer2.getEmail());
+
+        //        Act
+        //        Assert
+        ForbiddenException exception = assertThrows(ForbiddenException.class,
+                () -> bookingService.updateBooking(booking1.getId(), bookingInputDto2));
+        assertEquals("You're not allowed to update this booking.", exception.getMessage());
     }
 
     @Test
-    @Disabled
-    void getReviewCustomerWritten() {
+    void shouldReturnBadRequestExceptionWhenWorkshopIdIsNullInUpdateBooking() {
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        bookingInputDto2.workshopId = null;
+
+        //        Act
+        //        Assert
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> bookingService.updateBooking(booking1.getId(), bookingInputDto2));
+        assertEquals("You can't update a booking without connecting it to a workshop.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnNoAvailableSpotsExceptionWhenBookingAmountIsTooHighWithOtherWorkshopInUpdateBooking() {
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(workshopRepository.findById(workshop2.getId())).thenReturn(Optional.of(workshop2));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        bookingInputDto2.amount = 6;
+
+        //        Act
+        //        Assert
+        NoAvailableSpotsException exception = assertThrows(NoAvailableSpotsException.class,
+                () -> bookingService.updateBooking(booking1.getId(), bookingInputDto2));
+        assertEquals("Only 4 spots are available for this workshop on this date and you're trying to book 6 spots.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnNoAvailableSpotsExceptionWhenBookingAmountIsTooHighWithSameWorkshopInUpdateBooking() {
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        bookingInputDto1.amount = 7;
+        bookingInputDto1.workshopId = 1L;
+
+        //        Act
+        //        Assert
+        NoAvailableSpotsException exception = assertThrows(NoAvailableSpotsException.class,
+                () -> bookingService.updateBooking(booking1.getId(), bookingInputDto1));
+        assertEquals("Only 6 spots are available for this workshop on this date and you're trying to book 7 spots.", exception.getMessage());
+    }
+
+    @Test
+    void shouldDeleteBooking() {
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+
+        //        Act
+        bookingService.deleteBooking(booking1.getId());
+
+        //        Assert
+        verify(bookingRepository).delete(booking1);
+    }
+
+    @Test
+    void shouldReturnForbiddenExceptionWhenUserIsIncorrectInDeleteCar() {
+        //        Arrange
+        when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
+        when(authentication.getName()).thenReturn(customer2.getEmail());
+
+        //        Act
+        //        Assert
+        ForbiddenException exception = assertThrows(ForbiddenException.class,
+                () -> bookingService.deleteBooking(booking1.getId()));
+        assertEquals("You're not allowed to delete a booking from this user account.", exception.getMessage());
     }
 }
