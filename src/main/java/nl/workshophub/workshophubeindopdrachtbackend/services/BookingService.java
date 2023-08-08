@@ -156,8 +156,8 @@ public class BookingService {
 //            writer.write(csvContent.toString());
 //            writer.close();
 
-            byte[] content = csvContent.toString().getBytes();
-            return new ByteArrayResource(content);
+        byte[] content = csvContent.toString().getBytes();
+        return new ByteArrayResource(content);
 
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
@@ -196,13 +196,14 @@ public class BookingService {
 //            writer.write(csvContent.toString());
 //            writer.close();
 
-            byte[] content = csvContent.toString().getBytes();
-            return new ByteArrayResource(content);
+        byte[] content = csvContent.toString().getBytes();
+        return new ByteArrayResource(content);
 
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
 //        }
     }
+
     public ByteArrayResource generateAndDownloadCsv() {
         List<Booking> bookings = bookingRepository.findAll();
         StringBuilder csvContent = new StringBuilder();
@@ -229,8 +230,8 @@ public class BookingService {
 //            writer.write(csvContent.toString());
 //            writer.close();
 
-            byte[] content = csvContent.toString().getBytes();
-            return new ByteArrayResource(content);
+        byte[] content = csvContent.toString().getBytes();
+        return new ByteArrayResource(content);
 
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
@@ -269,16 +270,12 @@ public class BookingService {
             throw new BadRequestException("You can't update a booking without connecting it to a workshop.");
         }
         Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + bookingInputDto.workshopId + " doesn't exist."));
+        int availableSpots = (workshop.getId() == booking.getWorkshop().getId())
+                ? workshop.getAvailableSpotsWorkshop() + booking.getAmount()
+                : workshop.getAvailableSpotsWorkshop();
 
-        if (workshop.getId() == booking.getWorkshop().getId()) {
-            if ((workshop.getAvailableSpotsWorkshop() + booking.getAmount()) < bookingInputDto.amount) {
-                throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + booking.getAmount()) + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots.");
-            }
-        }
-        if (workshop.getId() != booking.getWorkshop().getId()) {
-            if (workshop.getAvailableSpotsWorkshop() < bookingInputDto.amount) {
-                throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
-            }
+        if (availableSpots < bookingInputDto.amount) {
+            throw new NoAvailableSpotsException("Only " + availableSpots + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots.");
         }
         booking.setAmount(bookingInputDto.amount);
         booking.setTotalPrice(bookingInputDto.amount * workshop.getPrice());

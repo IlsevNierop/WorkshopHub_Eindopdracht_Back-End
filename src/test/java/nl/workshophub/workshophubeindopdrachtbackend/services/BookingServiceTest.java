@@ -282,8 +282,6 @@ class BookingServiceTest {
         List<BookingOutputDto> bookingOutputDtos = List.of(bookingOutputDto1, bookingOutputDto3);
 
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
-
-        //customer2 is workshopowner of workshop1
         when(authentication.getName()).thenReturn(customer2.getEmail());
 
         //        Act
@@ -419,7 +417,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void shouldGetOneBookingById() {
+    void shouldReturnOneBookingById() {
 //        Arrange
         when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
         when(authentication.getName()).thenReturn(customer1.getEmail());
@@ -594,7 +592,6 @@ class BookingServiceTest {
 
     @Test
     void shouldCreateBookingAndReturnBookingOutputDto() {
-
         //        Arrange
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
