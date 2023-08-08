@@ -34,16 +34,12 @@ public class Workshop {
     private InOrOutdoors inOrOutdoors;
     private String location;
     private String highlightedInfo;
-
     @Column(columnDefinition = "text")
     private String description;
     private int amountOfParticipants;
-
-    // geen enumeratie, maar mogelijk een extra klasse maken (incl service, etc) met een voorop gezette ArrayList - waarbij dan ALLEEN de admin nieuwe strings kan toevoegen die dan ook toegevoegd worden aan de database en oude kan verwijderen (? beter niet mss ivm oude objecten? / editten?)
     private String workshopCategory1;
     private String workshopCategory2;
 
-    //mogelijk enumeratie van maken? met zelfde waardes als publishworkshop.
     private Boolean workshopVerified;
 
     @Column(columnDefinition = "text")
