@@ -49,7 +49,7 @@ public class ReviewService {
         return ReviewServiceTransferMethod.transferReviewToReviewOutputDto(review);
     }
 
-    public List<ReviewOutputDto> getReviewsFromWorkshopOwnerVerified(Long workshopOwnerId) {
+    public List<ReviewOutputDto> getReviewsVerifiedFromWorkshopOwner(Long workshopOwnerId) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         if (workshopOwner.getWorkshopOwner() != true) {
             throw new BadRequestException("This user is a customer, and not a workshop owner.");
@@ -66,18 +66,17 @@ public class ReviewService {
         return reviewOutputDtos;
     }
 
-    //check if user is customer
     public List<ReviewOutputDto> getReviewsFromCustomer(Long customerId) {
+        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new ForbiddenException("You're not allowed to view reviews from this user account.");
+        }
+
         List<Review> reviews = reviewRepository.findAllByCustomerId(customerId);
 
-        //below code is so I don't have to get the user from the userrepository (maybe it's omslachtig?)
-        if (!reviews.isEmpty()) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-            if (!CheckAuthorization.isAuthorized(reviews.get(0).getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-                throw new ForbiddenException("You're not allowed to view reviews from this user account.");
-            }
-        }
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Review r : reviews) {
             ReviewOutputDto reviewOutputDto = ReviewServiceTransferMethod.transferReviewToReviewOutputDto(r);
@@ -113,7 +112,7 @@ public class ReviewService {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
 
-        if (customer == workshop.getWorkshopOwner()){
+        if (customer == workshop.getWorkshopOwner()) {
             throw new ForbiddenException("You're not allowed to write a review about your own workshop.");
         }
 
@@ -151,14 +150,12 @@ public class ReviewService {
         return ReviewServiceTransferMethod.transferReviewToReviewOutputDto(review);
     }
 
-    //check if user is customer
-    //principal
     public ReviewOutputDto updateReviewByCustomer(Long reviewId, ReviewInputDto reviewInputDto) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!CheckAuthorization.isAuthorized(review.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-            throw new ForbiddenException("You're not allowed to view this review.");
+            throw new ForbiddenException("You're not allowed to update this review.");
         }
 
         // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original review. This could be prevented with a different inputdto for customer (excluding feedbackadmin and verifyreview) and for admin.

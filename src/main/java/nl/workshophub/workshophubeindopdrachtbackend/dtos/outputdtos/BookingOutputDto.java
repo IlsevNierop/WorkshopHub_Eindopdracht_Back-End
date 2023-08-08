@@ -12,7 +12,7 @@ public class BookingOutputDto {
     public double totalPrice;
 
     public Long workshopId;
-    public int sppotsAvailableWorkshop;
+    public int spotsAvailableWorkshop;
     public String workshopTitle;
     public LocalDate workshopDate;
 
@@ -23,7 +23,7 @@ public class BookingOutputDto {
 
     public String emailCustomer;
 
-    public  Boolean reviewCustomerWritten;
+    public Boolean reviewCustomerWritten;
 
 
 }

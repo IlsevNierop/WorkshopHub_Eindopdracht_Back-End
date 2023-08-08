@@ -113,7 +113,7 @@ Met een kleine groep van maximaal 6 deelnemers is er voldoende ruimte voor perso
 De workshop biedt een unieke gelegenheid om je eigen keramiek te creëren, zoals kommen, mokken, vazen en meer. Je kunt experimenteren met verschillende vormen, texturen en decoratieve technieken om een persoonlijk en uniek stuk te maken.
 De kosten voor de workshop bedragen 65 euro per persoon, inclusief alle materialen en het bakken van je keramische creaties. Aan het einde van de workshop worden je werken gebakken en kun je ze op een later tijdstip ophalen om ze te glazuren en af te werken.
 Laat je creativiteit de vrije loop en geniet van een unieke ervaring met de workshop Keramiek: Draaien. Reserveer nu je plek in deze exclusieve workshop en laat je inspireren door de magie van het keramiekdraaien.',
-        8, 'Keramiek', null, true, 'ziet er goed uit, mag online', true, 105, 'Keramiek1.webp', 'http://localhost:8080/downloadworkshoppic/105');
+        8, 'Keramiek', null, true, 'ziet er goed uit, mag online', true, 106, 'Keramiek1.webp', 'http://localhost:8080/downloadworkshoppic/105');
 
 
 INSERT INTO workshops (id, title, date, start_time, end_time, price, in_or_outdoors, location, highlighted_info,
@@ -240,7 +240,7 @@ VALUES (102, 5.0,
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (103, 2.3,
         'Helaas voldeed de workshop niet aan mijn verwachtingen. De inhoud was te oppervlakkig en ik vond de organisatie slecht.',
-        true, 'Onze excuses voor het ongemak. We zullen je opmerkingen gebruiken om onze service te verbeteren.', 102,
+        true, 'Review mag online', 102,
         107);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
@@ -256,7 +256,12 @@ VALUES (105, 4.3,
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (106, 4.8,
         'Ik heb een geweldige tijd gehad op de workshop. De inhoud was goed gestructureerd en de instructeur was vriendelijk en behulpzaam. Een echte aanrader!',
-        true, 'We waarderen je uitstekende feedback. Het is fijn om te horen dat je van de workshop hebt genoten!', 102, 107);
+        true, default, 102, 106);
+
+INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
+VALUES (107, 3.5,
+        'Prima workshop',
+        true, default, 102, 108);
 
 INSERT INTO user_favourite_workshop (user_id, workshop_id)
 values (100, 100),

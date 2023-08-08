@@ -151,17 +151,17 @@ public class BookingService {
 
         }
 
-        try {
-            FileWriter writer = new FileWriter("bookings.csv");
-            writer.write(csvContent.toString());
-            writer.close();
+//        try {
+//            FileWriter writer = new FileWriter("bookings.csv");
+//            writer.write(csvContent.toString());
+//            writer.close();
 
-            byte[] content = csvContent.toString().getBytes();
-            return new ByteArrayResource(content);
+        byte[] content = csvContent.toString().getBytes();
+        return new ByteArrayResource(content);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 
@@ -189,21 +189,21 @@ public class BookingService {
                     .append(booking.getWorkshop().getId()).append(",")
                     .append(booking.getWorkshop().getTitle()).append(",")
                     .append(booking.getWorkshop().getDate()).append(",");
-
         }
 
-        try {
-            FileWriter writer = new FileWriter("bookings.csv");
-            writer.write(csvContent.toString());
-            writer.close();
+//        try {
+//            FileWriter writer = new FileWriter("bookings.csv");
+//            writer.write(csvContent.toString());
+//            writer.close();
 
-            byte[] content = csvContent.toString().getBytes();
-            return new ByteArrayResource(content);
+        byte[] content = csvContent.toString().getBytes();
+        return new ByteArrayResource(content);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
+
     public ByteArrayResource generateAndDownloadCsv() {
         List<Booking> bookings = bookingRepository.findAll();
         StringBuilder csvContent = new StringBuilder();
@@ -225,17 +225,17 @@ public class BookingService {
 
         }
 
-        try {
-            FileWriter writer = new FileWriter("bookings.csv");
-            writer.write(csvContent.toString());
-            writer.close();
+//        try {
+//            FileWriter writer = new FileWriter("bookings.csv");
+//            writer.write(csvContent.toString());
+//            writer.close();
 
-            byte[] content = csvContent.toString().getBytes();
-            return new ByteArrayResource(content);
+        byte[] content = csvContent.toString().getBytes();
+        return new ByteArrayResource(content);
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 
@@ -270,8 +270,12 @@ public class BookingService {
             throw new BadRequestException("You can't update a booking without connecting it to a workshop.");
         }
         Workshop workshop = workshopRepository.findById(bookingInputDto.workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + bookingInputDto.workshopId + " doesn't exist."));
-        if ((workshop.getAvailableSpotsWorkshop() + booking.getAmount()) < bookingInputDto.amount) {
-            throw new NoAvailableSpotsException("Only " + (workshop.getAvailableSpotsWorkshop() + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots."));
+        int availableSpots = (workshop.getId() == booking.getWorkshop().getId())
+                ? workshop.getAvailableSpotsWorkshop() + booking.getAmount()
+                : workshop.getAvailableSpotsWorkshop();
+
+        if (availableSpots < bookingInputDto.amount) {
+            throw new NoAvailableSpotsException("Only " + availableSpots + " spots are available for this workshop on this date and you're trying to book " + bookingInputDto.amount + " spots.");
         }
         booking.setAmount(bookingInputDto.amount);
         booking.setTotalPrice(bookingInputDto.amount * workshop.getPrice());
@@ -304,7 +308,7 @@ public class BookingService {
         bookingOutputDto.workshopId = booking.getWorkshop().getId();
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
         bookingOutputDto.workshopDate = booking.getWorkshop().getDate();
-        bookingOutputDto.sppotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
+        bookingOutputDto.spotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
 
         bookingOutputDto.customerId = booking.getCustomer().getId();
         bookingOutputDto.firstNameCustomer = booking.getCustomer().getFirstName();
@@ -327,9 +331,11 @@ public class BookingService {
     }
 
     public Boolean getReviewCustomerWritten(Booking booking) {
-        for (Review r : booking.getCustomer().getCustomerReviews()) {
-            if (r.getWorkshop().getId() == booking.getWorkshop().getId()) {
-                return true;
+        if (booking.getCustomer().getCustomerReviews() != null) {
+            for (Review r : booking.getCustomer().getCustomerReviews()) {
+                if (r.getWorkshop().getId() == booking.getWorkshop().getId()) {
+                    return true;
+                }
             }
         }
         return false;
