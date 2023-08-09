@@ -39,22 +39,15 @@ public class Workshop {
     private int amountOfParticipants;
     private String workshopCategory1;
     private String workshopCategory2;
-
     private Boolean workshopVerified;
-
     @Column(columnDefinition = "text")
     private String feedbackAdmin;
-
     private Boolean publishWorkshop;
-
     private String workshopPicUrl;
-
     private String fileName;
-
     @ManyToOne
     @JsonIgnore
     private User workshopOwner;
-
     @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Booking> workshopBookings;

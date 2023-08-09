@@ -2,9 +2,7 @@ package nl.workshophub.workshophubeindopdrachtbackend.controllers;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.*;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
@@ -114,42 +112,89 @@ public class UserController {
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
     }
 
+    //create update essentials vs update non essentials
+
+//    @PutMapping("/customer/{customerId}")
+//    @Transactional
+//    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
+//        if (bindingResult.hasFieldErrors()) {
+//            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+//        }
+//        if (customerInputDto.workshopOwner == true) {
+//            return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
+//        }
+//        UserCustomerOutputDto customerOutputDto = userService.updateCustomer(customerId, customerInputDto);
+//
+//        return new ResponseEntity<>(customerOutputDto, HttpStatus.OK);
+//    }
+
     @PutMapping("/customer/{customerId}")
     @Transactional
-    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDtoExclPassword customerInputDtoExclPassword, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        if (customerInputDto.workshopOwner == true) {
+        if (customerInputDtoExclPassword.workshopOwner == true) {
             return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
         }
-        UserCustomerOutputDto customerOutputDto = userService.updateCustomer(customerId, customerInputDto);
+        UserCustomerOutputDto customerOutputDto = userService.updateCustomer(customerId, customerInputDtoExclPassword);
 
-        return new ResponseEntity<>(customerOutputDto, HttpStatus.OK);
+        //return a token, so a user can be logged in directly on front-end side after updating user information. Jwt needs to be updated for it to be matching the details of the logged in user
+        final UserDetails userDetails = userDetailsService
+                .loadUserByUsername(customerOutputDto.email);
+
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        return new ResponseEntity<>(new AuthenticationOutputDto(jwt), HttpStatus.ACCEPTED);
     }
 
 
     @PutMapping("/workshopowner/{workshopOwnerId}")
     @Transactional
-    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
+    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @Valid @RequestBody UserWorkshopOwnerInputDtoExclPassword workshopOwnerInputDtoExclPassword, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        if (workshopOwnerInputDto.workshopOwner == false) {
+        if (workshopOwnerInputDtoExclPassword.workshopOwner == false) {
             return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
         }
-        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
-        return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
+        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDtoExclPassword);
+        //return a token, so a user can be logged in directly on front-end side after updating user information. Jwt needs to be updated for it to be matching the details of the logged in user
+        final UserDetails userDetails = userDetailsService
+                .loadUserByUsername(workshopOwnerOutputDto.email);
+
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        return new ResponseEntity<>(new AuthenticationOutputDto(jwt), HttpStatus.ACCEPTED);
     }
+
+//    @PutMapping("/workshopowner/{workshopOwnerId}")
+//    @Transactional
+//    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
+//        if (bindingResult.hasFieldErrors()) {
+//            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+//        }
+//        if (workshopOwnerInputDto.workshopOwner == false) {
+//            return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
+//        }
+//        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
+//        return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
+//    }
 
     @PutMapping ("/passwordrequest/{email}")
     public ResponseEntity<String> updatePassword(@PathVariable("email") String email, @Valid @RequestBody PasswordInputDto passwordInputDto, BindingResult bindingResult){
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-
         return new ResponseEntity<>(userService.updatePassword(email, passwordInputDto), HttpStatus.ACCEPTED);
+    }
 
+    @PutMapping ("/passwordupdaterequest/{email}")
+    public ResponseEntity<Object> updatePasswordLoggedIn(@PathVariable("email") String email, @Valid @RequestBody PasswordInputDto passwordInputDto, BindingResult bindingResult){
+        if (bindingResult.hasFieldErrors()) {
+            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
+        }
+        return new ResponseEntity<>(userService.updatePasswordLoggedIn(email, passwordInputDto), HttpStatus.ACCEPTED);
     }
 
     @PostMapping(value = "admin/{email}/authorities")

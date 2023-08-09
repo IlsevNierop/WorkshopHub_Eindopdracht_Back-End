@@ -1,4 +1,4 @@
-package nl.workshophub.workshophubeindopdrachtbackend.controllers;
+package nl.workshophub.workshophubeindopdrachtbackend.integrationtests;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
