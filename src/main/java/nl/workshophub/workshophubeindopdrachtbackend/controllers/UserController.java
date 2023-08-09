@@ -194,18 +194,7 @@ public class UserController {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-
-        userService.updatePasswordLoggedIn(email, passwordInputDto);
-
-        //after changing password while logged in, jwt needs to be updated for it to be matching the details of the logged in user
-        // TODO: 09/08/2023 Not correct, the old jwt token continues to work, is that ok?  
-
-        final UserDetails userDetails = userDetailsService
-                .loadUserByUsername(email);
-
-        final String jwt = jwtUtil.generateToken(userDetails);
-
-        return new ResponseEntity<>(new AuthenticationOutputDto(jwt), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(userService.updatePasswordLoggedIn(email, passwordInputDto), HttpStatus.ACCEPTED);
     }
 
     @PostMapping(value = "admin/{email}/authorities")
