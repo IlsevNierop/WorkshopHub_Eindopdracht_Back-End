@@ -1,8 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.PasswordInputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserCustomerInputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.UserWorkshopOwnerInputDto;
+import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.*;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
@@ -150,35 +148,65 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) {
+//    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) {
+//        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist"));
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+//            throw new ForbiddenException("You're not allowed to update this profile.");
+//        }
+//        if (!customer.getEmail().equals(customerInputDto.email)) {
+//            if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
+//                throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
+//            }
+//        }
+//        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder));
+//        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
+//    }
+    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDtoExclPassword userCustomerInputDtoExclPassword) {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist"));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
         }
-        if (!customer.getEmail().equals(customerInputDto.email)) {
-            if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
-                throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
+        if (!customer.getEmail().equals(userCustomerInputDtoExclPassword.email)) {
+            if (userRepository.existsByEmailIgnoreCase(userCustomerInputDtoExclPassword.email)) {
+                throw new BadRequestException("Another user already exists with the email: " + userCustomerInputDtoExclPassword.email);
             }
         }
-        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder));
+        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoExclPasswordToUser(customer, userCustomerInputDtoExclPassword));
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
 
-    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto
-            workshopOwnerInputDto) {
+//    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto
+//            workshopOwnerInputDto) {
+//        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+//            throw new ForbiddenException("You're not allowed to update this profile.");
+//        }
+//        if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)) {
+//            if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
+//                throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
+//            }
+//        }
+//        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto, passwordEncoder));
+//        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
+//    }
+
+    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDtoExclPassword
+            workshopOwnerInputDtoExclPassword) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
         }
-        if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)) {
-            if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
-                throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
+        if (!workshopOwner.getEmail().equals(workshopOwnerInputDtoExclPassword.email)) {
+            if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDtoExclPassword.email)) {
+                throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDtoExclPassword.email);
             }
         }
-        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto, passwordEncoder));
+        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUserExclPasswordToUser(workshopOwner, workshopOwnerInputDtoExclPassword));
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
@@ -188,13 +216,24 @@ public class UserService {
         }
         User user = userRepository.findByEmailIgnoreCase(email);
 
-        // in case of a logged in user that wants to change the password:
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-                throw new ForbiddenException("You're not allowed to update the password for this account.");
-            }
+        //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
+        user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
+        userRepository.save(user);
+
+        return "The password has been updated sucessfully.";
+    }
+
+    public String updatePasswordLoggedIn(String email, PasswordInputDto passwordInputDto) {
+        if (!userRepository.existsByEmailIgnoreCase(email)) {
+            throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
+        User user = userRepository.findByEmailIgnoreCase(email);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
+            throw new ForbiddenException("You're not allowed to update this profile.");
+        }
+
         //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
         user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
         userRepository.save(user);

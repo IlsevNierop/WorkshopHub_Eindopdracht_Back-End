@@ -20,13 +20,9 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private LocalDate dateOrder;
-
     private String commentsCustomer;
-
     private int amount;
-
     private double totalPrice;
 
     //needs fetchtype lazy, otherwise get bookings from customer, shows double bookings
