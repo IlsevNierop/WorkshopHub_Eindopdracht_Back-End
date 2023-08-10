@@ -368,7 +368,7 @@ class ReviewServiceTest {
 
     @Test
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectInGetReviewsFromCustomer() {
-        //Arrange
+        //        Arrange
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
         when(authentication.getName()).thenReturn(customer2.getEmail());
 
@@ -454,10 +454,10 @@ class ReviewServiceTest {
         when(authentication.getName()).thenReturn(customer1.getEmail());
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-//        Act
+        //        Act
         ReviewOutputDto reviewOutputDto = reviewService.createReview(workshop3.getId(), customer1.getId(), reviewInputDto1);
 
-//        Assert
+        //        Assert
         verify(reviewRepository, times(1)).save(reviewCaptor.capture());
         Review savedReview = reviewCaptor.getValue();
         assertEquals(reviewInputDto1.rating, savedReview.getRating());
@@ -478,7 +478,7 @@ class ReviewServiceTest {
 
     @Test
     void shouldReturnForbiddenExceptionWhenUserIsWorkshopOwnerOfReview() {
-        //Arrange
+        //        Arrange
         when(userRepository.findById(workshopOwner2.getId())).thenReturn(Optional.of(workshopOwner2));
         when(workshopRepository.findById(workshop3.getId())).thenReturn(Optional.of(workshop3));
 
@@ -491,7 +491,7 @@ class ReviewServiceTest {
 
     @Test
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectInCreateReview() {
-        //Arrange
+        //        Arrange
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
         when(workshopRepository.findById(workshop3.getId())).thenReturn(Optional.of(workshop3));
         when(authentication.getName()).thenReturn(customer2.getEmail());
@@ -505,7 +505,7 @@ class ReviewServiceTest {
 
     @Test
     void shouldReturnBadRequestExceptionWhenUserHasAlreadySubmittedReview() {
-        //Arrange
+        //        Arrange
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(authentication.getName()).thenReturn(customer1.getEmail());
@@ -519,7 +519,7 @@ class ReviewServiceTest {
 
     @Test
     void shouldReturnForbiddenExceptionWhenWorkshopHasntTakenPlaceYet() {
-        //Arrange
+        //        Arrange
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
         when(workshopRepository.findById(workshop4.getId())).thenReturn(Optional.of(workshop4));
         when(authentication.getName()).thenReturn(customer1.getEmail());
@@ -540,10 +540,10 @@ class ReviewServiceTest {
         reviewInputDto1.reviewVerified = false;
         reviewInputDto1.feedbackAdmin = "Test Verify Review";
 
-//        Act
+        //        Act
         ReviewOutputDto reviewOutputDto = reviewService.verifyReviewByAdmin(review1.getId(), reviewInputDto1);
 
-//        Assert
+        //        Assert
         verify(reviewRepository, times(1)).save(reviewCaptor.capture());
         Review savedReview = reviewCaptor.getValue();
         assertEquals(reviewInputDto1.rating, savedReview.getRating());
@@ -568,10 +568,10 @@ class ReviewServiceTest {
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(authentication.getName()).thenReturn(customer1.getEmail());
 
-//        Act
+        //        Act
         ReviewOutputDto reviewOutputDto = reviewService.updateReviewByCustomer(review1.getId(), reviewInputDto1);
 
-//        Assert
+        //        Assert
         verify(reviewRepository, times(1)).save(reviewCaptor.capture());
         Review savedReview = reviewCaptor.getValue();
         assertEquals(reviewInputDto1.rating, savedReview.getRating());
