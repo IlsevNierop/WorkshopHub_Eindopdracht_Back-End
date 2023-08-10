@@ -7,7 +7,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.exceptions.ForbiddenExcepti
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.NoAvailableSpotsException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.*;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.BookingRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.repositories.ReviewRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import org.junit.jupiter.api.*;
@@ -36,9 +35,6 @@ class BookingServiceTest {
 
     @Mock
     WorkshopRepository workshopRepository;
-
-    @Mock
-    ReviewRepository reviewRepository;
 
     @Mock
     UserRepository userRepository;
@@ -225,9 +221,6 @@ class BookingServiceTest {
         authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-
-        // ook opslaan in repository om te testen of het verwijderen werkt.
-
     }
 
     @AfterEach
@@ -264,8 +257,6 @@ class BookingServiceTest {
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectWhenRequestingAllBookingsFromUser() {
         //        Arrange
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
-
-        //customer2 is logged in (while requesting data about customer1)
         when(authentication.getName()).thenReturn(customer2.getEmail());
 
         //        Act
@@ -418,14 +409,14 @@ class BookingServiceTest {
 
     @Test
     void shouldReturnOneBookingById() {
-//        Arrange
+        //        Arrange
         when(bookingRepository.findById(booking1.getId())).thenReturn(Optional.of(booking1));
         when(authentication.getName()).thenReturn(customer1.getEmail());
 
         //        Act
         BookingOutputDto bookingOutputDtoExpected = bookingService.getOneBookingById(booking1.getId());
 
-//        Assert
+        //        Assert
         assertEquals(bookingOutputDto1.id, bookingOutputDtoExpected.id);
         assertEquals(bookingOutputDto1.dateOrder, bookingOutputDtoExpected.dateOrder);
         assertEquals(bookingOutputDto1.commentsCustomer, bookingOutputDtoExpected.commentsCustomer);
@@ -535,10 +526,10 @@ class BookingServiceTest {
         byte[] content = csvContent.toString().getBytes();
         ByteArrayResource byteArrayResourceExpected = new ByteArrayResource(content);
 
-//        Act
+        //        Act
         ByteArrayResource getCsvContent = bookingService.generateAndDownloadCsvWorkshop(workshop1.getId());
 
-//        Assert
+        //        Assert
         assertEquals(byteArrayResourceExpected, getCsvContent);
         assertEquals(byteArrayResourceExpected.contentLength(), getCsvContent.contentLength());
     }
@@ -582,10 +573,10 @@ class BookingServiceTest {
         byte[] content = csvContent.toString().getBytes();
         ByteArrayResource byteArrayResourceExpected = new ByteArrayResource(content);
 
-//        Act
+        //        Act
         ByteArrayResource getCsvContent = bookingService.generateAndDownloadCsv();
 
-//        Assert
+        //        Assert
         assertEquals(byteArrayResourceExpected, getCsvContent);
         assertEquals(byteArrayResourceExpected.contentLength(), getCsvContent.contentLength());
     }
@@ -599,10 +590,10 @@ class BookingServiceTest {
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 
-//        Act
+        //        Act
         BookingOutputDto bookingOutputDto = bookingService.createBooking(customer1.getId(), workshop1.getId(), bookingInputDto1);
 
-//        Assert
+        //        Assert
         verify(bookingRepository, times(1)).save(bookingCaptor.capture());
         Booking savedBooking = bookingCaptor.getValue();
 
@@ -671,10 +662,10 @@ class BookingServiceTest {
         when(authentication.getName()).thenReturn(customer1.getEmail());
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-//        Act
+        //        Act
         BookingOutputDto bookingOutputDto = bookingService.updateBooking(customer1.getId(), bookingInputDto2);
 
-//        Assert
+        //        Assert
         verify(bookingRepository, times(1)).save(bookingCaptor.capture());
         Booking updatedBooking = bookingCaptor.getValue();
 
