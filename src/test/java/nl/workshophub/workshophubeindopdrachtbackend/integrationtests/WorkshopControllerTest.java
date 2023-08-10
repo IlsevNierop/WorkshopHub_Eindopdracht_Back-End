@@ -5,19 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
-import nl.workshophub.workshophubeindopdrachtbackend.controllers.WorkshopController;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
-import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.services.FileService;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,9 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static nl.workshophub.workshophubeindopdrachtbackend.models.InOrOutdoors.INDOORS;
 import static nl.workshophub.workshophubeindopdrachtbackend.models.InOrOutdoors.OUTDOORS;
@@ -54,9 +48,6 @@ class WorkshopControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    @InjectMocks
-    private WorkshopController workshopController;
-
     @MockBean
     private WorkshopService workshopService;
 
@@ -64,27 +55,18 @@ class WorkshopControllerTest {
     private Authentication authentication;
 
     @MockBean
-    private WorkshopRepository workshopRepository;
-
-    @MockBean
     private UserRepository userRepository;
 
     @MockBean
     private FileService fileService;
 
-    Workshop workshop5;
-    Workshop workshop2;
-    Workshop workshop3;
-    Workshop workshop4;
-
-    WorkshopOutputDto workshopOutputDto5;
+    Workshop workshop;
+    WorkshopOutputDto workshopOutputDto;
     WorkshopOutputDto workshopOutputDtoFromInputDto1;
-
     WorkshopInputDto workshopInputDto1;
     User workshopOwner1;
     User customer1;
 
-//    Authentication authentication;
 
 
     @BeforeEach
@@ -95,61 +77,52 @@ class WorkshopControllerTest {
         workshopOwner1.setWorkshopOwnerVerified(true);
         workshopOwner1.setWorkshopOwner(true);
         workshopOwner1.setEmail("test@example.com");
-
-        Set<Authority> authoritiesWorkshopOwner1 = new HashSet<>();
-        authoritiesWorkshopOwner1.add(new Authority(1L, "ROLE_WORKSHOPOWNER"));
-        workshopOwner1.setAuthorities(authoritiesWorkshopOwner1);
+//
+//        Set<Authority> authoritiesWorkshopOwner1 = new HashSet<>();
+//        authoritiesWorkshopOwner1.add(new Authority(1L, "ROLE_WORKSHOPOWNER"));
+//        workshopOwner1.setAuthorities(authoritiesWorkshopOwner1);
 
         userRepository.save(workshopOwner1);
 
         customer1 = new User();
         customer1.setId(2L);
 
-        workshop5 = new Workshop(5L, "Kaarsen maken test", LocalDate.of(2023, 9, 25), (LocalTime.of(16, 0)), (LocalTime.of(18, 0)), 45D, OUTDOORS, "Amsterdam", "Neem je regenjas mee", "Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee.", 10, "Koken", "Handwerk", true, "mag online", true, "testurl", "fotovanworkshop", workshopOwner1, null, null, null);
+        workshop = new Workshop(10L, "Kaarsen maken test", LocalDate.of(2023, 9, 25), (LocalTime.of(16, 0)), (LocalTime.of(18, 0)), 45D, OUTDOORS, "Amsterdam", "Neem je regenjas mee", "Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee.", 10, "Koken", "Handwerk", true, "mag online", true, "testurl", "fotovanworkshop", workshopOwner1, null, null, null);
 
-        workshop2 = new Workshop(2L, "Kaarsen maken test2", LocalDate.of(2023, 5, 25), (LocalTime.of(16, 0)), (LocalTime.of(18, 0)), 20D, INDOORS, "Leiden", "We blijven binnen", "Een hele leuke workshop, nummer 2, met kaarsen maken binnen.", 10, "Creatief", "Handwerk", true, "mag online", true, "testurl", "fotovanworkshop", workshopOwner1, null, null, null);
-
-        workshop3 = new Workshop(3L, "Kaarsen maken test3", LocalDate.of(2023, 10, 25), (LocalTime.of(16, 0)), (LocalTime.of(18, 0)), 20D, INDOORS, "Leiden", "We blijven binnen", "Een hele leuke workshop, nummer 3, met kaarsen maken binnen.", 10, "Creatief", "Handwerk", null, "mag online", true, "testurl", "fotovanworkshop", workshopOwner1, null, null, null);
-
-        workshop4 = new Workshop(4L, "Kaarsen maken test4", LocalDate.of(2023, 11, 25), (LocalTime.of(16, 0)), (LocalTime.of(18, 0)), 25D, OUTDOORS, "Woerden", "We gaan naar buiten.", "Een hele leuke workshop, nummer 4, met kaarsen maken binnen.", 10, "Kaarsen", "Handwerk", true, "mag online", false, "testurl", "fotovanworkshop", workshopOwner1, null, null, null);
-
-        List<Workshop> workshopOwner1Workshops = new ArrayList<>(List.of(workshop5, workshop2, workshop3, workshop4));
+        List<Workshop> workshopOwner1Workshops = new ArrayList<>(List.of(workshop));
         workshopOwner1.setWorkshops(workshopOwner1Workshops);
 
-        List<Workshop> customerFavouriteWorkshops = new ArrayList<>(List.of(workshop5));
+        List<Workshop> customerFavouriteWorkshops = new ArrayList<>(List.of(workshop));
         customer1.setWorkshops(customerFavouriteWorkshops);
 
-        workshop5.setWorkshopOwner(workshopOwner1);
-        workshop2.setWorkshopOwner(workshopOwner1);
-        workshop3.setWorkshopOwner(workshopOwner1);
-        workshop4.setWorkshopOwner(workshopOwner1);
+        workshop.setWorkshopOwner(workshopOwner1);
 
-        workshopOutputDto5 = new WorkshopOutputDto();
-        workshopOutputDto5.id = workshop5.getId();
-        workshopOutputDto5.title = workshop5.getTitle();
-        workshopOutputDto5.date = workshop5.getDate();
-        workshopOutputDto5.startTime = workshop5.getStartTime();
-        workshopOutputDto5.endTime = workshop5.getEndTime();
-        workshopOutputDto5.price = workshop5.getPrice();
-        workshopOutputDto5.inOrOutdoors = workshop5.getInOrOutdoors();
-        workshopOutputDto5.location = workshop5.getLocation();
-        workshopOutputDto5.highlightedInfo = workshop5.getHighlightedInfo();
-        workshopOutputDto5.description = workshop5.getDescription();
-        workshopOutputDto5.amountOfParticipants = workshop5.getAmountOfParticipants();
-        workshopOutputDto5.spotsAvailable = workshop5.getAmountOfParticipants();
-        workshopOutputDto5.workshopCategory1 = workshop5.getWorkshopCategory1();
-        workshopOutputDto5.workshopCategory2 = workshop5.getWorkshopCategory2();
-        workshopOutputDto5.workshopVerified = workshop5.getWorkshopVerified();
-        workshopOutputDto5.feedbackAdmin = workshop5.getFeedbackAdmin();
-        workshopOutputDto5.publishWorkshop = workshop5.getPublishWorkshop();
-        workshopOutputDto5.workshopOwnerReviews = new ArrayList<>();
+        workshopOutputDto = new WorkshopOutputDto();
+        workshopOutputDto.id = workshop.getId();
+        workshopOutputDto.title = workshop.getTitle();
+        workshopOutputDto.date = workshop.getDate();
+        workshopOutputDto.startTime = workshop.getStartTime();
+        workshopOutputDto.endTime = workshop.getEndTime();
+        workshopOutputDto.price = workshop.getPrice();
+        workshopOutputDto.inOrOutdoors = workshop.getInOrOutdoors();
+        workshopOutputDto.location = workshop.getLocation();
+        workshopOutputDto.highlightedInfo = workshop.getHighlightedInfo();
+        workshopOutputDto.description = workshop.getDescription();
+        workshopOutputDto.amountOfParticipants = workshop.getAmountOfParticipants();
+        workshopOutputDto.spotsAvailable = workshop.getAmountOfParticipants();
+        workshopOutputDto.workshopCategory1 = workshop.getWorkshopCategory1();
+        workshopOutputDto.workshopCategory2 = workshop.getWorkshopCategory2();
+        workshopOutputDto.workshopVerified = workshop.getWorkshopVerified();
+        workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
+        workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
+        workshopOutputDto.workshopOwnerReviews = new ArrayList<>();
 
-        workshopOutputDto5.workshopOwnerId = workshop5.getWorkshopOwner().getId();
-        workshopOutputDto5.workshopOwnerCompanyName = workshop5.getWorkshopOwner().getCompanyName();
-        workshopOutputDto5.averageRatingWorkshopOwnerReviews = null;
-        workshopOutputDto5.numberOfReviews = null;
-        workshopOutputDto5.amountOfFavsAndBookings = 0;
-        workshopOutputDto5.workshopPicUrl = workshop5.getWorkshopPicUrl();
+        workshopOutputDto.workshopOwnerId = workshop.getWorkshopOwner().getId();
+        workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
+        workshopOutputDto.averageRatingWorkshopOwnerReviews = null;
+        workshopOutputDto.numberOfReviews = null;
+        workshopOutputDto.amountOfFavsAndBookings = 0;
+        workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
 
         workshopInputDto1 = new WorkshopInputDto();
@@ -198,72 +171,17 @@ class WorkshopControllerTest {
         authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-//        workshopOutputDto3 = new WorkshopOutputDto();
-//        workshopOutputDto3.id = workshop3.getId();
-//        workshopOutputDto3.title = workshop3.getTitle();
-//        workshopOutputDto3.date = workshop3.getDate();
-//        workshopOutputDto3.startTime = workshop3.getStartTime();
-//        workshopOutputDto3.endTime = workshop3.getEndTime();
-//        workshopOutputDto3.price = workshop3.getPrice();
-//        workshopOutputDto3.inOrOutdoors = workshop3.getInOrOutdoors();
-//        workshopOutputDto3.location = workshop3.getLocation();
-//        workshopOutputDto3.highlightedInfo = workshop3.getHighlightedInfo();
-//        workshopOutputDto3.description = workshop3.getDescription();
-//        workshopOutputDto3.amountOfParticipants = workshop3.getAmountOfParticipants();
-//        workshopOutputDto3.spotsAvailable = workshop3.getAmountOfParticipants();
-//        workshopOutputDto3.workshopCategory1 = workshop3.getWorkshopCategory1();
-//        workshopOutputDto3.workshopCategory2 = workshop3.getWorkshopCategory2();
-//        workshopOutputDto3.workshopVerified = workshop3.getWorkshopVerified();
-//        workshopOutputDto3.feedbackAdmin = workshop3.getFeedbackAdmin();
-//        workshopOutputDto3.publishWorkshop = workshop3.getPublishWorkshop();
-//        workshopOutputDto3.workshopOwnerReviews = new ArrayList<>();
-//
-//        workshopOutputDto3.workshopOwnerId = workshop3.getWorkshopOwner().getId();
-//        workshopOutputDto3.workshopOwnerCompanyName = workshop3.getWorkshopOwner().getCompanyName();
-//        workshopOutputDto3.averageRatingWorkshopOwnerReviews = null;
-//        workshopOutputDto3.numberOfReviews = null;
-//        workshopOutputDto3.amountOfFavsAndBookings = 0;
-//        workshopOutputDto3.workshopPicUrl = workshop3.getWorkshopPicUrl();
-//
-//
-//        workshopOutputDto4 = new WorkshopOutputDto();
-//        workshopOutputDto4.id = workshop4.getId();
-//        workshopOutputDto4.title = workshop4.getTitle();
-//        workshopOutputDto4.date = workshop4.getDate();
-//        workshopOutputDto4.startTime = workshop4.getStartTime();
-//        workshopOutputDto4.endTime = workshop4.getEndTime();
-//        workshopOutputDto4.price = workshop4.getPrice();
-//        workshopOutputDto4.inOrOutdoors = workshop4.getInOrOutdoors();
-//        workshopOutputDto4.location = workshop4.getLocation();
-//        workshopOutputDto4.highlightedInfo = workshop4.getHighlightedInfo();
-//        workshopOutputDto4.description = workshop4.getDescription();
-//        workshopOutputDto4.amountOfParticipants = workshop4.getAmountOfParticipants();
-//        workshopOutputDto4.spotsAvailable = workshop4.getAmountOfParticipants();
-//        workshopOutputDto4.workshopCategory1 = workshop4.getWorkshopCategory1();
-//        workshopOutputDto4.workshopCategory2 = workshop4.getWorkshopCategory2();
-//        workshopOutputDto4.workshopVerified = workshop4.getWorkshopVerified();
-//        workshopOutputDto4.feedbackAdmin = workshop4.getFeedbackAdmin();
-//        workshopOutputDto4.publishWorkshop = workshop4.getPublishWorkshop();
-//        workshopOutputDto4.workshopOwnerReviews = new ArrayList<>();
-//
-//        workshopOutputDto4.workshopOwnerId = workshop4.getWorkshopOwner().getId();
-//        workshopOutputDto4.workshopOwnerCompanyName = workshop4.getWorkshopOwner().getCompanyName();
-//        workshopOutputDto4.averageRatingWorkshopOwnerReviews = null;
-//        workshopOutputDto4.numberOfReviews = null;
-//        workshopOutputDto4.amountOfFavsAndBookings = 0;
-//        workshopOutputDto4.workshopPicUrl = workshop4.getWorkshopPicUrl();
-
     }
 
     @Test
     void getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDateWithoutUser() throws Exception {
-        workshopOutputDto5.isFavourite = false;
+        workshopOutputDto.isFavourite = false;
 
-        given(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(null)).willReturn(List.of(workshopOutputDto5));
+        given(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(null)).willReturn(List.of(workshopOutputDto));
 
         mockMvc.perform(get("/workshops"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(5L))
+                .andExpect(jsonPath("$[0].id").value(10L))
                 .andExpect(jsonPath("$[0].title").value("Kaarsen maken test"))
                 .andExpect(jsonPath("$[0].date").value("2023-09-25"))
                 .andExpect(jsonPath("$[0].startTime").value("16:00:00"))
@@ -292,14 +210,14 @@ class WorkshopControllerTest {
 
     @Test
     void getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDateWithUser() throws Exception {
-        workshopOutputDto5.isFavourite = true;
-        workshopOutputDto5.amountOfFavsAndBookings = 1;
+        workshopOutputDto.isFavourite = true;
+        workshopOutputDto.amountOfFavsAndBookings = 1;
 
-        given(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(customer1.getId())).willReturn(List.of(workshopOutputDto5));
+        given(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(customer1.getId())).willReturn(List.of(workshopOutputDto));
 
         mockMvc.perform(get("/workshops?userId=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(5L))
+                .andExpect(jsonPath("$[0].id").value(10L))
                 .andExpect(jsonPath("$[0].title").value("Kaarsen maken test"))
                 .andExpect(jsonPath("$[0].date").value("2023-09-25"))
                 .andExpect(jsonPath("$[0].startTime").value("16:00:00"))
@@ -327,13 +245,13 @@ class WorkshopControllerTest {
 
     @Test
     void addOrRemoveWorkshopFavourites() throws Exception {
-        workshopOutputDto5.isFavourite = false;
-        workshopOutputDto5.amountOfFavsAndBookings = 0;
-        given(workshopService.addOrRemoveWorkshopFavourites(customer1.getId(), workshop5.getId(), false)).willReturn(List.of(workshopOutputDto5));
+        workshopOutputDto.isFavourite = false;
+        workshopOutputDto.amountOfFavsAndBookings = 0;
+        given(workshopService.addOrRemoveWorkshopFavourites(customer1.getId(), workshop.getId(), false)).willReturn(List.of(workshopOutputDto));
 
-        mockMvc.perform(put("/workshops/favourite/2/5?favourite=false"))
+        mockMvc.perform(put("/workshops/favourite/2/10?favourite=false"))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$[0].id").value(5L))
+                .andExpect(jsonPath("$[0].id").value(10L))
                 .andExpect(jsonPath("$[0].title").value("Kaarsen maken test"))
                 .andExpect(jsonPath("$[0].date").value("2023-09-25"))
                 .andExpect(jsonPath("$[0].startTime").value("16:00:00"))
