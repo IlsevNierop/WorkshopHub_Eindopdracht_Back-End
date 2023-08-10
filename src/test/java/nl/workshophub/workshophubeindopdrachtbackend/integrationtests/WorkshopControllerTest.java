@@ -77,10 +77,6 @@ class WorkshopControllerTest {
         workshopOwner1.setWorkshopOwnerVerified(true);
         workshopOwner1.setWorkshopOwner(true);
         workshopOwner1.setEmail("test@example.com");
-//
-//        Set<Authority> authoritiesWorkshopOwner1 = new HashSet<>();
-//        authoritiesWorkshopOwner1.add(new Authority(1L, "ROLE_WORKSHOPOWNER"));
-//        workshopOwner1.setAuthorities(authoritiesWorkshopOwner1);
 
         userRepository.save(workshopOwner1);
 
@@ -353,10 +349,10 @@ class WorkshopControllerTest {
                 "file", "test.jpg", MediaType.IMAGE_JPEG_VALUE, new byte[0]);
 
         MockMultipartFile workshopInputDto = new MockMultipartFile(
-                "workshopInputDto", // Part name
-                "workshopInputDto.json", // Original filename
-                MediaType.APPLICATION_JSON_VALUE, // Content type
-                asJsonString(workshopInputDto1).getBytes() // JSON data as bytes
+                "workshopInputDto",
+                "workshopInputDto.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                asJsonString(workshopInputDto1).getBytes()
         );
 
         mockMvc.perform(multipart("/workshops/workshopowner/{workshopOwnerId}", workshopOwner1.getId())
