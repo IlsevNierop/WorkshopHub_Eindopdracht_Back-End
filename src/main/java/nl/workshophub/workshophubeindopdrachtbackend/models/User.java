@@ -22,7 +22,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+     private Long id;
     private String firstName;
     private String lastName;
     @Column(unique=true)
@@ -60,7 +60,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "workshop_id")
 
     )
-    private  Set<Workshop> favouriteWorkshops = new HashSet<>();
+    private Set<Workshop> favouriteWorkshops = new HashSet<>();
 
     //security
     @Column(nullable = false)
