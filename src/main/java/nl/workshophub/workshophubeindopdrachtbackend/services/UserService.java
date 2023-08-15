@@ -111,29 +111,23 @@ public class UserService {
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
-        if (workshopOwnerVerified) {
-            for (Authority authority : workshopOwner.getAuthorities()) {
-                if (authority.getAuthority().equals("ROLE_WORKSHOPOWNER")) {
-                    break;
-                }
-                else {
-                    workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
-                }
+        if (workshopOwnerVerified == Boolean.TRUE) {
+
+            boolean hasAuthority = workshopOwner.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_WORKSHOPOWNER"));
+
+            if (!hasAuthority) {
+                Authority authority = new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER");
+                workshopOwner.getAuthorities().add(authority);
             }
         }
-        if (!workshopOwnerVerified) {
+        else if (workshopOwnerVerified == Boolean.FALSE) {
             for (Authority authority : workshopOwner.getAuthorities()) {
                 if (authority.getAuthority().equals("ROLE_WORKSHOPOWNER")) {
                     workshopOwner.getAuthorities().remove(authority);
                 }
             }
         }
-//            Optional authority = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny();
-//            if (authority.isPresent()) {
-//                Authority authorityToRemove = (Authority) authority.get();
-//                workshopOwner.removeAuthority(authorityToRemove);
-//            }
-//        }
         userRepository.save(workshopOwner);
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
