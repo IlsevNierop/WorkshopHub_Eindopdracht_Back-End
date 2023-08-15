@@ -20,7 +20,7 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate dateOrder;
+    private LocalDate dateOrder = LocalDate.now();
     private String commentsCustomer;
     private int amount;
     private double totalPrice;

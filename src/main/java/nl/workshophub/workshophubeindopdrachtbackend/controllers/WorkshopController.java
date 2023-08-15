@@ -99,17 +99,16 @@ public class WorkshopController {
         if (bindingResultWorkshopInputDto.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResultWorkshopInputDto));
         }
-
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         if (file != null) {
             String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+            workshopOutputDto.workshopPicUrl = url;
 
             String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
-
-//            fileController.uploadWorkshopPic(workshopOutputDto.id, file);
         }
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
+//        return new ResponseEntity<>(workshopOutputDto, HttpStatus.OK);
     }
 
     @PutMapping("/favourite/{userId}/{workshopId}")

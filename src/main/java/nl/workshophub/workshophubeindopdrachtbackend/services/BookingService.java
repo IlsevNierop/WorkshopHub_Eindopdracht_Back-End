@@ -20,8 +20,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,9 +82,7 @@ public class BookingService {
         List<Workshop> workshopOwnerWorkshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
         for (Workshop w : workshopOwnerWorkshops) {
             List<Booking> workshopBookings = w.getWorkshopBookings();
-            for (Booking b : workshopBookings) {
-                workshopOwnerBookings.add(b);
-            }
+            workshopOwnerBookings.addAll(workshopBookings);
         }
         List<BookingOutputDto> workshopOwnerBookingOutputDtos = new ArrayList<>();
         for (Booking b : workshopOwnerBookings) {
@@ -128,12 +124,10 @@ public class BookingService {
         List<Workshop> workshopOwnerWorkshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
         for (Workshop w : workshopOwnerWorkshops) {
             List<Booking> workshopBookings = w.getWorkshopBookings();
-            for (Booking b : workshopBookings) {
-                workshopOwnerBookings.add(b);
-            }
+            workshopOwnerBookings.addAll(workshopBookings);
         }
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+        csvContent.append("Boeking ID,Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
 
         for (Booking booking : workshopOwnerBookings) {
             csvContent.append(System.lineSeparator())
@@ -150,18 +144,8 @@ public class BookingService {
                     .append(booking.getWorkshop().getDate()).append(",");
 
         }
-
-//        try {
-//            FileWriter writer = new FileWriter("bookings.csv");
-//            writer.write(csvContent.toString());
-//            writer.close();
-
         byte[] content = csvContent.toString().getBytes();
         return new ByteArrayResource(content);
-
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
 
@@ -174,7 +158,7 @@ public class BookingService {
         }
         List<Booking> workshopBookings = workshop.getWorkshopBookings();
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
 
         for (Booking booking : workshopBookings) {
             csvContent.append(System.lineSeparator())
@@ -191,23 +175,14 @@ public class BookingService {
                     .append(booking.getWorkshop().getDate()).append(",");
         }
 
-//        try {
-//            FileWriter writer = new FileWriter("bookings.csv");
-//            writer.write(csvContent.toString());
-//            writer.close();
-
         byte[] content = csvContent.toString().getBytes();
         return new ByteArrayResource(content);
-
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     public ByteArrayResource generateAndDownloadCsv() {
         List<Booking> bookings = bookingRepository.findAll();
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
 
         for (Booking booking : bookings) {
             csvContent.append(System.lineSeparator())
@@ -224,18 +199,8 @@ public class BookingService {
                     .append(booking.getWorkshop().getDate()).append(",");
 
         }
-
-//        try {
-//            FileWriter writer = new FileWriter("bookings.csv");
-//            writer.write(csvContent.toString());
-//            writer.close();
-
         byte[] content = csvContent.toString().getBytes();
         return new ByteArrayResource(content);
-
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
 
@@ -283,7 +248,6 @@ public class BookingService {
             booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
         }
         booking.setWorkshop(workshop);
-        //customer can't be updated, customer is always leading
         bookingRepository.save(booking);
         return transferBookingToBookingOutputDto(booking);
     }
@@ -316,14 +280,12 @@ public class BookingService {
         bookingOutputDto.emailCustomer = booking.getCustomer().getEmail();
         bookingOutputDto.reviewCustomerWritten = getReviewCustomerWritten(booking);
 
-
         return bookingOutputDto;
     }
 
 
     public Booking transferBookingInputDtoToBooking(BookingInputDto bookingInputDto) {
         Booking booking = new Booking();
-        booking.setDateOrder(LocalDate.now());
         booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
         booking.setAmount(bookingInputDto.amount);
 
@@ -340,5 +302,4 @@ public class BookingService {
         }
         return false;
     }
-
 }

@@ -39,13 +39,13 @@ public class SpringSecurityConfig {
     }
     @Bean
     protected SecurityFilterChain filter(HttpSecurity http) throws Exception {
-        //JWT token authentication
+
         http
                 .csrf().disable()
                 .httpBasic().disable()
                 .cors().and()
                 .authorizeHttpRequests()
-//
+
                 //.................................open.................................
                 .requestMatchers("/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users/customer").permitAll() //everyone can register //post
