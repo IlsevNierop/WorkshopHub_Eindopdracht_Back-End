@@ -323,7 +323,6 @@ public class BookingService {
 
     public Booking transferBookingInputDtoToBooking(BookingInputDto bookingInputDto) {
         Booking booking = new Booking();
-        booking.setDateOrder(LocalDate.now());
         booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
         booking.setAmount(bookingInputDto.amount);
 

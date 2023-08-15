@@ -99,12 +99,10 @@ public class WorkshopController {
         if (bindingResultWorkshopInputDto.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResultWorkshopInputDto));
         }
-        System.out.println("input " + workshopInputDto.title);
-        System.out.println(workshopOwnerId);
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
-        System.out.println("output " + workshopOutputDto);
         if (file != null) {
             String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+            workshopOutputDto.workshopPicUrl = url;
 
             String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
         }

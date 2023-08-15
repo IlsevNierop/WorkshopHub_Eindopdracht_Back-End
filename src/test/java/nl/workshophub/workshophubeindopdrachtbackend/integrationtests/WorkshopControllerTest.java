@@ -10,8 +10,10 @@ import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOut
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
+import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.services.FileService;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +26,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static nl.workshophub.workshophubeindopdrachtbackend.models.InOrOutdoors.INDOORS;
 import static nl.workshophub.workshophubeindopdrachtbackend.models.InOrOutdoors.OUTDOORS;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,50 +50,103 @@ class WorkshopControllerTest {
     @Autowired
     MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     private WorkshopService workshopService;
+    @Autowired
+    private FileService fileService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private WorkshopRepository workshopRepository;
 
     @MockBean
     private Authentication authentication;
 
-    @MockBean
-    private UserRepository userRepository;
-
-    @MockBean
-    private FileService fileService;
-
     Workshop workshop;
+    Workshop workshop2;
     WorkshopOutputDto workshopOutputDto;
+    WorkshopOutputDto workshopOutputDto2;
     WorkshopOutputDto workshopOutputDtoFromInputDto1;
     WorkshopInputDto workshopInputDto1;
     User workshopOwner1;
     User customer1;
 
-
-
     @BeforeEach
     void setUp() {
         workshopOwner1 = new User();
-        workshopOwner1.setId(1L);
         workshopOwner1.setCompanyName("Test bedrijf");
         workshopOwner1.setWorkshopOwnerVerified(true);
         workshopOwner1.setWorkshopOwner(true);
         workshopOwner1.setEmail("test@example.com");
 
-        userRepository.save(workshopOwner1);
-
         customer1 = new User();
-        customer1.setId(2L);
+        customer1.setEmail("customer1@example.com");
 
-        workshop = new Workshop(10L, "Kaarsen maken test", LocalDate.of(2023, 9, 25), (LocalTime.of(16, 0)), (LocalTime.of(18, 0)), 45D, OUTDOORS, "Amsterdam", "Neem je regenjas mee", "Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee.", 10, "Koken", "Handwerk", true, "mag online", true, "testurl", "fotovanworkshop", workshopOwner1, null, null, null);
+        workshop = new Workshop();
+        workshop.setTitle("Kaarsen maken test");
+        workshop.setDate(LocalDate.of(2023, 9, 25));
+        workshop.setStartTime((LocalTime.of(16, 0)));
+        workshop.setEndTime((LocalTime.of(18, 0)));
+        workshop.setPrice(45D);
+        workshop.setInOrOutdoors(OUTDOORS);
+        workshop.setLocation("Amsterdam");
+        workshop.setHighlightedInfo("Neem je regenjas mee");
+        workshop.setDescription("Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee.");
+        workshop.setAmountOfParticipants(10);
+        workshop.setWorkshopCategory1("Koken");
+        workshop.setWorkshopCategory2("Handwerk");
+        workshop.setWorkshopVerified(true);
+        workshop.setFeedbackAdmin("mag online");
+        workshop.setPublishWorkshop(true);
+        workshop.setWorkshopPicUrl("testurl");
+        workshop.setFileName("fotovanworkshop");
+        workshop.setWorkshopBookings(null);
+        workshop.setWorkshopReviews(null);
+        workshop.setFavsUser(null);
 
-        List<Workshop> workshopOwner1Workshops = new ArrayList<>(List.of(workshop));
-        workshopOwner1.setWorkshops(workshopOwner1Workshops);
+        workshop2 = new Workshop();
+        workshop2.setTitle("Test workshop 2");
+        workshop2.setDate(LocalDate.of(2023, 10, 23));
+        workshop2.setStartTime((LocalTime.of(16, 0)));
+        workshop2.setEndTime((LocalTime.of(18, 0)));
+        workshop2.setPrice(45D);
+        workshop2.setInOrOutdoors(OUTDOORS);
+        workshop2.setLocation("Amsterdam");
+        workshop2.setHighlightedInfo("Neem je regenjas mee");
+        workshop2.setDescription("Een hele leuke workshop, nummer 2, met kaarsen maken en een regenjas mee.");
+        workshop2.setAmountOfParticipants(10);
+        workshop2.setWorkshopCategory1("Koken");
+        workshop2.setWorkshopCategory2("Handwerk");
+        workshop2.setWorkshopVerified(true);
+        workshop2.setFeedbackAdmin("mag online");
+        workshop2.setPublishWorkshop(true);
+        workshop2.setWorkshopPicUrl("testurl");
+        workshop2.setFileName("fotovanworkshop");
+        workshop2.setWorkshopBookings(null);
+        workshop2.setWorkshopReviews(null);
+        workshop2.setFavsUser(null);
 
-        List<Workshop> customerFavouriteWorkshops = new ArrayList<>(List.of(workshop));
-        customer1.setWorkshops(customerFavouriteWorkshops);
+        userRepository.save(workshopOwner1);
+        userRepository.save(customer1);
 
         workshop.setWorkshopOwner(workshopOwner1);
+        workshop.setFavsUser(new HashSet<>(List.of(customer1)));
+        workshop2.setWorkshopOwner(workshopOwner1);
+
+        workshopRepository.save(workshop);
+        workshopRepository.save(workshop2);
+
+        List<Workshop> workshopOwner1Workshops = new ArrayList<>(List.of(workshop, workshop2));
+        workshopOwner1.setWorkshops(workshopOwner1Workshops);
+
+        userRepository.save(workshopOwner1);
+
+        Set<Workshop> customerFavouriteWorkshops = new HashSet<>(List.of(workshop));
+        customer1.setFavouriteWorkshops(customerFavouriteWorkshops);
+        userRepository.save(customer1);
+
 
         workshopOutputDto = new WorkshopOutputDto();
         workshopOutputDto.id = workshop.getId();
@@ -112,14 +167,42 @@ class WorkshopControllerTest {
         workshopOutputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         workshopOutputDto.publishWorkshop = workshop.getPublishWorkshop();
         workshopOutputDto.workshopOwnerReviews = new ArrayList<>();
+        workshopOutputDto.isFavourite = true;
 
         workshopOutputDto.workshopOwnerId = workshop.getWorkshopOwner().getId();
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         workshopOutputDto.averageRatingWorkshopOwnerReviews = null;
         workshopOutputDto.numberOfReviews = null;
-        workshopOutputDto.amountOfFavsAndBookings = 0;
+        workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
         workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
+        workshopOutputDto2 = new WorkshopOutputDto();
+        workshopOutputDto2.id = workshop2.getId();
+        workshopOutputDto2.title = workshop2.getTitle();
+        workshopOutputDto2.date = workshop2.getDate();
+        workshopOutputDto2.startTime = workshop2.getStartTime();
+        workshopOutputDto2.endTime = workshop2.getEndTime();
+        workshopOutputDto2.price = workshop2.getPrice();
+        workshopOutputDto2.inOrOutdoors = workshop2.getInOrOutdoors();
+        workshopOutputDto2.location = workshop2.getLocation();
+        workshopOutputDto2.highlightedInfo = workshop2.getHighlightedInfo();
+        workshopOutputDto2.description = workshop2.getDescription();
+        workshopOutputDto2.amountOfParticipants = workshop2.getAmountOfParticipants();
+        workshopOutputDto2.spotsAvailable = workshop2.getAmountOfParticipants();
+        workshopOutputDto2.workshopCategory1 = workshop2.getWorkshopCategory1();
+        workshopOutputDto2.workshopCategory2 = workshop2.getWorkshopCategory2();
+        workshopOutputDto2.workshopVerified = workshop2.getWorkshopVerified();
+        workshopOutputDto2.feedbackAdmin = workshop2.getFeedbackAdmin();
+        workshopOutputDto2.publishWorkshop = workshop2.getPublishWorkshop();
+        workshopOutputDto2.isFavourite = true;
+        workshopOutputDto2.workshopOwnerReviews = new ArrayList<>();
+
+        workshopOutputDto2.workshopOwnerId = workshop2.getWorkshopOwner().getId();
+        workshopOutputDto2.workshopOwnerCompanyName = workshop2.getWorkshopOwner().getCompanyName();
+        workshopOutputDto2.averageRatingWorkshopOwnerReviews = null;
+        workshopOutputDto2.numberOfReviews = null;
+        workshopOutputDto2.amountOfFavsAndBookings = 1;
+        workshopOutputDto2.workshopPicUrl = workshop2.getWorkshopPicUrl();
 
         workshopInputDto1 = new WorkshopInputDto();
         workshopInputDto1.title = "Taart bakken";
@@ -138,155 +221,255 @@ class WorkshopControllerTest {
         workshopInputDto1.feedbackAdmin = null;
         workshopInputDto1.publishWorkshop = null;
 
-        workshopOutputDtoFromInputDto1 = new WorkshopOutputDto();
-        workshopOutputDtoFromInputDto1.id = 1L;
-        workshopOutputDtoFromInputDto1.title = workshopInputDto1.title;
-        workshopOutputDtoFromInputDto1.date = workshopInputDto1.date;
-        workshopOutputDtoFromInputDto1.startTime = workshopInputDto1.startTime;
-        workshopOutputDtoFromInputDto1.endTime = workshopInputDto1.endTime;
-        workshopOutputDtoFromInputDto1.price = workshopInputDto1.price;
-        workshopOutputDtoFromInputDto1.inOrOutdoors = workshopInputDto1.inOrOutdoors;
-        workshopOutputDtoFromInputDto1.location = workshopInputDto1.location;
-        workshopOutputDtoFromInputDto1.highlightedInfo = workshopInputDto1.highlightedInfo;
-        workshopOutputDtoFromInputDto1.description = workshopInputDto1.description;
-        workshopOutputDtoFromInputDto1.amountOfParticipants = workshopInputDto1.amountOfParticipants;
-        workshopOutputDtoFromInputDto1.spotsAvailable = workshopInputDto1.amountOfParticipants;
-        workshopOutputDtoFromInputDto1.workshopCategory1 = workshopInputDto1.workshopCategory1;
-        workshopOutputDtoFromInputDto1.workshopCategory2 = workshopInputDto1.workshopCategory2;
-        workshopOutputDtoFromInputDto1.workshopVerified = workshopInputDto1.workshopVerified;
-        workshopOutputDtoFromInputDto1.feedbackAdmin = workshopInputDto1.feedbackAdmin;
-        workshopOutputDtoFromInputDto1.publishWorkshop = workshopInputDto1.publishWorkshop;
-        workshopOutputDtoFromInputDto1.workshopOwnerReviews = new ArrayList<>();
-
-        workshopOutputDtoFromInputDto1.workshopOwnerId = workshopOwner1.getId();
-        workshopOutputDtoFromInputDto1.workshopOwnerCompanyName = workshopOwner1.getCompanyName();
-        workshopOutputDtoFromInputDto1.averageRatingWorkshopOwnerReviews = null;
-        workshopOutputDtoFromInputDto1.numberOfReviews = null;
-        workshopOutputDtoFromInputDto1.amountOfFavsAndBookings = 0;
-
         authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
     }
+
+    @AfterEach
+    void tearDown() {
+        for (User user : userRepository.findAll()) {
+            user.setFavouriteWorkshops(null);
+            userRepository.save(user);
+        }
+
+        for (Workshop w : workshopRepository.findAll()) {
+            w.setWorkshopOwner(null);
+            workshopRepository.save(w);
+        }
+
+        userRepository.deleteAll();
+        workshopRepository.deleteAll();
+    }
+
 
     @Test
     void getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDateWithoutUser() throws Exception {
-        workshopOutputDto.isFavourite = false;
-
-        given(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(null)).willReturn(List.of(workshopOutputDto));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         mockMvc.perform(get("/workshops"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10L))
-                .andExpect(jsonPath("$[0].title").value("Kaarsen maken test"))
-                .andExpect(jsonPath("$[0].date").value("2023-09-25"))
-                .andExpect(jsonPath("$[0].startTime").value("16:00:00"))
-                .andExpect(jsonPath("$[0].endTime").value("18:00:00"))
-                .andExpect(jsonPath("$[0].price").value("45.0"))
-                .andExpect(jsonPath("$[0].inOrOutdoors").value("OUTDOORS"))
-                .andExpect(jsonPath("$[0].location").value("Amsterdam"))
-                .andExpect(jsonPath("$[0].highlightedInfo").value("Neem je regenjas mee"))
-                .andExpect(jsonPath("$[0].description").value("Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee."))
-                .andExpect(jsonPath("$[0].amountOfParticipants").value(10))
-                .andExpect(jsonPath("$[0].workshopCategory1").value("Koken"))
-                .andExpect(jsonPath("$[0].workshopCategory2").value("Handwerk"))
-                .andExpect(jsonPath("$[0].workshopVerified").value(true))
-                .andExpect(jsonPath("$[0].feedbackAdmin").value("mag online"))
-                .andExpect(jsonPath("$[0].publishWorkshop").value(true))
+                .andExpect(jsonPath("$[0].id").value(workshop.getId()))
+                .andExpect(jsonPath("$[0].title").value(workshop.getTitle()))
+                .andExpect(jsonPath("$[0].date").value(workshop.getDate().toString()))
+                .andExpect(jsonPath("$[0].startTime").value(workshop.getStartTime().format(formatter)))
+                .andExpect(jsonPath("$[0].endTime").value(workshop.getEndTime().format(formatter)))
+                .andExpect(jsonPath("$[0].price").value(Double.toString(workshop.getPrice())))
+                .andExpect(jsonPath("$[0].inOrOutdoors").value(workshop.getInOrOutdoors().toString()))
+                .andExpect(jsonPath("$[0].location").value(workshop.getLocation()))
+                .andExpect(jsonPath("$[0].highlightedInfo").value(workshop.getHighlightedInfo()))
+                .andExpect(jsonPath("$[0].description").value(workshop.getDescription()))
+                .andExpect(jsonPath("$[0].amountOfParticipants").value(workshop.getAmountOfParticipants()))
+                .andExpect(jsonPath("$[0].workshopCategory1").value(workshop.getWorkshopCategory1()))
+                .andExpect(jsonPath("$[0].workshopCategory2").value(workshop.getWorkshopCategory2()))
+                .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
+                .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
+                .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
                 .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
-                .andExpect(jsonPath("$[0].workshopOwnerId").value(1L))
-                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value("Test bedrijf"))
+                .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
-                .andExpect(jsonPath("$[0].isFavourite").value(false))
+                .andExpect(jsonPath("$[0].isFavourite").doesNotExist())
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
+                .andExpect(jsonPath("$[0].id").value(workshop.getId()))
+                .andExpect(jsonPath("$[0].title").value(workshop.getTitle()))
+                .andExpect(jsonPath("$[0].date").value(workshop.getDate().toString()))
+                .andExpect(jsonPath("$[0].startTime").value(workshop.getStartTime().format(formatter)))
+                .andExpect(jsonPath("$[0].endTime").value(workshop.getEndTime().format(formatter)))
+                .andExpect(jsonPath("$[0].price").value(Double.toString(workshop.getPrice())))
+                .andExpect(jsonPath("$[0].inOrOutdoors").value(workshop.getInOrOutdoors().toString()))
+                .andExpect(jsonPath("$[0].location").value(workshop.getLocation()))
+                .andExpect(jsonPath("$[0].highlightedInfo").value(workshop.getHighlightedInfo()))
+                .andExpect(jsonPath("$[0].description").value(workshop.getDescription()))
+                .andExpect(jsonPath("$[0].amountOfParticipants").value(workshop.getAmountOfParticipants()))
+                .andExpect(jsonPath("$[0].workshopCategory1").value(workshop.getWorkshopCategory1()))
+                .andExpect(jsonPath("$[0].workshopCategory2").value(workshop.getWorkshopCategory2()))
+                .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
+                .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
+                .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
+                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
+                .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
+                .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
+                .andExpect(jsonPath("$[0].isFavourite").doesNotExist())
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
+                .andExpect(jsonPath("$[1].id").value(workshop2.getId()))
+                .andExpect(jsonPath("$[1].title").value(workshop2.getTitle()))
+                .andExpect(jsonPath("$[1].date").value(workshop2.getDate().toString()))
+                .andExpect(jsonPath("$[1].startTime").value(workshop2.getStartTime().format(formatter)))
+                .andExpect(jsonPath("$[1].endTime").value(workshop2.getEndTime().format(formatter)))
+                .andExpect(jsonPath("$[1].price").value(Double.toString(workshop2.getPrice())))
+                .andExpect(jsonPath("$[1].inOrOutdoors").value(workshop2.getInOrOutdoors().toString()))
+                .andExpect(jsonPath("$[1].location").value(workshop2.getLocation()))
+                .andExpect(jsonPath("$[1].highlightedInfo").value(workshop2.getHighlightedInfo()))
+                .andExpect(jsonPath("$[1].description").value(workshop2.getDescription()))
+                .andExpect(jsonPath("$[1].amountOfParticipants").value(workshop2.getAmountOfParticipants()))
+                .andExpect(jsonPath("$[1].workshopCategory1").value(workshop2.getWorkshopCategory1()))
+                .andExpect(jsonPath("$[1].workshopCategory2").value(workshop2.getWorkshopCategory2()))
+                .andExpect(jsonPath("$[1].workshopVerified").value(workshop2.getWorkshopVerified()))
+                .andExpect(jsonPath("$[1].feedbackAdmin").value(workshop2.getFeedbackAdmin()))
+                .andExpect(jsonPath("$[1].publishWorkshop").value(workshop2.getPublishWorkshop()))
+                .andExpect(jsonPath("$[1].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[1].workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$[1].workshopOwnerCompanyName").value(workshop2.getWorkshopOwner().getCompanyName()))
+                .andExpect(jsonPath("$[1].averageRatingWorkshopOwnerReviews").doesNotExist())
+                .andExpect(jsonPath("$[1].numberOfReviews").doesNotExist())
+                .andExpect(jsonPath("$[1].isFavourite").doesNotExist())
+                .andExpect(jsonPath("$[1].amountOfFavsAndBookings").value(workshop2
+                        .calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[1].workshopPicUrl").value(workshop2.getWorkshopPicUrl()));
 
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(0))
-                .andExpect(jsonPath("$[0].workshopPicUrl").value("testurl"));
     }
 
     @Test
     void getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDateWithUser() throws Exception {
-        workshopOutputDto.isFavourite = true;
-        workshopOutputDto.amountOfFavsAndBookings = 1;
+        when(authentication.getName()).thenReturn(customer1.getEmail());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-        given(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(customer1.getId())).willReturn(List.of(workshopOutputDto));
-
-        mockMvc.perform(get("/workshops?userId=2"))
+        mockMvc.perform(get("/workshops?userId={userId}", customer1.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10L))
-                .andExpect(jsonPath("$[0].title").value("Kaarsen maken test"))
-                .andExpect(jsonPath("$[0].date").value("2023-09-25"))
-                .andExpect(jsonPath("$[0].startTime").value("16:00:00"))
-                .andExpect(jsonPath("$[0].endTime").value("18:00:00"))
-                .andExpect(jsonPath("$[0].price").value("45.0"))
-                .andExpect(jsonPath("$[0].inOrOutdoors").value("OUTDOORS"))
-                .andExpect(jsonPath("$[0].location").value("Amsterdam"))
-                .andExpect(jsonPath("$[0].highlightedInfo").value("Neem je regenjas mee"))
-                .andExpect(jsonPath("$[0].description").value("Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee."))
-                .andExpect(jsonPath("$[0].amountOfParticipants").value(10))
-                .andExpect(jsonPath("$[0].workshopCategory1").value("Koken"))
-                .andExpect(jsonPath("$[0].workshopCategory2").value("Handwerk"))
-                .andExpect(jsonPath("$[0].workshopVerified").value(true))
-                .andExpect(jsonPath("$[0].feedbackAdmin").value("mag online"))
-                .andExpect(jsonPath("$[0].publishWorkshop").value(true))
+                .andExpect(jsonPath("$[0].id").value(workshop.getId()))
+                .andExpect(jsonPath("$[0].title").value(workshop.getTitle()))
+                .andExpect(jsonPath("$[0].date").value(workshop.getDate().toString()))
+                .andExpect(jsonPath("$[0].startTime").value(workshop.getStartTime().format(formatter)))
+                .andExpect(jsonPath("$[0].endTime").value(workshop.getEndTime().format(formatter)))
+                .andExpect(jsonPath("$[0].price").value(Double.toString(workshop.getPrice())))
+                .andExpect(jsonPath("$[0].inOrOutdoors").value(workshop.getInOrOutdoors().toString()))
+                .andExpect(jsonPath("$[0].location").value(workshop.getLocation()))
+                .andExpect(jsonPath("$[0].highlightedInfo").value(workshop.getHighlightedInfo()))
+                .andExpect(jsonPath("$[0].description").value(workshop.getDescription()))
+                .andExpect(jsonPath("$[0].amountOfParticipants").value(workshop.getAmountOfParticipants()))
+                .andExpect(jsonPath("$[0].workshopCategory1").value(workshop.getWorkshopCategory1()))
+                .andExpect(jsonPath("$[0].workshopCategory2").value(workshop.getWorkshopCategory2()))
+                .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
+                .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
+                .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
                 .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
-                .andExpect(jsonPath("$[0].workshopOwnerId").value(1L))
-                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value("Test bedrijf"))
+                .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
-                .andExpect(jsonPath("$[0].isFavourite").value(true))
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(1))
-                .andExpect(jsonPath("$[0].workshopPicUrl").value("testurl"));
+                .andExpect(jsonPath("$[0].isFavourite").value(customer1.getFavouriteWorkshops().contains(workshop)))
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
+                .andExpect(jsonPath("$[0].id").value(workshop.getId()))
+                .andExpect(jsonPath("$[0].title").value(workshop.getTitle()))
+                .andExpect(jsonPath("$[0].date").value(workshop.getDate().toString()))
+                .andExpect(jsonPath("$[0].startTime").value(workshop.getStartTime().format(formatter)))
+                .andExpect(jsonPath("$[0].endTime").value(workshop.getEndTime().format(formatter)))
+                .andExpect(jsonPath("$[0].price").value(Double.toString(workshop.getPrice())))
+                .andExpect(jsonPath("$[0].inOrOutdoors").value(workshop.getInOrOutdoors().toString()))
+                .andExpect(jsonPath("$[0].location").value(workshop.getLocation()))
+                .andExpect(jsonPath("$[0].highlightedInfo").value(workshop.getHighlightedInfo()))
+                .andExpect(jsonPath("$[0].description").value(workshop.getDescription()))
+                .andExpect(jsonPath("$[0].amountOfParticipants").value(workshop.getAmountOfParticipants()))
+                .andExpect(jsonPath("$[0].workshopCategory1").value(workshop.getWorkshopCategory1()))
+                .andExpect(jsonPath("$[0].workshopCategory2").value(workshop.getWorkshopCategory2()))
+                .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
+                .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
+                .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
+                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
+                .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
+                .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
+                .andExpect(jsonPath("$[0].isFavourite").value(customer1.getFavouriteWorkshops().contains(workshop)))
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
+                .andExpect(jsonPath("$[1].id").value(workshop2.getId()))
+                .andExpect(jsonPath("$[1].title").value(workshop2.getTitle()))
+                .andExpect(jsonPath("$[1].date").value(workshop2.getDate().toString()))
+                .andExpect(jsonPath("$[1].startTime").value(workshop2.getStartTime().format(formatter)))
+                .andExpect(jsonPath("$[1].endTime").value(workshop2.getEndTime().format(formatter)))
+                .andExpect(jsonPath("$[1].price").value(Double.toString(workshop2.getPrice())))
+                .andExpect(jsonPath("$[1].inOrOutdoors").value(workshop2.getInOrOutdoors().toString()))
+                .andExpect(jsonPath("$[1].location").value(workshop2.getLocation()))
+                .andExpect(jsonPath("$[1].highlightedInfo").value(workshop2.getHighlightedInfo()))
+                .andExpect(jsonPath("$[1].description").value(workshop2.getDescription()))
+                .andExpect(jsonPath("$[1].amountOfParticipants").value(workshop2.getAmountOfParticipants()))
+                .andExpect(jsonPath("$[1].workshopCategory1").value(workshop2.getWorkshopCategory1()))
+                .andExpect(jsonPath("$[1].workshopCategory2").value(workshop2.getWorkshopCategory2()))
+                .andExpect(jsonPath("$[1].workshopVerified").value(workshop2.getWorkshopVerified()))
+                .andExpect(jsonPath("$[1].feedbackAdmin").value(workshop2.getFeedbackAdmin()))
+                .andExpect(jsonPath("$[1].publishWorkshop").value(workshop2.getPublishWorkshop()))
+                .andExpect(jsonPath("$[1].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[1].workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$[1].workshopOwnerCompanyName").value(workshop2.getWorkshopOwner().getCompanyName()))
+                .andExpect(jsonPath("$[1].averageRatingWorkshopOwnerReviews").doesNotExist())
+                .andExpect(jsonPath("$[1].numberOfReviews").doesNotExist())
+                .andExpect(jsonPath("$[1].isFavourite").value(customer1.getFavouriteWorkshops().contains(workshop2)))
+                .andExpect(jsonPath("$[1].amountOfFavsAndBookings").value(workshop2
+                        .calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[1].workshopPicUrl").value(workshop2.getWorkshopPicUrl()));
+
     }
+
 
     @Test
     void addOrRemoveWorkshopFavourites() throws Exception {
-        workshopOutputDto.isFavourite = false;
-        workshopOutputDto.amountOfFavsAndBookings = 0;
-        given(workshopService.addOrRemoveWorkshopFavourites(customer1.getId(), workshop.getId(), false)).willReturn(List.of(workshopOutputDto));
+        when(authentication.getName()).thenReturn(customer1.getEmail());
 
-        mockMvc.perform(put("/workshops/favourite/2/10?favourite=false"))
+        MvcResult result = mockMvc.perform(put("/workshops/favourite/{userId}/{workshopId}?favourite=true", customer1.getId(), workshop2.getId()))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$[0].id").value(10L))
-                .andExpect(jsonPath("$[0].title").value("Kaarsen maken test"))
-                .andExpect(jsonPath("$[0].date").value("2023-09-25"))
-                .andExpect(jsonPath("$[0].startTime").value("16:00:00"))
-                .andExpect(jsonPath("$[0].endTime").value("18:00:00"))
-                .andExpect(jsonPath("$[0].price").value("45.0"))
-                .andExpect(jsonPath("$[0].inOrOutdoors").value("OUTDOORS"))
-                .andExpect(jsonPath("$[0].location").value("Amsterdam"))
-                .andExpect(jsonPath("$[0].highlightedInfo").value("Neem je regenjas mee"))
-                .andExpect(jsonPath("$[0].description").value("Een hele leuke workshop, nummer 1, met kaarsen maken en een regenjas mee."))
-                .andExpect(jsonPath("$[0].amountOfParticipants").value(10))
-                .andExpect(jsonPath("$[0].workshopCategory1").value("Koken"))
-                .andExpect(jsonPath("$[0].workshopCategory2").value("Handwerk"))
-                .andExpect(jsonPath("$[0].workshopVerified").value(true))
-                .andExpect(jsonPath("$[0].feedbackAdmin").value("mag online"))
-                .andExpect(jsonPath("$[0].publishWorkshop").value(true))
-                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
-                .andExpect(jsonPath("$[0].workshopOwnerId").value(1L))
-                .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value("Test bedrijf"))
-                .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
-                .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
-                .andExpect(jsonPath("$[0].isFavourite").value(false))
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(0))
-                .andExpect(jsonPath("$[0].workshopPicUrl").value("testurl"));
-    }
+                .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        List<WorkshopOutputDto> actualOutput = objectMapper.readValue(responseBody, new TypeReference<List<WorkshopOutputDto>>() {
+        });
+
+        List<WorkshopOutputDto> expectedOutput = new ArrayList<>(List.of(workshopOutputDto, workshopOutputDto2));
+
+        assertEquals(expectedOutput.size(), actualOutput.size());
+
+       WorkshopOutputDto sutWorkshopOutputDto = actualOutput.stream()
+                .filter(item -> item.title.equals(workshopOutputDto.title))
+                .findFirst().get();
+
+        WorkshopOutputDto sutWorkshopOutputDto2 = actualOutput.stream()
+                .filter(item -> item.title.equals(workshopOutputDto2.title))
+                .findFirst().get();
+
+
+        // TODO: 14/08/2023   // test de required fields alleen - want in de service test test je of de save en transfer goed gaat. test hier alleen de gehele lijn.
+                    assertEquals(workshopOutputDto.date, sutWorkshopOutputDto.date);
+                    assertEquals(workshopOutputDto.startTime, sutWorkshopOutputDto.startTime);
+                    assertEquals(workshopOutputDto.endTime, sutWorkshopOutputDto.endTime);
+                    assertEquals(workshopOutputDto.description, sutWorkshopOutputDto.description);
+                    assertEquals(workshopOutputDto.price, sutWorkshopOutputDto.price);
+                    assertEquals(workshopOutputDto.inOrOutdoors, sutWorkshopOutputDto.inOrOutdoors);
+                    assertEquals(workshopOutputDto.location, sutWorkshopOutputDto.location);
+                    assertEquals(workshopOutputDto.description, sutWorkshopOutputDto.description);
+                    assertEquals(workshopOutputDto.amountOfParticipants, sutWorkshopOutputDto.amountOfParticipants);
+                    assertEquals(workshopOutputDto.workshopCategory1, sutWorkshopOutputDto.workshopCategory1);
+
+
+                    assertEquals(workshopOutputDto2.date, sutWorkshopOutputDto2.date);
+                    assertEquals(workshopOutputDto2.startTime, sutWorkshopOutputDto2.startTime);
+                    assertEquals(workshopOutputDto2.endTime, sutWorkshopOutputDto2.endTime);
+                    assertEquals(workshopOutputDto2.description, sutWorkshopOutputDto2.description);
+                    assertEquals(workshopOutputDto2.price, sutWorkshopOutputDto2.price);
+                    assertEquals(workshopOutputDto2.inOrOutdoors, sutWorkshopOutputDto2.inOrOutdoors);
+                    assertEquals(workshopOutputDto2.location, sutWorkshopOutputDto2.location);
+                    assertEquals(workshopOutputDto2.description, sutWorkshopOutputDto2.description);
+                    assertEquals(workshopOutputDto2.amountOfParticipants, sutWorkshopOutputDto2.amountOfParticipants);
+                    assertEquals(workshopOutputDto2.workshopCategory1, sutWorkshopOutputDto2.workshopCategory1);
+
+                }
+
 
     @Test
     @Transactional
     void createWorkshopWithoutFileAndWithInputDto() throws Exception {
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
         when(authentication.getName()).thenReturn(workshopOwner1.getEmail());
-        System.out.println(workshopOutputDtoFromInputDto1.id);
-
-        when(workshopService.createWorkshop(eq(workshopOwner1.getId()), eq(workshopInputDto1)))
-                .thenReturn(workshopOutputDtoFromInputDto1);
-
-        given(workshopService.createWorkshop(
-                eq(workshopOwner1.getId()),
-                argThat(dto -> workshopOutputDtoFromInputDto1.title.equals(workshopInputDto1.title))))
-                .willReturn(workshopOutputDtoFromInputDto1);
 
         MockMultipartFile workshopInputDto = new MockMultipartFile(
                 "workshopInputDto",
@@ -298,26 +481,25 @@ class WorkshopControllerTest {
         mockMvc.perform(multipart("/workshops/workshopowner/{workshopOwnerId}", workshopOwner1.getId())
                         .file(workshopInputDto))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", matchesPattern("http://localhost/workshops/workshopowner/1/1")))
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.title").value("Taart bakken"))
-                .andExpect(jsonPath("$.date").value("2023-10-05"))
-                .andExpect(jsonPath("$.startTime").value("16:00:00"))
-                .andExpect(jsonPath("$.endTime").value("19:00:00"))
-                .andExpect(jsonPath("$.price").value("99.0"))
-                .andExpect(jsonPath("$.inOrOutdoors").value("INDOORS"))
-                .andExpect(jsonPath("$.location").value("Utrecht"))
-                .andExpect(jsonPath("$.highlightedInfo").value("Neem je lekkerste specerijen mee"))
-                .andExpect(jsonPath("$.description").value("Een workshop taart bakken in Utrecht. Neem al je vrienden mee en bak de lekkerste taart die je ooit gemaakt hebt. Je mag de taart mee naar huis nemen. En als je je favoriete specerijen meeneemt, kunnen we een improvisatie taart maken."))
-                .andExpect(jsonPath("$.amountOfParticipants").value(8))
-                .andExpect(jsonPath("$.workshopCategory1").value("Bakken"))
-                .andExpect(jsonPath("$.workshopCategory2").value("Koken"))
+                .andExpect(jsonPath("$.id").value(notNullValue()))
+                .andExpect(jsonPath("$.title").value(workshopInputDto1.title))
+                .andExpect(jsonPath("$.date").value(workshopInputDto1.date.toString()))
+                .andExpect(jsonPath("$.startTime").value(workshopInputDto1.startTime.format(formatter)))
+                .andExpect(jsonPath("$.endTime").value(workshopInputDto1.endTime.format(formatter)))
+                .andExpect(jsonPath("$.price").value(Double.toString(workshopInputDto1.price)))
+                .andExpect(jsonPath("$.inOrOutdoors").value(workshopInputDto1.inOrOutdoors.toString()))
+                .andExpect(jsonPath("$.location").value(workshopInputDto1.location))
+                .andExpect(jsonPath("$.highlightedInfo").value(workshopInputDto1.highlightedInfo))
+                .andExpect(jsonPath("$.description").value(workshopInputDto1.description))
+                .andExpect(jsonPath("$.amountOfParticipants").value(workshopInputDto1.amountOfParticipants))
+                .andExpect(jsonPath("$.workshopCategory1").value(workshopInputDto1.workshopCategory1))
+                .andExpect(jsonPath("$.workshopCategory2").value(workshopInputDto1.workshopCategory2))
                 .andExpect(jsonPath("$.workshopVerified").doesNotExist())
                 .andExpect(jsonPath("$.feedbackAdmin").doesNotExist())
                 .andExpect(jsonPath("$.publishWorkshop").doesNotExist())
                 .andExpect(jsonPath("$.workshopOwnerReviews").value(new ArrayList<>()))
-                .andExpect(jsonPath("$.workshopOwnerId").value(1L))
-                .andExpect(jsonPath("$.workshopOwnerCompanyName").value("Test bedrijf"))
+                .andExpect(jsonPath("$.workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$.workshopOwnerCompanyName").value(workshopOwner1.getCompanyName()))
                 .andExpect(jsonPath("$.averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$.numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$.isFavourite").doesNotExist())
@@ -328,22 +510,9 @@ class WorkshopControllerTest {
     @Test
     @Transactional
     void createWorkshopWithFileAndWithInputDto() throws Exception {
-
-        workshopOutputDtoFromInputDto1.workshopPicUrl = "http://localhost8080/downloadworkshoppic/1";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         when(authentication.getName()).thenReturn(workshopOwner1.getEmail());
-        System.out.println(workshopOutputDtoFromInputDto1.id);
-
-        when(workshopService.createWorkshop(eq(workshopOwner1.getId()), eq(workshopInputDto1)))
-                .thenReturn(workshopOutputDtoFromInputDto1);
-
-        when(fileService.uploadWorkshopPic(any(MultipartFile.class), anyString(), anyLong()))
-                .thenReturn("mockedFileName");
-
-        given(workshopService.createWorkshop(
-                eq(workshopOwner1.getId()),
-                argThat(dto -> workshopOutputDtoFromInputDto1.title.equals(workshopInputDto1.title))))
-                .willReturn(workshopOutputDtoFromInputDto1);
 
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.jpg", MediaType.IMAGE_JPEG_VALUE, new byte[0]);
@@ -360,30 +529,30 @@ class WorkshopControllerTest {
                         .file(file)
                         .contentType("multipart/form-data"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.title").value("Taart bakken"))
-                .andExpect(jsonPath("$.date").value("2023-10-05"))
-                .andExpect(jsonPath("$.startTime").value("16:00:00"))
-                .andExpect(jsonPath("$.endTime").value("19:00:00"))
-                .andExpect(jsonPath("$.price").value("99.0"))
-                .andExpect(jsonPath("$.inOrOutdoors").value("INDOORS"))
-                .andExpect(jsonPath("$.location").value("Utrecht"))
-                .andExpect(jsonPath("$.highlightedInfo").value("Neem je lekkerste specerijen mee"))
-                .andExpect(jsonPath("$.description").value("Een workshop taart bakken in Utrecht. Neem al je vrienden mee en bak de lekkerste taart die je ooit gemaakt hebt. Je mag de taart mee naar huis nemen. En als je je favoriete specerijen meeneemt, kunnen we een improvisatie taart maken."))
-                .andExpect(jsonPath("$.amountOfParticipants").value(8))
-                .andExpect(jsonPath("$.workshopCategory1").value("Bakken"))
-                .andExpect(jsonPath("$.workshopCategory2").value("Koken"))
+                .andExpect(jsonPath("$.id").value(notNullValue()))
+                .andExpect(jsonPath("$.title").value(workshopInputDto1.title))
+                .andExpect(jsonPath("$.date").value(workshopInputDto1.date.toString()))
+                .andExpect(jsonPath("$.startTime").value(workshopInputDto1.startTime.format(formatter)))
+                .andExpect(jsonPath("$.endTime").value(workshopInputDto1.endTime.format(formatter)))
+                .andExpect(jsonPath("$.price").value(Double.toString(workshopInputDto1.price)))
+                .andExpect(jsonPath("$.inOrOutdoors").value(workshopInputDto1.inOrOutdoors.toString()))
+                .andExpect(jsonPath("$.location").value(workshopInputDto1.location))
+                .andExpect(jsonPath("$.highlightedInfo").value(workshopInputDto1.highlightedInfo))
+                .andExpect(jsonPath("$.description").value(workshopInputDto1.description))
+                .andExpect(jsonPath("$.amountOfParticipants").value(workshopInputDto1.amountOfParticipants))
+                .andExpect(jsonPath("$.workshopCategory1").value(workshopInputDto1.workshopCategory1))
+                .andExpect(jsonPath("$.workshopCategory2").value(workshopInputDto1.workshopCategory2))
                 .andExpect(jsonPath("$.workshopVerified").doesNotExist())
                 .andExpect(jsonPath("$.feedbackAdmin").doesNotExist())
                 .andExpect(jsonPath("$.publishWorkshop").doesNotExist())
                 .andExpect(jsonPath("$.workshopOwnerReviews").value(new ArrayList<>()))
-                .andExpect(jsonPath("$.workshopOwnerId").value(1L))
-                .andExpect(jsonPath("$.workshopOwnerCompanyName").value("Test bedrijf"))
+                .andExpect(jsonPath("$.workshopOwnerId").value(workshopOwner1.getId()))
+                .andExpect(jsonPath("$.workshopOwnerCompanyName").value(workshopOwner1.getCompanyName()))
                 .andExpect(jsonPath("$.averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$.numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$.isFavourite").doesNotExist())
                 .andExpect(jsonPath("$.amountOfFavsAndBookings").value(0))
-                .andExpect(jsonPath("$.workshopPicUrl").value("http://localhost8080/downloadworkshoppic/1"));
+                .andExpect(jsonPath("$.workshopPicUrl").value(notNullValue()));
     }
 
 

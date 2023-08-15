@@ -72,7 +72,9 @@ public class Workshop {
 
     public int calculateAmountOfFavsAndBookingsWorkshop(){
         int popularityNumber = 0;
-        popularityNumber += this.getFavsUser().size();
+        if (this.getFavsUser() != null){
+            popularityNumber += this.getFavsUser().size();
+        }
         if (this.getWorkshopBookings() != null) {
             for (Booking booking : this.getWorkshopBookings()) {
                 popularityNumber += booking.getAmount();
