@@ -112,15 +112,28 @@ public class UserService {
         }
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
         if (workshopOwnerVerified) {
-            workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
-        }
-        if (!workshopOwnerVerified) {
-            Optional authority = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny();
-            if (authority.isPresent()) {
-                Authority authorityToRemove = (Authority) authority.get();
-                workshopOwner.removeAuthority(authorityToRemove);
+            for (Authority authority : workshopOwner.getAuthorities()) {
+                if (authority.getAuthority().equals("ROLE_WORKSHOPOWNER")) {
+                    break;
+                }
+                else {
+                    workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
+                }
             }
         }
+        if (!workshopOwnerVerified) {
+            for (Authority authority : workshopOwner.getAuthorities()) {
+                if (authority.getAuthority().equals("ROLE_WORKSHOPOWNER")) {
+                    workshopOwner.getAuthorities().remove(authority);
+                }
+            }
+        }
+//            Optional authority = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny();
+//            if (authority.isPresent()) {
+//                Authority authorityToRemove = (Authority) authority.get();
+//                workshopOwner.removeAuthority(authorityToRemove);
+//            }
+//        }
         userRepository.save(workshopOwner);
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
