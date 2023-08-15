@@ -231,10 +231,7 @@ class BookingServiceTest {
     void shouldReturnAllBookingsFromUser() {
         //        Arrange
         List<BookingOutputDto> bookingOutputDtos = List.of(bookingOutputDto1, bookingOutputDto2);
-
         when(userRepository.findById(customer1.getId())).thenReturn(Optional.of(customer1));
-
-        //Dit is om te checken of de juiste persoon de juiste gegevens opvraagt
         when(authentication.getName()).thenReturn(customer1.getEmail());
 
         //        Act
@@ -271,7 +268,6 @@ class BookingServiceTest {
     void shouldReturnAllBookingsFromWorkshop() {
         //        Arrange
         List<BookingOutputDto> bookingOutputDtos = List.of(bookingOutputDto1, bookingOutputDto3);
-
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(authentication.getName()).thenReturn(customer2.getEmail());
 
@@ -306,7 +302,6 @@ class BookingServiceTest {
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectWhenRequestingAllBookingsFromWorkshop() {
         //        Arrange
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
-
         when(authentication.getName()).thenReturn(customer1.getEmail());
 
         //        Act
@@ -321,10 +316,8 @@ class BookingServiceTest {
     void shouldReturnAllBookingsFromWorkshopsFromWorkshopOwner() {
         //        Arrange
         List<BookingOutputDto> bookingOutputDtos = List.of(bookingOutputDto1, bookingOutputDto3);
-
         when(userRepository.findById(customer2.getId())).thenReturn(Optional.of(customer2));
         when(workshopRepository.findByWorkshopOwnerId(customer2.getId())).thenReturn(List.of(workshop1));
-
         when(authentication.getName()).thenReturn(customer2.getEmail());
 
         //        Act
@@ -358,7 +351,6 @@ class BookingServiceTest {
     void shouldReturnForbiddenExceptionWhenUserIsIncorrectInGetAllBookingsFromWorkshopsFromWorkshopOwner() {
         //        Arrange
         when(userRepository.findById(customer2.getId())).thenReturn(Optional.of(customer2));
-
         when(authentication.getName()).thenReturn(customer1.getEmail());
 
         //        Act
@@ -373,7 +365,6 @@ class BookingServiceTest {
     void shouldReturnAllBookings() {
         //        Arrange
         List<BookingOutputDto> bookingOutputDtos = List.of(bookingOutputDto1, bookingOutputDto2, bookingOutputDto3, bookingOutputDto4);
-
         when(bookingRepository.findAll()).thenReturn(List.of(booking1, booking2, booking3, booking4));
 
         //        Act
@@ -431,7 +422,6 @@ class BookingServiceTest {
         assertEquals(bookingOutputDto1.lastNameCustomer, bookingOutputDtoExpected.lastNameCustomer);
         assertEquals(bookingOutputDto1.emailCustomer, bookingOutputDtoExpected.emailCustomer);
         assertEquals(bookingOutputDto1.reviewCustomerWritten, bookingOutputDtoExpected.reviewCustomerWritten);
-
     }
 
     @Test
@@ -453,7 +443,6 @@ class BookingServiceTest {
         List<Booking> workshopOwner1Bookings = new ArrayList<>(List.of(booking2, booking4));
         when(userRepository.findById(workshopOwner1.getId())).thenReturn(Optional.of(workshopOwner1));
         when(workshopRepository.findByWorkshopOwnerId(workshopOwner1.getId())).thenReturn(List.of(workshop2));
-
         when(authentication.getName()).thenReturn(workshopOwner1.getEmail());
 
         StringBuilder csvContent = new StringBuilder();
@@ -505,7 +494,6 @@ class BookingServiceTest {
         List<Booking> workshop1Bookings = new ArrayList<>(List.of(booking1, booking3));
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(authentication.getName()).thenReturn(customer2.getEmail());
-
         StringBuilder csvContent = new StringBuilder();
         csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
 
@@ -589,7 +577,6 @@ class BookingServiceTest {
         when(authentication.getName()).thenReturn(customer1.getEmail());
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-
         //        Act
         BookingOutputDto bookingOutputDto = bookingService.createBooking(customer1.getId(), workshop1.getId(), bookingInputDto1);
 
@@ -613,7 +600,6 @@ class BookingServiceTest {
     void shouldReturnBadRequestExceptionWhenWorkshopDateIsInThePastInCreateBooking() {
         //        Arrange
         workshop1.setDate(LocalDate.of(2023, 4, 15));
-
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
 
         //        Act
