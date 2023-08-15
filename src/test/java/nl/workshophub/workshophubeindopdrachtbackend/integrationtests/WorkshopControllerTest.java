@@ -11,8 +11,6 @@ import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Workshop;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.WorkshopRepository;
-import nl.workshophub.workshophubeindopdrachtbackend.services.FileService;
-import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,21 +44,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class WorkshopControllerTest {
-
     @Autowired
     MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private WorkshopService workshopService;
-    @Autowired
-    private FileService fileService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private WorkshopRepository workshopRepository;
-
     @MockBean
     private Authentication authentication;
 
@@ -68,7 +57,6 @@ class WorkshopControllerTest {
     Workshop workshop2;
     WorkshopOutputDto workshopOutputDto;
     WorkshopOutputDto workshopOutputDto2;
-    WorkshopOutputDto workshopOutputDtoFromInputDto1;
     WorkshopInputDto workshopInputDto1;
     User workshopOwner1;
     User customer1;
@@ -264,7 +252,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
                 .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
                 .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
-                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList<>()))
                 .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
                 .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
@@ -288,7 +276,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
                 .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
                 .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
-                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList<>()))
                 .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
                 .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
@@ -312,7 +300,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[1].workshopVerified").value(workshop2.getWorkshopVerified()))
                 .andExpect(jsonPath("$[1].feedbackAdmin").value(workshop2.getFeedbackAdmin()))
                 .andExpect(jsonPath("$[1].publishWorkshop").value(workshop2.getPublishWorkshop()))
-                .andExpect(jsonPath("$[1].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[1].workshopOwnerReviews").value(new ArrayList<>()))
                 .andExpect(jsonPath("$[1].workshopOwnerId").value(workshopOwner1.getId()))
                 .andExpect(jsonPath("$[1].workshopOwnerCompanyName").value(workshop2.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[1].averageRatingWorkshopOwnerReviews").doesNotExist())
@@ -347,7 +335,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
                 .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
                 .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
-                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList<>()))
                 .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
                 .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
@@ -371,7 +359,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].workshopVerified").value(workshop.getWorkshopVerified()))
                 .andExpect(jsonPath("$[0].feedbackAdmin").value(workshop.getFeedbackAdmin()))
                 .andExpect(jsonPath("$[0].publishWorkshop").value(workshop.getPublishWorkshop()))
-                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[0].workshopOwnerReviews").value(new ArrayList<>()))
                 .andExpect(jsonPath("$[0].workshopOwnerId").value(workshopOwner1.getId()))
                 .andExpect(jsonPath("$[0].workshopOwnerCompanyName").value(workshop.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
@@ -395,7 +383,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[1].workshopVerified").value(workshop2.getWorkshopVerified()))
                 .andExpect(jsonPath("$[1].feedbackAdmin").value(workshop2.getFeedbackAdmin()))
                 .andExpect(jsonPath("$[1].publishWorkshop").value(workshop2.getPublishWorkshop()))
-                .andExpect(jsonPath("$[1].workshopOwnerReviews").value(new ArrayList()))
+                .andExpect(jsonPath("$[1].workshopOwnerReviews").value(new ArrayList<>()))
                 .andExpect(jsonPath("$[1].workshopOwnerId").value(workshopOwner1.getId()))
                 .andExpect(jsonPath("$[1].workshopOwnerCompanyName").value(workshop2.getWorkshopOwner().getCompanyName()))
                 .andExpect(jsonPath("$[1].averageRatingWorkshopOwnerReviews").doesNotExist())
@@ -420,7 +408,7 @@ class WorkshopControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        List<WorkshopOutputDto> actualOutput = objectMapper.readValue(responseBody, new TypeReference<List<WorkshopOutputDto>>() {
+        List<WorkshopOutputDto> actualOutput = objectMapper.readValue(responseBody, new TypeReference<>() {
         });
 
         List<WorkshopOutputDto> expectedOutput = new ArrayList<>(List.of(workshopOutputDto, workshopOutputDto2));

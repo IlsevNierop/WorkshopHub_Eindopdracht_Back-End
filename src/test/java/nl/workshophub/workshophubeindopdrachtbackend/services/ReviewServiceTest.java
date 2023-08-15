@@ -462,8 +462,8 @@ class ReviewServiceTest {
         Review savedReview = reviewCaptor.getValue();
         assertEquals(reviewInputDto1.rating, savedReview.getRating());
         assertEquals(reviewInputDto1.reviewDescription, savedReview.getReviewDescription());
-        assertEquals(null, savedReview.getReviewVerified());
-        assertEquals(null, savedReview.getFeedbackAdmin());
+        assertNull(savedReview.getReviewVerified());
+        assertNull(savedReview.getFeedbackAdmin());
         assertEquals(customer1, savedReview.getCustomer());
         assertEquals(workshop3, savedReview.getWorkshop());
         assertEquals(reviewInputDto1.rating, reviewOutputDto.rating);
@@ -536,7 +536,6 @@ class ReviewServiceTest {
         //        Arrange
         when(reviewRepository.findById(review1.getId())).thenReturn(Optional.of(review1));
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
         reviewInputDto1.reviewVerified = false;
         reviewInputDto1.feedbackAdmin = "Test Verify Review";
 
@@ -576,7 +575,7 @@ class ReviewServiceTest {
         Review savedReview = reviewCaptor.getValue();
         assertEquals(reviewInputDto1.rating, savedReview.getRating());
         assertEquals(reviewInputDto1.reviewDescription, savedReview.getReviewDescription());
-        assertEquals(null, savedReview.getReviewVerified());
+        assertNull(savedReview.getReviewVerified());
         assertEquals(reviewInputDto1.feedbackAdmin, savedReview.getFeedbackAdmin());
         assertEquals(customer1, savedReview.getCustomer());
         assertEquals(workshop1, savedReview.getWorkshop());
