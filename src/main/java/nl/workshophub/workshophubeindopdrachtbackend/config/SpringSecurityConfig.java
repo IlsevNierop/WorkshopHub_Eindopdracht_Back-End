@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -21,48 +20,34 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SpringSecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-
     private final JwtRequestFilter jwtRequestFilter;
+    private final PasswordEncoder passwordEncoder;
 
-    public SpringSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtRequestFilter jwtRequestFilter) {
+    public SpringSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtRequestFilter jwtRequestFilter, PasswordEncoder passwordEncoder) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtRequestFilter = jwtRequestFilter;
+        this.passwordEncoder = passwordEncoder;
     }
 
-
-    // Authenticatie met customUserDetailsService en passwordEncoder
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder())
+                .passwordEncoder(passwordEncoder)
                 .and()
                 .build();
     }
-
-
-    // PasswordEncoderBean. Deze kun je overal in je applicatie injecteren waar nodig.
-    // Je kunt dit ook in een aparte configuratie klasse zetten.
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    // Authorizatie met jwt
     @Bean
     protected SecurityFilterChain filter(HttpSecurity http) throws Exception {
-
         //JWT token authentication
         http
                 .csrf().disable()
                 .httpBasic().disable()
                 .cors().and()
                 .authorizeHttpRequests()
-//                .requestMatchers("/**").permitAll()
-                //authentication
-                .requestMatchers("/authenticated").authenticated()
-                .requestMatchers("/signin").permitAll()
+//
                 //.................................open.................................
+                .requestMatchers("/signin").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users/customer").permitAll() //everyone can register //post
                 .requestMatchers(HttpMethod.POST, "/users/workshopowner").permitAll() //everyone can register //post
                 .requestMatchers(HttpMethod.GET, "/workshops").permitAll() //everyone can see the workshop calendar //get
@@ -78,6 +63,7 @@ public class SpringSecurityConfig {
 
                 //...............................authority: customer...............................
 
+                .requestMatchers("/authenticated").authenticated()
                 .requestMatchers("/uploadprofilepic/{userId}").authenticated() //post
                 .requestMatchers("/deleteprofilepic/{userId}").authenticated() //delete
 
@@ -94,6 +80,7 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/bookings/{bookingId}").authenticated() //put
                 .requestMatchers(HttpMethod.POST, "/bookings/{customerId}/{workshopId}").authenticated() //post
                 .requestMatchers(HttpMethod.DELETE, "/bookings/{bookingId}").authenticated() //delete
+
                 .requestMatchers(HttpMethod.GET, "/reviews/customer/{customerId}").authenticated() //get
                 .requestMatchers(HttpMethod.POST, "/reviews/{workshopId}/{customerId}").authenticated() //post
                 .requestMatchers(HttpMethod.PUT, "/reviews/{customerId}/{reviewId}").authenticated() //put
