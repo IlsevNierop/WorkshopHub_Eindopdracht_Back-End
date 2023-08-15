@@ -69,14 +69,14 @@ public class UserController {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        if (customerInputDto.workshopOwner == true) {
+        if (customerInputDto.workshopOwner) {
             return ResponseEntity.badRequest().body("To create a new account for a workshopowner you need to use a different link and more details are required.");
         }
         UserCustomerOutputDto customerOutputDto = userService.createCustomer(customerInputDto);
 
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + customerOutputDto.id).toUriString());
 
-        //also return a token, so a user can be logged in directly on front-end side
+        //return a token, so a user can be logged in directly on front-end side
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(customerOutputDto.email);
 
@@ -90,13 +90,13 @@ public class UserController {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        if (workshopOwnerInputDto.workshopOwner == false) {
+        if (!workshopOwnerInputDto.workshopOwner) {
             return ResponseEntity.badRequest().body("To create a new customer you need to use another link and less information is required.");
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.createWorkshopOwner(workshopOwnerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
 
-        //also return a token, so a user can be logged in directly on front-end side
+        //return a token, so a user can be logged in directly on front-end side
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(workshopOwnerOutputDto.email);
 
@@ -112,29 +112,13 @@ public class UserController {
         return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
     }
 
-    //create update essentials vs update non essentials
-
-//    @PutMapping("/customer/{customerId}")
-//    @Transactional
-//    public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDto customerInputDto, BindingResult bindingResult) {
-//        if (bindingResult.hasFieldErrors()) {
-//            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
-//        }
-//        if (customerInputDto.workshopOwner == true) {
-//            return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
-//        }
-//        UserCustomerOutputDto customerOutputDto = userService.updateCustomer(customerId, customerInputDto);
-//
-//        return new ResponseEntity<>(customerOutputDto, HttpStatus.OK);
-//    }
-
     @PutMapping("/customer/{customerId}")
     @Transactional
     public ResponseEntity<Object> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UserCustomerInputDtoExclPassword customerInputDtoExclPassword, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        if (customerInputDtoExclPassword.workshopOwner == true) {
+        if (customerInputDtoExclPassword.workshopOwner) {
             return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
         }
         UserCustomerOutputDto customerOutputDto = userService.updateCustomer(customerId, customerInputDtoExclPassword);
@@ -155,7 +139,7 @@ public class UserController {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-        if (workshopOwnerInputDtoExclPassword.workshopOwner == false) {
+        if (!workshopOwnerInputDtoExclPassword.workshopOwner) {
             return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDtoExclPassword);
@@ -167,19 +151,6 @@ public class UserController {
 
         return new ResponseEntity<>(new AuthenticationOutputDto(jwt), HttpStatus.ACCEPTED);
     }
-
-//    @PutMapping("/workshopowner/{workshopOwnerId}")
-//    @Transactional
-//    public ResponseEntity<Object> updateWorkshopOwner(@PathVariable Long workshopOwnerId, @Valid @RequestBody UserWorkshopOwnerInputDto workshopOwnerInputDto, BindingResult bindingResult) {
-//        if (bindingResult.hasFieldErrors()) {
-//            return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
-//        }
-//        if (workshopOwnerInputDto.workshopOwner == false) {
-//            return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
-//        }
-//        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDto);
-//        return new ResponseEntity<>(workshopOwnerOutputDto, HttpStatus.OK);
-//    }
 
     @PutMapping ("/passwordrequest/{email}")
     public ResponseEntity<String> updatePassword(@PathVariable("email") String email, @Valid @RequestBody PasswordInputDto passwordInputDto, BindingResult bindingResult){

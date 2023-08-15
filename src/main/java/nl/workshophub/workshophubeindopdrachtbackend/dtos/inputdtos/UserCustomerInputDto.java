@@ -28,10 +28,6 @@ public class UserCustomerInputDto {
     @NotNull(message= "You should choose between workshop owner or customer.")
     public Boolean workshopOwner;
 
-    //security
-    public Boolean enabled;
-    public String apikey;
-
     @JsonSerialize
     public Set<Authority> authorities;
 

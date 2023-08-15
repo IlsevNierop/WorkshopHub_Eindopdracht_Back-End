@@ -1,7 +1,5 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
-
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.UsernameNotFoundException;
 import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
@@ -21,8 +19,6 @@ import java.util.Set;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    /*inject userservice */
-
     private final UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
@@ -34,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
 
         Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmailIgnoreCase(email));
-        if (!optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
             throw new UsernameNotFoundException("The user with " + email + " doesn't exist.");
         }
         User user = optionalUser.get();

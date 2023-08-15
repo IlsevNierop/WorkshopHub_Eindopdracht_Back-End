@@ -16,10 +16,6 @@ public class UserCustomerOutputDto {
 
     public String profilePicUrl;
 
-    //security
-    public Boolean enabled;
-//    public String apikey;
-
     @JsonSerialize
     public Set<Authority> authorities;
 
