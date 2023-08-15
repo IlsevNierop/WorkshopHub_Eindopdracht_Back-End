@@ -7,9 +7,6 @@ import java.util.Set;
 
 public class UserWorkshopOwnerOutputDto {
 
-    //later verwijderen als security goed aangepast is
-//    public String username;
-
     public Long id;
 
     public String firstName;
@@ -23,10 +20,6 @@ public class UserWorkshopOwnerOutputDto {
     public Boolean workshopOwner;
     public Double averageRatingReviews;
     public String profilePicUrl;
-
-    //security
-    public Boolean enabled;
-    public String apikey;
 
     @JsonSerialize
     public Set<Authority> authorities;

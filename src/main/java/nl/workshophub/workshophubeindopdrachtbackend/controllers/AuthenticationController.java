@@ -18,11 +18,10 @@ import java.security.Principal;
 @RestController
 public class AuthenticationController {
 
-    /*inject authentionManager, userDetailsService en jwtUtil*/
     private final CustomUserDetailsService userDetailsService;
 
     private final JwtUtil jwtUtil;
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
 
     public AuthenticationController(CustomUserDetailsService userDetailsService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
@@ -31,18 +30,13 @@ public class AuthenticationController {
         this.authenticationManager = authenticationManager;
     }
 
-
-        // Deze methode geeft de principal (basis user gegevens) terug van de ingelogde gebruiker
-
     @GetMapping(value = "/authenticated")
     public ResponseEntity<Object> authenticated(Authentication authentication, Principal principal) {
         return ResponseEntity.ok().body(principal);
     }
 
-    //om in te loggen
     @PostMapping(value = "/signin")
     public ResponseEntity<?> signIn(@RequestBody AuthenticationInputDto authenticationInputDto) {
-
         String email = authenticationInputDto.getEmail();
         String password = authenticationInputDto.getPassword();
 
@@ -59,9 +53,6 @@ public class AuthenticationController {
                 .loadUserByUsername(email);
 
         final String jwt = jwtUtil.generateToken(userDetails);
-
-        //hier meer info toevoegen? usercustomeroutputdto? of als iemand ingelogd is - deze redirecten overzicht (home) get all workshops
-        // of als iemand inlogt - dat hij/zij blijft op de pagina waar hij/zij is / heen wilde maar dan incl verificatie
 
         return ResponseEntity.ok(new AuthenticationOutputDto(jwt));
     }

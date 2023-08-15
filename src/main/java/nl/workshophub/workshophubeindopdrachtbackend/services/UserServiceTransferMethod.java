@@ -18,7 +18,7 @@ public class UserServiceTransferMethod {
         customerOutputDto.lastName = customer.getLastName();
         customerOutputDto.email = customer.getEmail();
         customerOutputDto.workshopOwner = customer.getWorkshopOwner();
-        customerOutputDto.enabled = customer.isEnabled();
+//        customerOutputDto.enabled = customer.isEnabled();
         customerOutputDto.authorities = customer.getAuthorities();
         customerOutputDto.profilePicUrl = customer.getProfilePicUrl();
 

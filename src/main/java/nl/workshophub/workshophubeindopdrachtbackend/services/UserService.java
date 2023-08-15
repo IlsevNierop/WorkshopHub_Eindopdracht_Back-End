@@ -1,7 +1,6 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.*;
-import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.AuthenticationOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserCustomerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.UserWorkshopOwnerOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.exceptions.BadRequestException;
@@ -11,15 +10,9 @@ import nl.workshophub.workshophubeindopdrachtbackend.models.Authority;
 import nl.workshophub.workshophubeindopdrachtbackend.models.User;
 import nl.workshophub.workshophubeindopdrachtbackend.repositories.UserRepository;
 import nl.workshophub.workshophubeindopdrachtbackend.util.CheckAuthorization;
-import nl.workshophub.workshophubeindopdrachtbackend.util.RandomStringGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,20 +23,13 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    @Autowired
-    @Lazy
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
-
-    public boolean userExists(String email) {
-
-        return userRepository.existsByEmailIgnoreCase(email);
-    }
-
 
     public UserCustomerOutputDto getCustomerById(Long customerId) {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
@@ -62,7 +48,7 @@ public class UserService {
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view this profile.");
         }
-        if (workshopOwner.getWorkshopOwner() == false) {
+        if (!workshopOwner.getWorkshopOwner()) {
             throw new RecordNotFoundException("The user with ID " + workshopOwnerId + " is a customer and not a workshop owner.");
         }
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
@@ -90,8 +76,7 @@ public class UserService {
     public Set<Authority> getUserAuthorities(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         UserCustomerOutputDto userOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
-        // Don't want to communicate authorities with every outputdto - so only setting authorities in userOutputDto in this method.
-        userOutputDto.authorities = user.getAuthorities();
+
         return userOutputDto.authorities;
     }
 
@@ -99,12 +84,7 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
-
-        //TODO check if I can make this: User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
-        User customer = new User();
-        String randomString = RandomStringGenerator.generateAlphaNumeric(20);
-        customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder);
-        customer.setApikey(randomString);
+        User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
         userRepository.save(customer);
         customer.addAuthority(new Authority(customer.getId(), "ROLE_CUSTOMER"));
         userRepository.save(customer);
@@ -117,10 +97,7 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
-        User workshopOwner = new User();
-        workshopOwner = UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto, passwordEncoder);
-        String randomString = RandomStringGenerator.generateAlphaNumeric(20);
-        workshopOwner.setApikey(randomString);
+        User workshopOwner = UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(new User(), workshopOwnerInputDto, passwordEncoder);
         userRepository.save(workshopOwner);
         workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_CUSTOMER"));
         userRepository.save(workshopOwner);
@@ -130,14 +107,14 @@ public class UserService {
     public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean
             workshopOwnerVerified) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist"));
-        if (workshopOwner.getWorkshopOwner() == false) {
+        if (!workshopOwner.getWorkshopOwner()) {
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
-        if (workshopOwnerVerified == true) {
+        if (workshopOwnerVerified) {
             workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
         }
-        if (workshopOwnerVerified == false) {
+        if (!workshopOwnerVerified) {
             Optional authority = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny();
             if (authority.isPresent()) {
                 Authority authorityToRemove = (Authority) authority.get();
@@ -148,20 +125,6 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
-//    public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDto customerInputDto) {
-//        User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist"));
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-//            throw new ForbiddenException("You're not allowed to update this profile.");
-//        }
-//        if (!customer.getEmail().equals(customerInputDto.email)) {
-//            if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
-//                throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
-//            }
-//        }
-//        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoToUser(customer, customerInputDto, passwordEncoder));
-//        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
-//    }
     public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDtoExclPassword userCustomerInputDtoExclPassword) {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist"));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -177,22 +140,6 @@ public class UserService {
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
-
-//    public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDto
-//            workshopOwnerInputDto) {
-//        User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-//            throw new ForbiddenException("You're not allowed to update this profile.");
-//        }
-//        if (!workshopOwner.getEmail().equals(workshopOwnerInputDto.email)) {
-//            if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
-//                throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
-//            }
-//        }
-//        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(workshopOwner, workshopOwnerInputDto, passwordEncoder));
-//        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
-//    }
 
     public UserWorkshopOwnerOutputDto updateWorkshopOwner(Long workshopOwnerId, UserWorkshopOwnerInputDtoExclPassword
             workshopOwnerInputDtoExclPassword) {

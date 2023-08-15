@@ -23,7 +23,6 @@ public class UserCustomerInputDtoExclPassword {
     @NotNull(message= "You should choose between workshop owner or customer.")
     public Boolean workshopOwner;
 
-
     @JsonSerialize
     public Set<Authority> authorities;
 }
