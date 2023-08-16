@@ -85,6 +85,7 @@ public class UserService {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
         User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
+        //TODO need to save first, because ID is needed when adding the authority
         userRepository.save(customer);
         customer.addAuthority(new Authority(customer.getId(), "ROLE_CUSTOMER"));
         userRepository.save(customer);
@@ -118,8 +119,7 @@ public class UserService {
                 Authority authority = new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER");
                 workshopOwner.getAuthorities().add(authority);
             }
-        }
-        else if (workshopOwnerVerified == Boolean.FALSE) {
+        } else if (workshopOwnerVerified == Boolean.FALSE) {
             for (Authority authority : workshopOwner.getAuthorities()) {
                 if (authority.getAuthority().equals("ROLE_WORKSHOPOWNER")) {
                     workshopOwner.getAuthorities().remove(authority);
@@ -224,8 +224,8 @@ public class UserService {
 
 
     public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         try {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
             userRepository.delete(user);
         } catch (Exception e) {
             throw new BadRequestException("This user has a relation with either one or more workshop(s), review(s) and/or booking(s). You can't remove this user before removing the other items.");
