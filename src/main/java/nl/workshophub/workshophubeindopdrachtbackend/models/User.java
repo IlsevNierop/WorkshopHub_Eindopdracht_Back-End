@@ -62,13 +62,6 @@ public class User {
     )
     private Set<Workshop> favouriteWorkshops = new HashSet<>();
 
-    //security
-    @Column(nullable = false)
-    private boolean enabled = true;
-
-    @Column
-    private String apikey;
-
     @OneToMany(
             targetEntity = Authority.class,
             mappedBy = "userId",
@@ -81,10 +74,6 @@ public class User {
     public void addAuthority(Authority authority) {
         this.authorities.add(authority);
     }
-    public void removeAuthority(Authority authority) {
-        this.authorities.remove(authority);
-    }
-
 
     public ArrayList<Double> calculateAverageRatingAndNumberReviewsWorkshopOwner() {
         if (this.getWorkshops() == null) {
