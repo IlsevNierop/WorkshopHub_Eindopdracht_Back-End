@@ -23,8 +23,6 @@ public class WorkshopOutputDto {
     public int spotsAvailable;
     public String workshopCategory1;
     public String workshopCategory2;
-
-    // public workshopImage --> list of verschillende variabelen?
     public Boolean workshopVerified;
     public String feedbackAdmin;
     public Boolean publishWorkshop;

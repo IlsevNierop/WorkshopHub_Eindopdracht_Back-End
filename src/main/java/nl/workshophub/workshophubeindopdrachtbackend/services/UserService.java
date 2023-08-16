@@ -112,10 +112,8 @@ public class UserService {
         }
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
         if (workshopOwnerVerified == Boolean.TRUE) {
-
             boolean hasAuthority = workshopOwner.getAuthorities().stream()
                     .anyMatch(authority -> authority.getAuthority().equals("ROLE_WORKSHOPOWNER"));
-
             if (!hasAuthority) {
                 Authority authority = new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER");
                 workshopOwner.getAuthorities().add(authority);

@@ -13,10 +13,10 @@ public class WorkshopInputDto {
 
     @NotBlank(message = "Workshop title can't be empty.")
     public String title;
+
     @NotNull(message = "Date can't be empty.")
     @Future(message = "Date needs to be in the future.")
     @DateTimeFormat(pattern="YYYY-MM-DD")
-//    @Pattern(regexp = "YYYY-MM-DD", message = "Date format should be YYYY-MM-DD.") - not working, check validation date and time
     public LocalDate date;
     @NotNull(message = "Start time can't be empty.")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
