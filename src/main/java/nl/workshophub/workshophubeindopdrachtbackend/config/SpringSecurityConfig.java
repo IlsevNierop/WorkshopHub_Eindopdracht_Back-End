@@ -48,37 +48,33 @@ public class SpringSecurityConfig {
 
                 //.................................open.................................
                 .requestMatchers("/signin").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users/customer").permitAll() //everyone can register //post
+                .requestMatchers(HttpMethod.POST, "/users/customer").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users/workshopowner").permitAll() //everyone can register //post
+                .requestMatchers(HttpMethod.PUT, "/users/passwordrequest/{email}").permitAll() //no verification when password is forgotten, see userservice comments
                 .requestMatchers(HttpMethod.GET, "/workshops").permitAll() //everyone can see the workshop calendar //get
                 .requestMatchers(HttpMethod.GET, "/workshops/{workshopId}").permitAll() //everyone can see the workshop calendar //get
                 .requestMatchers(HttpMethod.GET, "/workshops/workshopowner/{workshopOwnerId}").permitAll() //everyone can see the workshop calendar //get
                 .requestMatchers(HttpMethod.GET, "/reviews/{reviewId}").permitAll() //get
                 .requestMatchers(HttpMethod.GET, "/reviews/workshopowner/{workshopOwnerId}").permitAll() //everyone can see verified reviews //get
-                .requestMatchers(HttpMethod.PUT, "/users/passwordrequest/{email}").permitAll() //no verification when password is forgotten, see userservice comments
                 .requestMatchers(HttpMethod.GET, "/downloadworkshoppic/{workshopId}").permitAll()
-                .requestMatchers(HttpMethod.POST, "/uploadworkshoppic/{workshopId}").permitAll()
-                .requestMatchers(HttpMethod.GET, "admin/bookings/generateanddownloadcsv").permitAll()
                 .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get
 
                 //...............................authority: customer...............................
 
                 .requestMatchers("/authenticated").authenticated()
-                .requestMatchers("/uploadprofilepic/{userId}").authenticated() //post
-                .requestMatchers("/deleteprofilepic/{userId}").authenticated() //delete
 
                 .requestMatchers("/users/customer/**").authenticated() //get, put
                 .requestMatchers(HttpMethod.PUT, "/users/passwordupdaterequest/{email}").authenticated()
-
                 .requestMatchers(HttpMethod.GET, "/users/workshopowner/{workshopOwnerId}").authenticated() //get workshopowner
                 .requestMatchers(HttpMethod.PUT, "/users/workshopowner/{workshopOwnerId}").authenticated() //put workshopowner
+
                 .requestMatchers(HttpMethod.PUT, "/workshops/favourite/{userId}/{workshopId}").authenticated() //put
                 .requestMatchers(HttpMethod.GET, "/workshops/favourites/{userId}").authenticated() //get
 
                 .requestMatchers(HttpMethod.GET, "/bookings/user/{userId}").authenticated() //get
                 .requestMatchers(HttpMethod.GET, "/bookings/{bookingId}").authenticated() //get
-                .requestMatchers(HttpMethod.PUT, "/bookings/{bookingId}").authenticated() //put
                 .requestMatchers(HttpMethod.POST, "/bookings/{customerId}/{workshopId}").authenticated() //post
+                .requestMatchers(HttpMethod.PUT, "/bookings/{bookingId}").authenticated() //put
                 .requestMatchers(HttpMethod.DELETE, "/bookings/{bookingId}").authenticated() //delete
 
                 .requestMatchers(HttpMethod.GET, "/reviews/customer/{customerId}").authenticated() //get
@@ -86,22 +82,30 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/reviews/{customerId}/{reviewId}").authenticated() //put
                 .requestMatchers(HttpMethod.DELETE, "/reviews/{reviewId}").authenticated() //delete
 
+                .requestMatchers("/uploadprofilepic/{userId}").authenticated() //post
+                .requestMatchers("/deleteprofilepic/{userId}").authenticated() //delete
 
                 //.................................authority: owner.................................
                 .requestMatchers("/users/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, put
-                .requestMatchers("/workshops/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN") //get, get, post, put, put, delete
+
+                .requestMatchers("/workshops/workshopowner/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")
+
                 .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
                 .requestMatchers(HttpMethod.GET, "/bookings/workshopowner/{workshopOwnerId}").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
                 .requestMatchers(HttpMethod.GET, "/bookings/workshopowner/generateanddownloadcsv/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
+                .requestMatchers(HttpMethod.POST, "/uploadworkshoppic/{workshopId}").hasAnyRole("WORKSHOPOWNER", "ADMIN")
+                .requestMatchers("/deleteworkshoppic/{workshopId}").hasAnyRole("WORKSHOPOWNER", "ADMIN") //delete
 
                 //..............................authority: only-admin...............................
-                .requestMatchers(HttpMethod.GET, "/bookings").hasAnyRole("ADMIN") //get
                 .requestMatchers("/users/admin/**").hasRole("ADMIN") //get, get, put, post, delete, delete
+
                 .requestMatchers("/workshops/admin/**").hasRole("ADMIN") //get, get, get, put
-                .requestMatchers("/reviews/admin/**").hasRole("ADMIN") // get, get, put, delete
+
+                .requestMatchers(HttpMethod.GET, "/bookings").hasAnyRole("ADMIN") //get
                 .requestMatchers(HttpMethod.GET, "/bookings/admin/generateanddownloadcsv").hasRole("ADMIN") //get
 
+                .requestMatchers("/reviews/admin/**").hasRole("ADMIN") // get, get, put, delete
 
                 .anyRequest().denyAll()
                 .and()

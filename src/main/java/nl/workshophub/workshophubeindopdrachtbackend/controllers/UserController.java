@@ -175,6 +175,8 @@ public class UserController {
         return new ResponseEntity<>(userService.updatePasswordLoggedIn(email, passwordInputDto), HttpStatus.ACCEPTED);
     }
 
+
+
     @DeleteMapping(value = "admin/{userId}/authorities")
     public ResponseEntity<Object> removeAuthority(@PathVariable("userId") Long userId, @RequestParam("authority") String authority) {
         userService.removeAuthority(userId, authority.toUpperCase());
