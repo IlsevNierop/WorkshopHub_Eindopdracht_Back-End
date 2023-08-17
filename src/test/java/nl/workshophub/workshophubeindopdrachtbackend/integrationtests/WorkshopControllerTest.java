@@ -161,7 +161,7 @@ class WorkshopControllerTest {
         workshopOutputDto.workshopOwnerCompanyName = workshop.getWorkshopOwner().getCompanyName();
         workshopOutputDto.averageRatingWorkshopOwnerReviews = null;
         workshopOutputDto.numberOfReviews = null;
-        workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
+        workshopOutputDto.amountOfFavsAndBookings = (workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop());
         workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
         workshopOutputDto2 = new WorkshopOutputDto();
@@ -258,7 +258,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].isFavourite").doesNotExist())
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value((workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop())))
                 .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
                 .andExpect(jsonPath("$[0].id").value(workshop.getId()))
                 .andExpect(jsonPath("$[0].title").value(workshop.getTitle()))
@@ -282,7 +282,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].isFavourite").doesNotExist())
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value((workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop())))
                 .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
                 .andExpect(jsonPath("$[1].id").value(workshop2.getId()))
                 .andExpect(jsonPath("$[1].title").value(workshop2.getTitle()))
@@ -306,8 +306,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[1].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[1].numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$[1].isFavourite").doesNotExist())
-                .andExpect(jsonPath("$[1].amountOfFavsAndBookings").value(workshop2
-                        .calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[1].amountOfFavsAndBookings").value((workshop2.calculateAmountOfBookingsWorkshop() + workshop2.calculateAmountOfFavouritesWorkshop())))
                 .andExpect(jsonPath("$[1].workshopPicUrl").value(workshop2.getWorkshopPicUrl()));
 
     }
@@ -341,7 +340,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].isFavourite").value(customer1.getFavouriteWorkshops().contains(workshop)))
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value((workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop())))
                 .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
                 .andExpect(jsonPath("$[0].id").value(workshop.getId()))
                 .andExpect(jsonPath("$[0].title").value(workshop.getTitle()))
@@ -365,7 +364,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[0].averageRatingWorkshopOwnerReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$[0].isFavourite").value(customer1.getFavouriteWorkshops().contains(workshop)))
-                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value(workshop.calculateAmountOfFavsAndBookingsWorkshop()))
+                .andExpect(jsonPath("$[0].amountOfFavsAndBookings").value((workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop())))
                 .andExpect(jsonPath("$[0].workshopPicUrl").value(workshop.getWorkshopPicUrl()))
                 .andExpect(jsonPath("$[1].id").value(workshop2.getId()))
                 .andExpect(jsonPath("$[1].title").value(workshop2.getTitle()))
@@ -390,7 +389,7 @@ class WorkshopControllerTest {
                 .andExpect(jsonPath("$[1].numberOfReviews").doesNotExist())
                 .andExpect(jsonPath("$[1].isFavourite").value(customer1.getFavouriteWorkshops().contains(workshop2)))
                 .andExpect(jsonPath("$[1].amountOfFavsAndBookings").value(workshop2
-                        .calculateAmountOfFavsAndBookingsWorkshop()))
+                        .calculateAmountOfFavouritesWorkshop()))
                 .andExpect(jsonPath("$[1].workshopPicUrl").value(workshop2.getWorkshopPicUrl()));
 
     }

@@ -190,7 +190,7 @@ public class WorkshopService {
         Workshop workshop = new Workshop();
         workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         workshop.setWorkshopOwner(workshopOwner);
-        // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin need to get default values.
+        // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin get default values.
         workshop.setPublishWorkshop(null);
         workshop.setWorkshopVerified(null);
         workshop.setFeedbackAdmin(null);
@@ -198,7 +198,7 @@ public class WorkshopService {
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
-    public List<WorkshopOutputDto> addOrRemoveWorkshopFavourites(Long userId, Long workshopId, Boolean favourite) {
+    public List<WorkshopOutputDto> addOrRemoveWorkshopToFavourites(Long userId, Long workshopId, Boolean favourite) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -231,10 +231,13 @@ public class WorkshopService {
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this workshop.");
         }
-
         if (!workshopOwner.getWorkshopOwner() || workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || workshop.getWorkshopOwner().getId() != workshopOwner.getId()) {
             throw new ForbiddenException("You're not allowed to update this workshop.");
         }
+        if (workshop.calculateAmountOfBookingsWorkshop() > workshopInputDto.amountOfParticipants) {
+            throw new BadRequestException("You're trying to set the amount of participants to: " + workshopInputDto.amountOfParticipants + " while you already have " + workshop.calculateAmountOfBookingsWorkshop() + " bookings on this workshop.");
+        }
+
         // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original workshop. This could be prevented with a different inputdto for workshopowner (excluding feedbackadmin and verifyworkshop) and for admin.
         workshopInputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
@@ -269,6 +272,10 @@ public class WorkshopService {
 
     public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        if (workshop.calculateAmountOfBookingsWorkshop() > workshopInputDto.amountOfParticipants) {
+            throw new BadRequestException("You're trying to set the amount of participants to: " + workshopInputDto.amountOfParticipants + " while you already have " + workshop.calculateAmountOfBookingsWorkshop() + " bookings on this workshop.");
+        }
+
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         // After verifying / disapproving the workshop by admin, publish workshop will automatically get a default value.
         workshop.setPublishWorkshop(null);
@@ -327,7 +334,7 @@ public class WorkshopService {
             workshopOutputDto.averageRatingWorkshopOwnerReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
             workshopOutputDto.numberOfReviews = workshop.getWorkshopOwner().calculateAverageRatingAndNumberReviewsWorkshopOwner().get(1);
         }
-        workshopOutputDto.amountOfFavsAndBookings = workshop.calculateAmountOfFavsAndBookingsWorkshop();
+        workshopOutputDto.amountOfFavsAndBookings = (workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop());
         workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
 
         return workshopOutputDto;

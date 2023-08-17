@@ -93,8 +93,8 @@ public class WorkshopController {
     }
 
     @PutMapping("/favourite/{userId}/{workshopId}")
-    public ResponseEntity<List<WorkshopOutputDto>> addOrRemoveWorkshopFavourites(@PathVariable("userId") Long userId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean favourite) {
-        return new ResponseEntity<>(workshopService.addOrRemoveWorkshopFavourites(userId, workshopId, favourite), HttpStatus.ACCEPTED);
+    public ResponseEntity<List<WorkshopOutputDto>> addOrRemoveWorkshopToFavourites(@PathVariable("userId") Long userId, @PathVariable("workshopId") Long workshopId, @RequestParam Boolean favourite) {
+        return new ResponseEntity<>(workshopService.addOrRemoveWorkshopToFavourites(userId, workshopId, favourite), HttpStatus.ACCEPTED);
     }
 
 
