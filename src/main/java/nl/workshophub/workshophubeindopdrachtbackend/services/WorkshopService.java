@@ -1,6 +1,5 @@
 package nl.workshophub.workshophubeindopdrachtbackend.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.inputdtos.WorkshopInputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.ReviewOutputDto;
 import nl.workshophub.workshophubeindopdrachtbackend.dtos.outputdtos.WorkshopOutputDto;
@@ -18,10 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.DataInput;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -137,7 +133,7 @@ public class WorkshopService {
         return workshopOutputDtos;
     }
 
-    public List<WorkshopOutputDto> getAllWorkshopsToVerifyFromWorkshopOwner(Long workshopOwnerId) {
+    public List<WorkshopOutputDto> getAllWorkshopsToPublishFromWorkshopOwner(Long workshopOwnerId) {
         List<Workshop> workshops = workshopRepository.findByWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsNullOrPublishWorkshopIsFalseOrderByDate(workshopOwnerId);
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -210,9 +206,6 @@ public class WorkshopService {
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to add favourites to this user's account.");
         }
-        if (workshop.getWorkshopVerified() != Boolean.TRUE || workshop.getPublishWorkshop() != Boolean.TRUE) {
-            throw new ForbiddenException("You're not allowed to view this workshop and add it to your favourites.");
-        }
         if (favourite) {
             user.getFavouriteWorkshops().add(workshop);
         } else {
@@ -254,7 +247,7 @@ public class WorkshopService {
     }
 
     @PutMapping
-    public WorkshopOutputDto verifyWorkshopByOwner(Long workshopId, Boolean publishWorkshop) {
+    public WorkshopOutputDto publishWorkshopByOwner(Long workshopId, Boolean publishWorkshop) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

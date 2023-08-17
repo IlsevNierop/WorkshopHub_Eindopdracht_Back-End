@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -30,50 +29,35 @@ public class WorkshopController {
         this.workshopService = workshopService;
         this.fileService = fileService;
     }
-
-    //open
-
     @GetMapping
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(@RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(userId), HttpStatus.OK);
     }
-
     @GetMapping("/favourites/{userId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllFavouriteWorkshopsUser(@PathVariable(value = "userId") Long userId) {
         return new ResponseEntity<>(workshopService.getAllFavouriteWorkshopsUser(userId), HttpStatus.OK);
     }
-
     @GetMapping("/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable("workshopId") Long workshopId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId, userId), HttpStatus.OK);
     }
-
     @GetMapping("/workshopowner/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(@PathVariable Long workshopOwnerId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(workshopOwnerId, userId), HttpStatus.OK);
     }
-
-
-    //owner
     @GetMapping("/workshopowner/workshop/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByIdForWorkshopOwner(@PathVariable("workshopId") Long workshopId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdForWorkshopOwner(workshopId), HttpStatus.OK);
     }
-
-
-    // filter at frontend on what to verify etc. show startdate today - but possibility to go back in time
     @GetMapping("/workshopowner/all/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
     @GetMapping("/workshopowner/verify/{workshopOwnerId}")
-    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerifyFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
-        return new ResponseEntity<>(workshopService.getAllWorkshopsToVerifyFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
+    public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToPublishFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
+        return new ResponseEntity<>(workshopService.getAllWorkshopsToPublishFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
-
-
-    // admin getmappings:
     @GetMapping("/admin/verify")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerify() {
         return new ResponseEntity<>(workshopService.getAllWorkshopsToVerify(), HttpStatus.OK);
@@ -88,8 +72,6 @@ public class WorkshopController {
     public ResponseEntity<WorkshopOutputDto> getWorkshopById(@PathVariable Long workshopId) {
         return new ResponseEntity<>(workshopService.getWorkshopById(workshopId), HttpStatus.OK);
     }
-
-
     @PostMapping(value = "/workshopowner/{workshopOwnerId}", consumes = {"multipart/form-data"}, produces = "application/json")
     public ResponseEntity<Object> createWorkshop(
             @PathVariable Long workshopOwnerId,
@@ -108,7 +90,6 @@ public class WorkshopController {
         }
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
-//        return new ResponseEntity<>(workshopOutputDto, HttpStatus.OK);
     }
 
     @PutMapping("/favourite/{userId}/{workshopId}")
@@ -141,19 +122,17 @@ public class WorkshopController {
 
 
     @PutMapping("/workshopowner/verify/{workshopId}")
-    public ResponseEntity<WorkshopOutputDto> verifyWorkshopByOwner(@PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
+    public ResponseEntity<WorkshopOutputDto> publishWorkshopByOwner(@PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
 
-        return new ResponseEntity<>(workshopService.verifyWorkshopByOwner(workshopId, publishWorkshop), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(workshopService.publishWorkshopByOwner(workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
-
-    // admin:
     @PutMapping(value="/admin/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
     public ResponseEntity<Object> verifyWorkshopByAdmin(
             @PathVariable Long workshopId,
             @RequestPart @Valid WorkshopInputDto workshopInputDto,
             BindingResult bindingResult,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+            @RequestPart(name = "file", required = false) MultipartFile file){
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
@@ -167,9 +146,6 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
     }
 
-
-
-    //owner mag ook eigenworkshop deleten - has role owner - check workshop.getWorkshopOwner().getId() != workshopOwner.getId()
     @DeleteMapping("/workshopowner/{workshopId}")
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {
         workshopService.deleteWorkshop(workshopId);
