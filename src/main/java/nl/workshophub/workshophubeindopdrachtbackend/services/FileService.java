@@ -52,6 +52,29 @@ public class FileService {
 
     }
 
+    public Resource downloadProfilePic(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
+
+        if (user.getProfilePicUrl() == null || user.getFileName() == null){
+            throw new RecordNotFoundException("The file doesn't exist.");
+        }
+
+        Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
+
+        Resource resource;
+
+        try {
+            resource = new UrlResource(path.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Issue in reading the file", e);
+        }
+
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new BadRequestException("The file doesn't exist or is not readable.");
+        }
+        return resource;
+    }
+
     public String uploadProfilePic(MultipartFile file, String url, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -88,30 +111,6 @@ public class FileService {
         return fileName;
     }
 
-    public Resource downloadProfilePic(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
-
-        if (user.getProfilePicUrl() == null || user.getFileName() == null){
-            throw new RecordNotFoundException("The file doesn't exist.");
-        }
-
-        Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(user.getFileName());
-
-        Resource resource;
-
-        try {
-            resource = new UrlResource(path.toUri());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Issue in reading the file", e);
-        }
-
-        if (!resource.exists() || !resource.isReadable()) {
-            throw new BadRequestException("The file doesn't exist or is not readable.");
-        }
-        return resource;
-
-    }
-
     public boolean deleteProfilePic(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -130,28 +129,6 @@ public class FileService {
         } catch (IOException e) {
             throw new RuntimeException("A problem occurred with deleting: " + user.getFileName());
         }
-
-
-    }
-
-    public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId) {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
-
-        Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
-
-        try {
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException("Issue in storing the file", e);
-        }
-
-        workshop.setWorkshopPicUrl(url);
-        workshop.setFileName(fileName);
-        workshopRepository.save(workshop);
-
-        return fileName;
     }
 
     public Resource downloadWorkshopPic(Long workshopId) {
@@ -175,8 +152,29 @@ public class FileService {
             throw new BadRequestException("The file doesn't exist or is not readable.");
         }
         return resource;
-
     }
+
+    public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId) {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
+
+        Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
+
+        try {
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Issue in storing the file", e);
+        }
+
+        workshop.setWorkshopPicUrl(url);
+        workshop.setFileName(fileName);
+        workshopRepository.save(workshop);
+
+        return fileName;
+    }
+
+
 
 
     public boolean deleteWorkshopPic(Long workshopId) {
@@ -184,7 +182,7 @@ public class FileService {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
-            throw new ForbiddenException("You're not allowed to delete the photo of this profile.");
+            throw new ForbiddenException("You're not allowed to delete the photo of this workshop.");
         }
 
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(workshop.getFileName());
@@ -198,8 +196,6 @@ public class FileService {
         } catch (IOException e) {
             throw new RuntimeException("A problem occurred with deleting: " + workshop.getFileName());
         }
-
-
     }
 
 }
