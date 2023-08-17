@@ -105,6 +105,13 @@ public class UserController {
         return ResponseEntity.created(uri).body(new AuthenticationOutputDto(jwt));
     }
 
+    @PostMapping(value = "admin/{email}/authorities")
+    @Transactional
+    public ResponseEntity<UserCustomerOutputDto> addUserAuthority(@PathVariable("email") String email, @RequestParam("authority") String authority) {
+        UserCustomerOutputDto userCustomerOutputDto = userService.addUserAuthority(email, authority.toUpperCase());
+        return new ResponseEntity<>(userCustomerOutputDto, HttpStatus.CREATED);
+    }
+
     @PutMapping("/admin/{workshopOwnerId}")
     @Transactional
     public ResponseEntity<Object> verifyWorkshopOwnerByAdmin(@PathVariable Long workshopOwnerId, @RequestParam Boolean workshopOwnerVerified) {
@@ -168,12 +175,7 @@ public class UserController {
         return new ResponseEntity<>(userService.updatePasswordLoggedIn(email, passwordInputDto), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping(value = "admin/{email}/authorities")
-    @Transactional
-    public ResponseEntity<UserCustomerOutputDto> addUserAuthority(@PathVariable("email") String email, @RequestParam("authority") String authority) {
-        UserCustomerOutputDto userCustomerOutputDto = userService.addUserAuthority(email, authority.toUpperCase());
-        return new ResponseEntity<>(userCustomerOutputDto, HttpStatus.CREATED);
-    }
+
 
     @DeleteMapping(value = "admin/{userId}/authorities")
     public ResponseEntity<Object> removeAuthority(@PathVariable("userId") Long userId, @RequestParam("authority") String authority) {

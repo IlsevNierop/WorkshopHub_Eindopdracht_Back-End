@@ -34,13 +34,11 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.getReviewsVerifiedFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
-    //principal
     @GetMapping("/customer/{customerId}")
     public ResponseEntity <List<ReviewOutputDto>> getReviewsFromCustomer(@PathVariable Long customerId) {
         return new ResponseEntity<>(reviewService.getReviewsFromCustomer(customerId), HttpStatus.OK);
     }
 
-//admin
     @GetMapping("/admin/")
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
         return new ResponseEntity<>(reviewService.getAllReviews(), HttpStatus.OK);
@@ -50,9 +48,7 @@ public class ReviewController {
     @GetMapping("/admin/verify")
     public ResponseEntity<List<ReviewOutputDto>> getReviewsToVerify(){
         return new ResponseEntity<>(reviewService.getReviewsToVerify(), HttpStatus.OK);
-
     }
-
 
     @PostMapping ("/{workshopId}/{customerId}")
     public ResponseEntity<Object> createReview (@PathVariable("workshopId") Long workshopId, @PathVariable ("customerId") Long customerId, @Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult bindingResult) {
@@ -61,7 +57,7 @@ public class ReviewController {
         }
         ReviewOutputDto reviewOutputDto = reviewService.createReview(workshopId, customerId, reviewInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + reviewOutputDto.id).toUriString());
-        return new ResponseEntity<>(reviewOutputDto, HttpStatus.ACCEPTED);
+        return ResponseEntity.created(uri).body(reviewOutputDto);
     }
 
     @PutMapping ("/admin/verify/{reviewId}")

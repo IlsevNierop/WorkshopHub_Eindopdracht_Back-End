@@ -24,9 +24,6 @@ public class UserWorkshopOwnerInputDtoExclPassword {
 
     public String vatNumber;
 
-    // deze kan alleen geset worden via verify put methode met request param
-//    public Boolean workshopOwnerVerified;
-
     @NotNull(message= "You should choose between workshop owner or customer.")
     public Boolean workshopOwner;
 

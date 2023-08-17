@@ -8,7 +8,6 @@ import java.util.Set;
 public class UserWorkshopOwnerOutputDto {
 
     public Long id;
-
     public String firstName;
     public String lastName;
     public String email;

@@ -85,6 +85,7 @@ public class UserService {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
         User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
+        //TODO need to save first, because ID is needed when adding the authority
         userRepository.save(customer);
         customer.addAuthority(new Authority(customer.getId(), "ROLE_CUSTOMER"));
         userRepository.save(customer);
@@ -111,14 +112,18 @@ public class UserService {
             throw new BadRequestException("This is a customer, not a workshop owner. The workshop owner should first enter all his/her company details & declare he/she is a workshopowner, before you can verify the account.");
         }
         workshopOwner.setWorkshopOwnerVerified(workshopOwnerVerified);
-        if (workshopOwnerVerified) {
-            workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
-        }
-        if (!workshopOwnerVerified) {
-            Optional authority = workshopOwner.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase("ROLE_WORKSHOPOWNER")).findAny();
-            if (authority.isPresent()) {
-                Authority authorityToRemove = (Authority) authority.get();
-                workshopOwner.removeAuthority(authorityToRemove);
+        if (workshopOwnerVerified == Boolean.TRUE) {
+            boolean hasAuthority = workshopOwner.getAuthorities().stream()
+                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_WORKSHOPOWNER"));
+            if (!hasAuthority) {
+                Authority authority = new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER");
+                workshopOwner.getAuthorities().add(authority);
+            }
+        } else if (workshopOwnerVerified == Boolean.FALSE) {
+            for (Authority authority : workshopOwner.getAuthorities()) {
+                if (authority.getAuthority().equals("ROLE_WORKSHOPOWNER")) {
+                    workshopOwner.getAuthorities().remove(authority);
+                }
             }
         }
         userRepository.save(workshopOwner);
@@ -219,8 +224,8 @@ public class UserService {
 
 
     public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         try {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
             userRepository.delete(user);
         } catch (Exception e) {
             throw new BadRequestException("This user has a relation with either one or more workshop(s), review(s) and/or booking(s). You can't remove this user before removing the other items.");
