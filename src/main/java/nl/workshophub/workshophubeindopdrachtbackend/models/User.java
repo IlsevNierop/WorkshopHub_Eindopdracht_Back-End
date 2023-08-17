@@ -22,24 +22,19 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+    private Long id;
     private String firstName;
     private String lastName;
     @Column(unique=true)
     private String email; //identifier
-
     private String password;
     private String companyName;
     private String kvkNumber;
     private String vatNumber;
     private Boolean workshopOwnerVerified;
     private Boolean workshopOwner;
-
     private String profilePicUrl;
-
     private String fileName;
-
-    //relations
 
     @OneToMany (mappedBy = "customer")
     @JsonIgnore
@@ -71,9 +66,6 @@ public class User {
     )
     private Set<Authority> authorities = new HashSet<>();
 
-    public void addAuthority(Authority authority) {
-        this.authorities.add(authority);
-    }
 
     public ArrayList<Double> calculateAverageRatingAndNumberReviewsWorkshopOwner() {
         if (this.getWorkshops() == null) {
