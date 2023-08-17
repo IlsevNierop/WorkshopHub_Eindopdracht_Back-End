@@ -69,18 +69,23 @@ public class Workshop {
             }}
         return (this.getAmountOfParticipants() - spotsBooked);
     }
-
-    public int calculateAmountOfFavsAndBookingsWorkshop(){
-        int popularityNumber = 0;
-        if (this.getFavsUser() != null){
-            popularityNumber += this.getFavsUser().size();
-        }
+    public int calculateAmountOfBookingsWorkshop(){
+        int bookingsWorkshop = 0;
         if (this.getWorkshopBookings() != null) {
             for (Booking booking : this.getWorkshopBookings()) {
-                popularityNumber += booking.getAmount();
+                bookingsWorkshop += booking.getAmount();
             }
         }
-        return popularityNumber;
+        return bookingsWorkshop;
+    }
+
+
+    public int calculateAmountOfFavouritesWorkshop(){
+        int amountOfFavourites = 0;
+        if (this.getFavsUser() != null){
+            amountOfFavourites += this.getFavsUser().size();
+        }
+        return amountOfFavourites;
     }
 
 
