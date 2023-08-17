@@ -446,7 +446,8 @@ class BookingServiceTest {
         when(authentication.getName()).thenReturn(workshopOwner1.getEmail());
 
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+        csvContent.append("Boeking ID,Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
+
 
         for (Booking booking : workshopOwner1Bookings) {
             csvContent.append(System.lineSeparator())
@@ -495,7 +496,8 @@ class BookingServiceTest {
         when(workshopRepository.findById(workshop1.getId())).thenReturn(Optional.of(workshop1));
         when(authentication.getName()).thenReturn(customer2.getEmail());
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
+
 
         for (Booking booking : workshop1Bookings) {
             csvContent.append(System.lineSeparator())
@@ -542,7 +544,7 @@ class BookingServiceTest {
         when(bookingRepository.findAll()).thenReturn(List.of(booking1, booking2, booking3, booking4));
 
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Booking ID,Date booking, Amount, First name customer, Last name customer, Email customer, Comments customer, Total Price, Workshop ID, Title workshop, Workshop date");
+        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
 
         for (Booking booking : allBookings) {
             csvContent.append(System.lineSeparator())

@@ -179,7 +179,8 @@ VALUES (101, '2023-06-01', 'Geweldige workshop!', 2, 101, 102, 90.0),
        (104, '2023-06-01', 'Ik breng twee vrienden mee!', 3, 102, 101, 105.0),
        (105, '2023-05-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 104, 100, 50.0),
        (106, '2023-05-31', default, 3, 102, 102, 50.0),
-       (107, '2023-05-31', default, 3, 102, 103, 50.0);
+       (107, '2023-05-31', default, 3, 102, 103, 50.0),
+       (108, '2023-03-31', 'Interessante workshop! Wij moeten een half uurtje eerder weg', 2, 107, 100, 30.0);
 
 INSERT INTO reviews (id, rating, review_description, review_verified, feedback_admin, workshop_id, customer_id)
 VALUES (100, 4.5,
