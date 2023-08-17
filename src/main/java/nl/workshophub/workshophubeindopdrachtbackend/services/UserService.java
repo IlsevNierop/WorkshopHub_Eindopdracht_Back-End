@@ -87,10 +87,8 @@ public class UserService {
         User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
         //TODO need to save first, because ID is needed when adding the authority
         userRepository.save(customer);
-        customer.addAuthority(new Authority(customer.getId(), "ROLE_CUSTOMER"));
+        customer.getAuthorities().add(new Authority(customer.getId(), "ROLE_CUSTOMER"));
         userRepository.save(customer);
-
-
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
@@ -100,7 +98,7 @@ public class UserService {
         }
         User workshopOwner = UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(new User(), workshopOwnerInputDto, passwordEncoder);
         userRepository.save(workshopOwner);
-        workshopOwner.addAuthority(new Authority(workshopOwner.getId(), "ROLE_CUSTOMER"));
+        workshopOwner.getAuthorities().add(new Authority(workshopOwner.getId(), "ROLE_CUSTOMER"));
         userRepository.save(workshopOwner);
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
@@ -116,8 +114,7 @@ public class UserService {
             boolean hasAuthority = workshopOwner.getAuthorities().stream()
                     .anyMatch(authority -> authority.getAuthority().equals("ROLE_WORKSHOPOWNER"));
             if (!hasAuthority) {
-                Authority authority = new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER");
-                workshopOwner.getAuthorities().add(authority);
+                workshopOwner.getAuthorities().add(new Authority(workshopOwner.getId(), "ROLE_WORKSHOPOWNER"));
             }
         } else if (workshopOwnerVerified == Boolean.FALSE) {
             for (Authority authority : workshopOwner.getAuthorities()) {
@@ -204,7 +201,7 @@ public class UserService {
             }
         }
         try {
-            user.addAuthority(new Authority(user.getId(), "ROLE_" + authority));
+            user.getAuthorities().add(new Authority(user.getId(),"ROLE_" + authority));
         } catch (Exception e) {
             throw new BadRequestException("This authority can't be added");
         }
