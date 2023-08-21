@@ -58,7 +58,7 @@ public class Workshop {
 
     @ManyToMany (mappedBy = "favouriteWorkshops")
     @JsonIgnore
-    private Set<User> favsUser  = new HashSet<>();
+    private Set<User> favsUsers = new HashSet<>();
 
 
     public int getAvailableSpotsWorkshop() {
@@ -82,8 +82,8 @@ public class Workshop {
 
     public int calculateAmountOfFavouritesWorkshop(){
         int amountOfFavourites = 0;
-        if (this.getFavsUser() != null){
-            amountOfFavourites += this.getFavsUser().size();
+        if (this.getFavsUsers() != null){
+            amountOfFavourites += this.getFavsUsers().size();
         }
         return amountOfFavourites;
     }

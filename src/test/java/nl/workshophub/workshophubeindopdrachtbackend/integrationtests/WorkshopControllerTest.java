@@ -92,7 +92,7 @@ class WorkshopControllerTest {
         workshop.setFileName("fotovanworkshop");
         workshop.setWorkshopBookings(null);
         workshop.setWorkshopReviews(null);
-        workshop.setFavsUser(null);
+        workshop.setFavsUsers(null);
 
         workshop2 = new Workshop();
         workshop2.setTitle("Test workshop 2");
@@ -114,13 +114,13 @@ class WorkshopControllerTest {
         workshop2.setFileName("fotovanworkshop");
         workshop2.setWorkshopBookings(null);
         workshop2.setWorkshopReviews(null);
-        workshop2.setFavsUser(null);
+        workshop2.setFavsUsers(null);
 
         userRepository.save(workshopOwner1);
         userRepository.save(customer1);
 
         workshop.setWorkshopOwner(workshopOwner1);
-        workshop.setFavsUser(new HashSet<>(List.of(customer1)));
+        workshop.setFavsUsers(new HashSet<>(List.of(customer1)));
         workshop2.setWorkshopOwner(workshopOwner1);
 
         workshopRepository.save(workshop);
