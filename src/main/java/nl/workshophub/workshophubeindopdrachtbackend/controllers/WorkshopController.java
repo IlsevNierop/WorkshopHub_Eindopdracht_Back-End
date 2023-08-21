@@ -83,10 +83,7 @@ public class WorkshopController {
         }
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         if (file != null) {
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
-            workshopOutputDto.workshopPicUrl = url;
-
-            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+           workshopOutputDto = uploadWorkshopPicture (file, workshopOutputDto);
         }
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
@@ -111,10 +108,7 @@ public class WorkshopController {
 
         WorkshopOutputDto workshopOutputDto = workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto);
         if (file != null) {
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
-
-            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
-
+            workshopOutputDto = uploadWorkshopPicture (file, workshopOutputDto);
         }
 
         return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
@@ -138,10 +132,7 @@ public class WorkshopController {
         }
         WorkshopOutputDto workshopOutputDto = workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto);
         if (file != null) {
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
-
-            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
-
+            workshopOutputDto = uploadWorkshopPicture (file, workshopOutputDto);
         }
         return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
     }
@@ -150,6 +141,13 @@ public class WorkshopController {
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {
         workshopService.deleteWorkshop(workshopId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    public WorkshopOutputDto uploadWorkshopPicture (MultipartFile file, WorkshopOutputDto workshopOutputDto) {
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+            workshopOutputDto.workshopPicUrl = url;
+            fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+        return workshopOutputDto;
     }
 
 }
