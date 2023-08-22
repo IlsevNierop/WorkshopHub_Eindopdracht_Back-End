@@ -22,11 +22,8 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -34,7 +31,6 @@ public class UserService {
     public UserCustomerOutputDto getCustomerById(Long customerId) {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view this profile.");
         }
@@ -44,7 +40,6 @@ public class UserService {
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long workshopOwnerId) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view this profile.");
         }
@@ -65,7 +60,6 @@ public class UserService {
 
     public List<UserWorkshopOwnerOutputDto> getAllUsers() {
         List<User> users = userRepository.findAll();
-        // will create a combination of customers and workshopowners - using workshopOwnerOutputDto's for all, since that contains more information.
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
         for (User user : users) {
             workshopOwnerOutputDtos.add(UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(user));
@@ -76,7 +70,6 @@ public class UserService {
     public Set<Authority> getUserAuthorities(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         UserCustomerOutputDto userOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
-
         return userOutputDto.authorities;
     }
 
@@ -84,7 +77,7 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
-        User customer = UserServiceTransferMethod.transferCustomerInputDtoToUser(new User(), customerInputDto, passwordEncoder);
+        User customer = UserServiceTransferMethod.transferUserInputDtoToUser(new User(), customerInputDto, passwordEncoder);
         //TODO need to save first, because ID is needed when adding the authority
         userRepository.save(customer);
         customer.getAuthorities().add(new Authority(customer.getId(), "ROLE_CUSTOMER"));
@@ -96,7 +89,7 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
-        User workshopOwner = UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUser(new User(), workshopOwnerInputDto, passwordEncoder);
+        User workshopOwner = UserServiceTransferMethod.transferUserInputDtoToUser(new User(), workshopOwnerInputDto, passwordEncoder);
         userRepository.save(workshopOwner);
         workshopOwner.getAuthorities().add(new Authority(workshopOwner.getId(), "ROLE_CUSTOMER"));
         userRepository.save(workshopOwner);
@@ -138,7 +131,7 @@ public class UserService {
                 throw new BadRequestException("Another user already exists with the email: " + userCustomerInputDtoExclPassword.email);
             }
         }
-        userRepository.save(UserServiceTransferMethod.transferCustomerInputDtoExclPasswordToUser(customer, userCustomerInputDtoExclPassword));
+        userRepository.save(UserServiceTransferMethod.transferUserInputDtoToUser(customer, userCustomerInputDtoExclPassword));
         return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
     }
 
@@ -155,7 +148,7 @@ public class UserService {
                 throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDtoExclPassword.email);
             }
         }
-        userRepository.save(UserServiceTransferMethod.transferWorkshopOwnerInputDtoToUserExclPasswordToUser(workshopOwner, workshopOwnerInputDtoExclPassword));
+        userRepository.save(UserServiceTransferMethod.transferUserInputDtoToUser(workshopOwner, workshopOwnerInputDtoExclPassword));
         return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
@@ -164,11 +157,9 @@ public class UserService {
             throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
         User user = userRepository.findByEmailIgnoreCase(email);
-
-        //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
+        //in case of a forgotten password (email verification (or another way of verification) which happens in the 'real world' is too complex for this proof of concept, so I will just reset the password to the new password) the password will be changed without verification.
         user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
         userRepository.save(user);
-
         return "The password has been updated sucessfully.";
     }
 
@@ -177,16 +168,12 @@ public class UserService {
             throw new RecordNotFoundException("The user with email: " + email + " doesn't exist.");
         }
         User user = userRepository.findByEmailIgnoreCase(email);
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this profile.");
         }
-
-        //in case of a forgotten password (email verification which happens in the 'real world' is too complex, so I will just reset the password to the new password) the password will be changed without verification.
         user.setPassword(passwordEncoder.encode(passwordInputDto.newPassword));
         userRepository.save(user);
-
         return "The password has been updated sucessfully.";
     }
 
