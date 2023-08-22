@@ -446,7 +446,7 @@ class BookingServiceTest {
         when(authentication.getName()).thenReturn(workshopOwner1.getEmail());
 
         StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Boeking ID,Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
+        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
 
 
         for (Booking booking : workshopOwner1Bookings) {
