@@ -20,11 +20,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Workshop {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
     private LocalDate date;
     private LocalTime startTime;
@@ -51,25 +49,24 @@ public class Workshop {
     @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Booking> workshopBookings;
-
     @OneToMany(mappedBy = "workshop")
     @JsonIgnore
     private List<Review> workshopReviews;
-
-    @ManyToMany (mappedBy = "favouriteWorkshops")
+    @ManyToMany(mappedBy = "favouriteWorkshops")
     @JsonIgnore
     private Set<User> favsUsers = new HashSet<>();
 
-
     public int getAvailableSpotsWorkshop() {
         int spotsBooked = 0;
-        if (this.getWorkshopBookings() != null){
+        if (this.getWorkshopBookings() != null) {
             for (Booking b : this.getWorkshopBookings()) {
                 spotsBooked += b.getAmount();
-            }}
+            }
+        }
         return (this.getAmountOfParticipants() - spotsBooked);
     }
-    public int calculateAmountOfBookingsWorkshop(){
+
+    public int calculateAmountOfBookingsWorkshop() {
         int bookingsWorkshop = 0;
         if (this.getWorkshopBookings() != null) {
             for (Booking booking : this.getWorkshopBookings()) {
@@ -79,14 +76,11 @@ public class Workshop {
         return bookingsWorkshop;
     }
 
-
-    public int calculateAmountOfFavouritesWorkshop(){
+    public int calculateAmountOfFavouritesWorkshop() {
         int amountOfFavourites = 0;
-        if (this.getFavsUsers() != null){
+        if (this.getFavsUsers() != null) {
             amountOfFavourites += this.getFavsUsers().size();
         }
         return amountOfFavourites;
     }
-
-
 }

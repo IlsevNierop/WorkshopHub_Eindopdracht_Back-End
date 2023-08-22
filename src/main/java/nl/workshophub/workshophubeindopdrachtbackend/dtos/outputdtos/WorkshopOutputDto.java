@@ -26,22 +26,13 @@ public class WorkshopOutputDto {
     public Boolean workshopVerified;
     public String feedbackAdmin;
     public Boolean publishWorkshop;
-    public List<ReviewOutputDto> workshopOwnerReviews;
-
     public Long workshopOwnerId;
     public String workshopOwnerCompanyName;
     public Double averageRatingWorkshopOwnerReviews;
-
     public Double numberOfReviews;
-
     public Boolean isFavourite;
-
     public int amountOfFavsAndBookings;
-
     public String workshopPicUrl;
-
-
-
-
+    public List<ReviewOutputDto> workshopOwnerReviews;
 
 }

@@ -36,44 +36,26 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(Long userId) {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-
+        User customer = null;
         if (userId != null) {
-            User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, customer);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
-        } else {
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
+            customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         }
-
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, customer);
     }
 
     public List<WorkshopOutputDto> getAllFavouriteWorkshopsUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the favourite workshops for this user.");
         }
+        List<Workshop> favouriteWorkshops = new ArrayList<>(user.getFavouriteWorkshops());
+        return processWorkshopsToWorkshopOutputDtos(favouriteWorkshops, user);
 
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : user.getFavouriteWorkshops()) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, user);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
     }
 
     public WorkshopOutputDto getWorkshopByIdVerifiedAndPublish(Long workshopId, Long userId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-        // using Boolean.TRUE because != true gives errors when the variable is null.
         if (workshop.getWorkshopVerified() != Boolean.TRUE || workshop.getPublishWorkshop() != Boolean.TRUE) {
             throw new ForbiddenException("You're not allowed to view this workshop.");
         }
@@ -86,27 +68,16 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(Long workshopOwnerId, Long userId) {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now(), workshopOwnerId);
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        User customer = null;
         if (userId != null) {
-            User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, customer);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
-        } else {
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
+            customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, customer);
     }
-
 
     public WorkshopOutputDto getWorkshopByIdForWorkshopOwner(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshop from this workshopowner.");
         }
@@ -121,58 +92,33 @@ public class WorkshopService {
         List<Workshop> workshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, workshopOwner);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, workshopOwner);
     }
 
     public List<WorkshopOutputDto> getAllWorkshopsToPublishFromWorkshopOwner(Long workshopOwnerId) {
         List<Workshop> workshops = workshopRepository.findByWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsNullOrPublishWorkshopIsFalseOrderByDate(workshopOwnerId);
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, workshopOwner);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, workshopOwner);
     }
-
 
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(java.time.LocalDate.now());
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, null);
     }
 
     public List<WorkshopOutputDto> getAllWorkshops() {
-        //admin - while being logged in as admin - doesn't see favourite with this method - frontend admin can switch to user/ workshopowner view.
         List<Workshop> workshops = workshopRepository.findAll();
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, null);
     }
 
     public WorkshopOutputDto getWorkshopById(Long workshopId) {
-        //admin - while being logged in as admin - doesn't see favourite with this method - frontend admin can switch to user/ workshopowner view.
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
@@ -180,7 +126,6 @@ public class WorkshopService {
     public WorkshopOutputDto createWorkshop(Long workshopOwnerId, WorkshopInputDto workshopInputDto) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to create a workshop from this workshopowner's account.");
         }
@@ -190,7 +135,6 @@ public class WorkshopService {
         Workshop workshop = new Workshop();
         workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
         workshop.setWorkshopOwner(workshopOwner);
-        // when creating a new workshop, publishWorkshop, workshopVerified and feedbackAdmin get default values.
         workshop.setPublishWorkshop(null);
         workshop.setWorkshopVerified(null);
         workshop.setFeedbackAdmin(null);
@@ -202,7 +146,6 @@ public class WorkshopService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to add favourites to this user's account.");
         }
@@ -212,22 +155,14 @@ public class WorkshopService {
             user.getFavouriteWorkshops().remove(workshop);
         }
         userRepository.save(user);
-
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : user.getFavouriteWorkshops()) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-            workshopOutputDto.isFavourite = true;
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        List<Workshop> favouriteWorkshops = new ArrayList<>(user.getFavouriteWorkshops());
+        return processWorkshopsToWorkshopOutputDtos(favouriteWorkshops, user);
     }
 
     public WorkshopOutputDto updateWorkshopByOwner(Long workshopOwnerId, Long workshopId, WorkshopInputDto workshopInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this workshop.");
         }
@@ -235,13 +170,10 @@ public class WorkshopService {
             throw new ForbiddenException("You're not allowed to update this workshop.");
         }
         if (workshop.calculateAmountOfBookingsWorkshop() > workshopInputDto.amountOfParticipants) {
-            throw new BadRequestException("You're trying to set the amount of participants to: " + workshopInputDto.amountOfParticipants + " while you already have " + workshop.calculateAmountOfBookingsWorkshop() + " bookings on this workshop.");
+            throw new BadRequestException("You're trying to set the amount of participants to: " + workshopInputDto.amountOfParticipants + " while there are already " + workshop.calculateAmountOfBookingsWorkshop() + " bookings on this workshop.");
         }
-
-        // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original workshop. This could be prevented with a different inputdto for workshopowner (excluding feedbackadmin and verifyworkshop) and for admin.
         workshopInputDto.feedbackAdmin = workshop.getFeedbackAdmin();
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
-        // after updating a workshop, publish and verify will be automatically set to default values.
         workshop.setPublishWorkshop(null);
         workshop.setWorkshopVerified(null);
         workshopRepository.save(workshop);
@@ -252,13 +184,10 @@ public class WorkshopService {
     @PutMapping
     public WorkshopOutputDto publishWorkshopByOwner(Long workshopId, Boolean publishWorkshop) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to publish this workshop.");
         }
-
         if (workshop.getWorkshopVerified() != Boolean.TRUE) {
             throw new BadRequestException("This workshop is not yet approved by the administrator, therefore it can't be published.");
         }
@@ -273,32 +202,26 @@ public class WorkshopService {
     public WorkshopOutputDto verifyWorkshopByAdmin(Long workshopId, WorkshopInputDto workshopInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         if (workshop.calculateAmountOfBookingsWorkshop() > workshopInputDto.amountOfParticipants) {
-            throw new BadRequestException("You're trying to set the amount of participants to: " + workshopInputDto.amountOfParticipants + " while you already have " + workshop.calculateAmountOfBookingsWorkshop() + " bookings on this workshop.");
+            throw new BadRequestException("You're trying to set the amount of participants to: " + workshopInputDto.amountOfParticipants + " while there are already " + workshop.calculateAmountOfBookingsWorkshop() + " bookings on this workshop.");
         }
-
         transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
-        // After verifying / disapproving the workshop by admin, publish workshop will automatically get a default value.
         workshop.setPublishWorkshop(null);
         workshopRepository.save(workshop);
-
         return transferWorkshopToWorkshopOutputDto(workshop);
     }
 
     public void deleteWorkshop(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to delete this workshop.");
         }
-
         if (!workshop.getWorkshopBookings().isEmpty()) {
             throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with bookings.");
         }
         if (!workshop.getWorkshopReviews().isEmpty()) {
             throw new BadRequestException("This workshop can't be removed, since it already has one or more relation with reviews.");
         }
-        // workshop is referencing entity in manytomany relation with user, regarding favourites, the workshop should be able to be deleted, even if users have it listed as favourite, therefore delete all those associations first:
         if (!workshop.getFavsUsers().isEmpty()) {
             for (User user : workshop.getFavsUsers()) {
                 user.getFavouriteWorkshops().remove(workshop);
@@ -306,6 +229,20 @@ public class WorkshopService {
         }
         workshopRepository.delete(workshop);
 
+    }
+
+    public List<WorkshopOutputDto> processWorkshopsToWorkshopOutputDtos(List<Workshop> workshops, User user) {
+        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        if (user != null) {
+            for (Workshop w : workshops) {
+                workshopOutputDtos.add(transferWorkshopToWorkshopOutputDto(w, user));
+            }
+        } else {
+            for (Workshop w : workshops) {
+                workshopOutputDtos.add(transferWorkshopToWorkshopOutputDto(w));
+            }
+        }
+        return workshopOutputDtos;
     }
 
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop) {
@@ -336,16 +273,12 @@ public class WorkshopService {
         }
         workshopOutputDto.amountOfFavsAndBookings = (workshop.calculateAmountOfBookingsWorkshop() + workshop.calculateAmountOfFavouritesWorkshop());
         workshopOutputDto.workshopPicUrl = workshop.getWorkshopPicUrl();
-
         return workshopOutputDto;
     }
 
-    //Overloading, in case there is a user the variable isfavourite is made.
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop, User user) {
-
         WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(workshop);
         workshopOutputDto.isFavourite = user.getFavouriteWorkshops().contains(workshop);
-
         return workshopOutputDto;
     }
 
@@ -366,7 +299,6 @@ public class WorkshopService {
         if (workshopInputDto.workshopCategory2 != null) {
             workshop.setWorkshopCategory2(workshopInputDto.workshopCategory2);
         }
-        // this can be set (by admin) via de workshopinputdto, since the admin doesn't only verify, but can also update the whole workshop
         if (workshopInputDto.workshopVerified != null) {
             workshop.setWorkshopVerified(workshopInputDto.workshopVerified);
         }
@@ -376,7 +308,6 @@ public class WorkshopService {
         workshop.setPublishWorkshop(workshopInputDto.publishWorkshop);
 
         return workshop;
-
     }
 
     public List<ReviewOutputDto> createReviewOutPutDtosFromWorkshopOwner(Workshop workshop) {
@@ -394,6 +325,5 @@ public class WorkshopService {
         }
         return allReviewOutputDtosFromWorkshopOwner;
     }
-
 
 }

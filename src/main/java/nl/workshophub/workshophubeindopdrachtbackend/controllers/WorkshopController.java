@@ -29,35 +29,42 @@ public class WorkshopController {
         this.workshopService = workshopService;
         this.fileService = fileService;
     }
+
     @GetMapping
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(@RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(userId), HttpStatus.OK);
     }
+
     @GetMapping("/favourites/{userId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllFavouriteWorkshopsUser(@PathVariable(value = "userId") Long userId) {
         return new ResponseEntity<>(workshopService.getAllFavouriteWorkshopsUser(userId), HttpStatus.OK);
     }
+
     @GetMapping("/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByIdVerifiedAndPublish(@PathVariable("workshopId") Long workshopId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdVerifiedAndPublish(workshopId, userId), HttpStatus.OK);
     }
+
     @GetMapping("/workshopowner/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(@PathVariable Long workshopOwnerId, @RequestParam(value = "userId", required = false) Long userId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(workshopOwnerId, userId), HttpStatus.OK);
     }
+
     @GetMapping("/workshopowner/workshop/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> getWorkshopByIdForWorkshopOwner(@PathVariable("workshopId") Long workshopId) {
         return new ResponseEntity<>(workshopService.getWorkshopByIdForWorkshopOwner(workshopId), HttpStatus.OK);
     }
+
     @GetMapping("/workshopowner/all/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
-    @GetMapping("/workshopowner/verify/{workshopOwnerId}")
+    @GetMapping("/workshopowner/publish/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToPublishFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsToPublishFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
+
     @GetMapping("/admin/verify")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToVerify() {
         return new ResponseEntity<>(workshopService.getAllWorkshopsToVerify(), HttpStatus.OK);
@@ -72,6 +79,7 @@ public class WorkshopController {
     public ResponseEntity<WorkshopOutputDto> getWorkshopById(@PathVariable Long workshopId) {
         return new ResponseEntity<>(workshopService.getWorkshopById(workshopId), HttpStatus.OK);
     }
+
     @PostMapping(value = "/workshopowner/{workshopOwnerId}", consumes = {"multipart/form-data"}, produces = "application/json")
     public ResponseEntity<Object> createWorkshop(
             @PathVariable Long workshopOwnerId,
@@ -83,10 +91,7 @@ public class WorkshopController {
         }
         WorkshopOutputDto workshopOutputDto = workshopService.createWorkshop(workshopOwnerId, workshopInputDto);
         if (file != null) {
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
-            workshopOutputDto.workshopPicUrl = url;
-
-            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+            workshopOutputDto = uploadWorkshopPicture(file, workshopOutputDto);
         }
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOutputDto.id).toUriString());
         return ResponseEntity.created(uri).body(workshopOutputDto);
@@ -98,7 +103,7 @@ public class WorkshopController {
     }
 
 
-    @PutMapping(value= "/workshopowner/{workshopOwnerId}/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
+    @PutMapping(value = "/workshopowner/{workshopOwnerId}/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
     public ResponseEntity<Object> updateWorkshopByOwner(
             @PathVariable("workshopOwnerId") Long workshopOwnerId,
             @PathVariable("workshopId") Long workshopId,
@@ -108,40 +113,31 @@ public class WorkshopController {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
-
         WorkshopOutputDto workshopOutputDto = workshopService.updateWorkshopByOwner(workshopOwnerId, workshopId, workshopInputDto);
         if (file != null) {
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
-
-            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
-
+            workshopOutputDto = uploadWorkshopPicture(file, workshopOutputDto);
         }
-
         return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
     }
 
 
-    @PutMapping("/workshopowner/verify/{workshopId}")
+    @PutMapping("/workshopowner/publish/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> publishWorkshopByOwner(@PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
-
         return new ResponseEntity<>(workshopService.publishWorkshopByOwner(workshopId, publishWorkshop), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping(value="/admin/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
+    @PutMapping(value = "/admin/{workshopId}", consumes = {"multipart/form-data"}, produces = "application/json")
     public ResponseEntity<Object> verifyWorkshopByAdmin(
             @PathVariable Long workshopId,
             @RequestPart @Valid WorkshopInputDto workshopInputDto,
             BindingResult bindingResult,
-            @RequestPart(name = "file", required = false) MultipartFile file){
+            @RequestPart(name = "file", required = false) MultipartFile file) {
         if (bindingResult.hasFieldErrors()) {
             return ResponseEntity.badRequest().body(FieldErrorHandling.getErrorToStringHandling(bindingResult));
         }
         WorkshopOutputDto workshopOutputDto = workshopService.verifyWorkshopByAdmin(workshopId, workshopInputDto);
         if (file != null) {
-            String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
-
-            String fileName = fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
-
+            workshopOutputDto = uploadWorkshopPicture(file, workshopOutputDto);
         }
         return new ResponseEntity<>(workshopOutputDto, HttpStatus.ACCEPTED);
     }
@@ -150,6 +146,13 @@ public class WorkshopController {
     public ResponseEntity<HttpStatus> deleteWorkshop(@PathVariable Long workshopId) {
         workshopService.deleteWorkshop(workshopId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    public WorkshopOutputDto uploadWorkshopPicture(MultipartFile file, WorkshopOutputDto workshopOutputDto) {
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+        workshopOutputDto.workshopPicUrl = url;
+        fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+        return workshopOutputDto;
     }
 
 }
