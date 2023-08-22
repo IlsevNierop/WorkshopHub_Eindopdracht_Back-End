@@ -92,7 +92,6 @@ public class User {
         avgRatingAndNumberReviews.add(numberReviews);
 
         return avgRatingAndNumberReviews;
-
     }
 
 }

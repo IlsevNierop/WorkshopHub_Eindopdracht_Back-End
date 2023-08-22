@@ -11,9 +11,7 @@ public class UserCustomerOutputDto {
     public String firstName;
     public String lastName;
     public String email;
-
     public Boolean workshopOwner;
-
     public String profilePicUrl;
 
     @JsonSerialize
