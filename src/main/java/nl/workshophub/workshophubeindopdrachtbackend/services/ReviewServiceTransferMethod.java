@@ -21,7 +21,6 @@ public class ReviewServiceTransferMethod {
         reviewOutputDto.lastNameReviewer = review.getCustomer().getLastName();
         reviewOutputDto.companyNameWorkshopOwner = review.getWorkshop().getWorkshopOwner().getCompanyName();
 
-
         return reviewOutputDto;
 
     }
@@ -35,8 +34,6 @@ public class ReviewServiceTransferMethod {
         if (reviewInputDto.feedbackAdmin != null){
             review.setFeedbackAdmin(reviewInputDto.feedbackAdmin);
         }
-
         return review;
-
     }
 }
