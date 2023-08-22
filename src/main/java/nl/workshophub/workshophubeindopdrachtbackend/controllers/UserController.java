@@ -73,15 +73,10 @@ public class UserController {
             return ResponseEntity.badRequest().body("To create a new account for a workshopowner you need to use a different link and more details are required.");
         }
         UserCustomerOutputDto customerOutputDto = userService.createCustomer(customerInputDto);
-
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + customerOutputDto.id).toUriString());
-
-        //return a token, so a user can be logged in directly on front-end side
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(customerOutputDto.email);
-
         final String jwt = jwtUtil.generateToken(userDetails);
-
         return ResponseEntity.created(uri).body(new AuthenticationOutputDto(jwt));
     }
 
@@ -95,13 +90,9 @@ public class UserController {
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.createWorkshopOwner(workshopOwnerInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/" + workshopOwnerOutputDto.id).toUriString());
-
-        //return a token, so a user can be logged in directly on front-end side
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(workshopOwnerOutputDto.email);
-
         final String jwt = jwtUtil.generateToken(userDetails);
-
         return ResponseEntity.created(uri).body(new AuthenticationOutputDto(jwt));
     }
 
@@ -129,13 +120,9 @@ public class UserController {
             return ResponseEntity.badRequest().body("With this link you can only update a customer's account. If you want to update/become a workshop owner you need to use another link and that requires more information.");
         }
         UserCustomerOutputDto customerOutputDto = userService.updateCustomer(customerId, customerInputDtoExclPassword);
-
-        //return a token, so a user can be logged in directly on front-end side after updating user information. Jwt needs to be updated for it to be matching the details of the logged in user
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(customerOutputDto.email);
-
         final String jwt = jwtUtil.generateToken(userDetails);
-
         return new ResponseEntity<>(new AuthenticationOutputDto(jwt), HttpStatus.ACCEPTED);
     }
 
@@ -150,12 +137,9 @@ public class UserController {
             return ResponseEntity.badRequest().body("With this link you can only update a workshop owner's account. If you want to update/become a customer you need to use another link and that requires less information.");
         }
         UserWorkshopOwnerOutputDto workshopOwnerOutputDto = userService.updateWorkshopOwner(workshopOwnerId, workshopOwnerInputDtoExclPassword);
-        //return a token, so a user can be logged in directly on front-end side after updating user information. Jwt needs to be updated for it to be matching the details of the logged in user
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(workshopOwnerOutputDto.email);
-
         final String jwt = jwtUtil.generateToken(userDetails);
-
         return new ResponseEntity<>(new AuthenticationOutputDto(jwt), HttpStatus.ACCEPTED);
     }
 
@@ -188,5 +172,4 @@ public class UserController {
         userService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
 }

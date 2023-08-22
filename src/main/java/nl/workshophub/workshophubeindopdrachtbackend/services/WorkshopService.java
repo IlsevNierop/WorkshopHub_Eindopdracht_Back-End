@@ -132,8 +132,7 @@ public class WorkshopService {
         if (workshopOwner.getWorkshopOwnerVerified() != Boolean.TRUE || !workshopOwner.getWorkshopOwner()) {
             throw new ForbiddenException("You're not allowed to create a new workshop, only a verified owner can create and publish workshops.");
         }
-        Workshop workshop = new Workshop();
-        workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, workshop);
+        Workshop workshop = transferWorkshopInputDtoToWorkshop(workshopInputDto, new Workshop());
         workshop.setWorkshopOwner(workshopOwner);
         workshop.setPublishWorkshop(null);
         workshop.setWorkshopVerified(null);

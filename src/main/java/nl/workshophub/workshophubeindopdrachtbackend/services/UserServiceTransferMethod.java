@@ -18,7 +18,6 @@ public class UserServiceTransferMethod {
         customerOutputDto.lastName = customer.getLastName();
         customerOutputDto.email = customer.getEmail();
         customerOutputDto.workshopOwner = customer.getWorkshopOwner();
-//        customerOutputDto.enabled = customer.isEnabled();
         customerOutputDto.authorities = customer.getAuthorities();
         customerOutputDto.profilePicUrl = customer.getProfilePicUrl();
 
@@ -39,15 +38,13 @@ public class UserServiceTransferMethod {
         if (workshopOwner.calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
             workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
         }
-
         workshopOwnerOutputDto.authorities = workshopOwner.getAuthorities();
         workshopOwnerOutputDto.profilePicUrl = workshopOwner.getProfilePicUrl();
-
 
         return workshopOwnerOutputDto;
     }
 
-    public static User transferWorkshopOwnerInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto, PasswordEncoder passwordEncoder) {
+    public static User transferUserInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto, PasswordEncoder passwordEncoder) {
         workshopOwner.setPassword(passwordEncoder.encode(workshopOwnerInputDto.password));
         workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
         workshopOwner.setLastName(workshopOwnerInputDto.lastName);
@@ -56,11 +53,11 @@ public class UserServiceTransferMethod {
         workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
         workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
         workshopOwner.setWorkshopOwner(workshopOwnerInputDto.workshopOwner);
-        //workshopowner verified is not set in this transfer method, because verifying takes place via the put method containing verify boolean as a request parameter (and only admin can do that)
+
         return workshopOwner;
     }
 
-    public static User transferWorkshopOwnerInputDtoToUserExclPasswordToUser(User workshopOwner, UserWorkshopOwnerInputDtoExclPassword workshopOwnerInputDtoExclPassword) {
+    public static User transferUserInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDtoExclPassword workshopOwnerInputDtoExclPassword) {
         workshopOwner.setFirstName(workshopOwnerInputDtoExclPassword.firstName);
         workshopOwner.setLastName(workshopOwnerInputDtoExclPassword.lastName);
         workshopOwner.setEmail(workshopOwnerInputDtoExclPassword.email);
@@ -68,11 +65,11 @@ public class UserServiceTransferMethod {
         workshopOwner.setKvkNumber(workshopOwnerInputDtoExclPassword.kvkNumber);
         workshopOwner.setVatNumber(workshopOwnerInputDtoExclPassword.vatNumber);
         workshopOwner.setWorkshopOwner(workshopOwnerInputDtoExclPassword.workshopOwner);
-        //workshopowner verified is not set in this transfer method, because verifying takes place via the put method containing verify boolean as a request parameter (and only admin can do that)
+
         return workshopOwner;
     }
 
-    public static User transferCustomerInputDtoToUser(User customer, UserCustomerInputDto customerInputDto, PasswordEncoder passwordEncoder) {
+    public static User transferUserInputDtoToUser(User customer, UserCustomerInputDto customerInputDto, PasswordEncoder passwordEncoder) {
         customer.setPassword(passwordEncoder.encode(customerInputDto.password));
         customer.setFirstName(customerInputDto.firstName);
         customer.setLastName(customerInputDto.lastName);
@@ -82,7 +79,7 @@ public class UserServiceTransferMethod {
         return customer;
     }
 
-    public static User transferCustomerInputDtoExclPasswordToUser(User customer, UserCustomerInputDtoExclPassword customerInputDtoExclPassword) {
+    public static User transferUserInputDtoToUser(User customer, UserCustomerInputDtoExclPassword customerInputDtoExclPassword) {
         customer.setFirstName(customerInputDtoExclPassword.firstName);
         customer.setLastName(customerInputDtoExclPassword.lastName);
         customer.setEmail(customerInputDtoExclPassword.email);

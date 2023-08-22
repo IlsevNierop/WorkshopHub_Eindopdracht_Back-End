@@ -103,8 +103,7 @@ public class ReviewService {
         }
         for (Booking b : customer.getBookings()) {
             if (b.getWorkshop().getId() == workshop.getId() && b.getWorkshop().getDate().isBefore(LocalDate.now())) {
-                Review review = new Review();
-                ReviewServiceTransferMethod.transferReviewInputDtoToReview(reviewInputDto, review);
+                Review review = ReviewServiceTransferMethod.transferReviewInputDtoToReview(reviewInputDto, new Review());
                 review.setWorkshop(workshop);
                 review.setCustomer(customer);
                 review.setReviewVerified(null);
