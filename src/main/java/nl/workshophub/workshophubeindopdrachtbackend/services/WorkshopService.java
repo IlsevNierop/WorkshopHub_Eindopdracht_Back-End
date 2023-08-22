@@ -36,22 +36,11 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsVerifiedAndPublishFromCurrentDateOnwardsOrderByDate(Long userId) {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now());
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-
+        User customer = null;
         if (userId != null) {
-            User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, customer);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
-        } else {
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
+            customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         }
-
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, customer);
     }
 
     public List<WorkshopOutputDto> getAllFavouriteWorkshopsUser(Long userId) {
@@ -62,13 +51,9 @@ public class WorkshopService {
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the favourite workshops for this user.");
         }
+        List<Workshop> favouriteWorkshops = new ArrayList<>(user.getFavouriteWorkshops());
+        return processWorkshopsToWorkshopOutputDtos(favouriteWorkshops, user);
 
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : user.getFavouriteWorkshops()) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, user);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
     }
 
     public WorkshopOutputDto getWorkshopByIdVerifiedAndPublish(Long workshopId, Long userId) {
@@ -86,22 +71,12 @@ public class WorkshopService {
 
     public List<WorkshopOutputDto> getAllWorkshopsFromWorkshopOwnerVerifiedAndPublish(Long workshopOwnerId, Long userId) {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsTrueOrderByDate(java.time.LocalDate.now(), workshopOwnerId);
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+        User customer = null;
         if (userId != null) {
-            User customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, customer);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
-        } else {
-            for (Workshop w : workshops) {
-                WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-                workshopOutputDtos.add(workshopOutputDto);
-            }
+            customer = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, customer);
     }
-
 
     public WorkshopOutputDto getWorkshopByIdForWorkshopOwner(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
@@ -125,12 +100,7 @@ public class WorkshopService {
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, workshopOwner);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, workshopOwner);
     }
 
     public List<WorkshopOutputDto> getAllWorkshopsToPublishFromWorkshopOwner(Long workshopOwnerId) {
@@ -141,34 +111,19 @@ public class WorkshopService {
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w, workshopOwner);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, workshopOwner);
     }
 
 
     public List<WorkshopOutputDto> getAllWorkshopsToVerify() {
         List<Workshop> workshops = workshopRepository.findByDateAfterAndWorkshopVerifiedIsNullOrWorkshopVerifiedIsFalseOrderByDate(java.time.LocalDate.now());
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, null);
     }
 
     public List<WorkshopOutputDto> getAllWorkshops() {
         //admin - while being logged in as admin - doesn't see favourite with this method - frontend admin can switch to user/ workshopowner view.
         List<Workshop> workshops = workshopRepository.findAll();
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : workshops) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        return processWorkshopsToWorkshopOutputDtos(workshops, null);
     }
 
     public WorkshopOutputDto getWorkshopById(Long workshopId) {
@@ -213,13 +168,15 @@ public class WorkshopService {
         }
         userRepository.save(user);
 
-        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
-        for (Workshop w : user.getFavouriteWorkshops()) {
-            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
-            workshopOutputDto.isFavourite = true;
-            workshopOutputDtos.add(workshopOutputDto);
-        }
-        return workshopOutputDtos;
+        List<Workshop> favouriteWorkshops = new ArrayList<>(user.getFavouriteWorkshops());
+        return processWorkshopsToWorkshopOutputDtos(favouriteWorkshops, user);
+//        List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+//        for (Workshop w : user.getFavouriteWorkshops()) {
+//            WorkshopOutputDto workshopOutputDto = transferWorkshopToWorkshopOutputDto(w);
+//            workshopOutputDto.isFavourite = true;
+//            workshopOutputDtos.add(workshopOutputDto);
+//        }
+//        return workshopOutputDtos;
     }
 
     public WorkshopOutputDto updateWorkshopByOwner(Long workshopOwnerId, Long workshopId, WorkshopInputDto workshopInputDto) {
@@ -306,6 +263,21 @@ public class WorkshopService {
         }
         workshopRepository.delete(workshop);
 
+    }
+
+    public List<WorkshopOutputDto> processWorkshopsToWorkshopOutputDtos(List<Workshop> workshops, User user) {
+            List<WorkshopOutputDto> workshopOutputDtos = new ArrayList<>();
+            if (user != null) {
+                for (Workshop w : workshops) {
+                    workshopOutputDtos.add(transferWorkshopToWorkshopOutputDto(w, user));
+                }
+            }
+            else {
+                for (Workshop w : workshops) {
+                    workshopOutputDtos.add(transferWorkshopToWorkshopOutputDto(w));
+                }
+            }
+            return workshopOutputDtos;
     }
 
     public WorkshopOutputDto transferWorkshopToWorkshopOutputDto(Workshop workshop) {
