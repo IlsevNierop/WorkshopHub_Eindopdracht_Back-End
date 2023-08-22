@@ -235,8 +235,6 @@ public class BookingService {
     }
 
 
-
-
     public Boolean getReviewCustomerWritten(Booking booking) {
         if (booking.getCustomer().getCustomerReviews() != null) {
             for (Review r : booking.getCustomer().getCustomerReviews()) {
