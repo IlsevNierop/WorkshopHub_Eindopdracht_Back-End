@@ -18,11 +18,9 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private double rating;
 
     private String reviewDescription;
-
     private Boolean reviewVerified;
     private String feedbackAdmin;
     @ManyToOne

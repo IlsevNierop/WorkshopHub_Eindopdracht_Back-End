@@ -42,7 +42,6 @@ public class ReviewController {
     @GetMapping("/admin/")
     public ResponseEntity<List<ReviewOutputDto>> getAllReviews(){
         return new ResponseEntity<>(reviewService.getAllReviews(), HttpStatus.OK);
-
     }
 
     @GetMapping("/admin/verify")
