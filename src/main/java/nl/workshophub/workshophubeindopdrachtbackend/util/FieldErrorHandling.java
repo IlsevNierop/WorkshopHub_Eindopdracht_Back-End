@@ -1,6 +1,4 @@
 package nl.workshophub.workshophubeindopdrachtbackend.util;
-
-import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 

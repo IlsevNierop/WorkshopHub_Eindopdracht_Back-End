@@ -79,7 +79,7 @@ Gedurende de 3 uur durende workshop leer je een verscheidenheid aan patisserieva
 De workshop is interactief en hands-on, waarbij elke deelnemer de kans krijgt om actief mee te doen en zijn/haar eigen gebak te creëren. Aan het einde van de workshop is er een gezamenlijke proeverij, waarbij je kunt genieten van de heerlijke resultaten van je inspanningen.
 De locatie van de workshop bevindt zich in het bruisende centrum van Utrecht, dicht bij het openbaar vervoer en andere bezienswaardigheden. Het is de perfecte gelegenheid om een culinaire ervaring te combineren met het verkennen van de prachtige stad.
 Kortom, deze 3 uur durende Patisserie workshop in Utrecht is een unieke gelegenheid om je vaardigheden op het gebied van patisserie te verbeteren, nieuwe vrienden te maken en te genieten van een smakelijke en gezellige ervaring. Reserveer nu en laat je betoveren door de zoete wereld van de patisserie.',
-        6, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', true, 105, 'Bakken--1.webp',
+        9, 'Koken', 'Bakken', true, 'ziet er goed uit, mag online', true, 105, 'Bakken--1.webp',
         'http://localhost:8080/downloadworkshoppic/102'),
        (103, 'Macramé plantenhanger maken', '2023-10-01', '14:30:00', '16:30:00', 15.0, 'INDOORS', 'Amsterdam',
         'Er is thee en koffie aanwezig.', 'Kom en ontdek de kunst van macramé tijdens onze creatieve 2 uur durende workshop in Amsterdam. Leer hoe je prachtige plantenhangers kunt maken met de oude techniek van knopen, en geef je huis een stijlvolle en groene touch.

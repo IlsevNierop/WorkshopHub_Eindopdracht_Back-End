@@ -24,12 +24,10 @@ public class Booking {
     private String commentsCustomer;
     private int amount;
     private double totalPrice;
-
     //needs fetchtype lazy, otherwise get bookings from customer, shows double bookings
     @ManyToOne (fetch = FetchType.LAZY)
     @JsonIgnore
     private Workshop workshop;
-
     //needs fetchtype lazy, otherwise booking amounts are being counted double
     @ManyToOne (fetch = FetchType.LAZY)
     @JsonIgnore

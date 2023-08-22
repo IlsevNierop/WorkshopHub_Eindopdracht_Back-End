@@ -42,39 +42,25 @@ public class BookingService {
     public List<BookingOutputDto> getAllBookingsFromUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view bookings from this user.");
         }
-        List<Booking> userBookings = user.getBookings();
-        List<BookingOutputDto> userBookingOutputDtos = new ArrayList<>();
-        for (Booking b : userBookings) {
-            BookingOutputDto userBookingOutputDto = transferBookingToBookingOutputDto(b);
-            userBookingOutputDtos.add(userBookingOutputDto);
-        }
-        return userBookingOutputDtos;
+        return processBookingsToBookingOutputDtos(user.getBookings());
     }
 
     public List<BookingOutputDto> getAllBookingsFromWorkshop(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(workshop.getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view bookings from this workshop, since you're not the owner.");
         }
-        List<Booking> workshopBookings = workshop.getWorkshopBookings();
-        List<BookingOutputDto> workshopBookingOutputDtos = new ArrayList<>();
-        for (Booking b : workshopBookings) {
-            BookingOutputDto workshopBookingOutputDto = transferBookingToBookingOutputDto(b);
-            workshopBookingOutputDtos.add(workshopBookingOutputDto);
-        }
-        return workshopBookingOutputDtos;
+        return processBookingsToBookingOutputDtos(workshop.getWorkshopBookings());
+
     }
 
     public List<BookingOutputDto> getAllBookingsFromWorkshopsFromWorkshopOwner(Long workshopOwnerId) {
         User user = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view bookings from this user.");
         }
@@ -84,29 +70,17 @@ public class BookingService {
             List<Booking> workshopBookings = w.getWorkshopBookings();
             workshopOwnerBookings.addAll(workshopBookings);
         }
-        List<BookingOutputDto> workshopOwnerBookingOutputDtos = new ArrayList<>();
-        for (Booking b : workshopOwnerBookings) {
-            BookingOutputDto userBookingOutputDto = transferBookingToBookingOutputDto(b);
-            workshopOwnerBookingOutputDtos.add(userBookingOutputDto);
-        }
-        return workshopOwnerBookingOutputDtos;
+        return processBookingsToBookingOutputDtos(workshopOwnerBookings);
     }
 
     public List<BookingOutputDto> getAllBookings() {
         List<Booking> allBookings = bookingRepository.findAll();
-
-        List<BookingOutputDto> allBookingOutputDtos = new ArrayList<>();
-        for (Booking b : allBookings) {
-            BookingOutputDto workshopBookingOutputDto = transferBookingToBookingOutputDto(b);
-            allBookingOutputDtos.add(workshopBookingOutputDto);
-        }
-        return allBookingOutputDtos;
+        return processBookingsToBookingOutputDtos(allBookings);
     }
 
     public BookingOutputDto getOneBookingById(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new RecordNotFoundException("The booking with ID  " + bookingId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (CheckAuthorization.isAuthorized(booking.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName()) || CheckAuthorization.isAuthorized(booking.getWorkshop().getWorkshopOwner(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             return transferBookingToBookingOutputDto(booking);
         }
@@ -126,26 +100,7 @@ public class BookingService {
             List<Booking> workshopBookings = w.getWorkshopBookings();
             workshopOwnerBookings.addAll(workshopBookings);
         }
-        StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Boeking ID,Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
-
-        for (Booking booking : workshopOwnerBookings) {
-            csvContent.append(System.lineSeparator())
-                    .append(booking.getId()).append(",")
-                    .append(booking.getDateOrder()).append(",")
-                    .append(booking.getAmount()).append(",")
-                    .append(booking.getCustomer().getFirstName()).append(",")
-                    .append(booking.getCustomer().getLastName()).append(",")
-                    .append(booking.getCustomer().getEmail()).append(",")
-                    .append(booking.getCommentsCustomer()).append(",")
-                    .append(booking.getTotalPrice()).append(",")
-                    .append(booking.getWorkshop().getId()).append(",")
-                    .append(booking.getWorkshop().getTitle()).append(",")
-                    .append(booking.getWorkshop().getDate()).append(",");
-
-        }
-        byte[] content = csvContent.toString().getBytes();
-        return new ByteArrayResource(content);
+        return new ByteArrayResource(createCSVFromBookings(workshopOwnerBookings));
     }
 
 
@@ -157,50 +112,12 @@ public class BookingService {
             throw new ForbiddenException("You're not allowed to view bookings from this workshop, since you're not the owner.");
         }
         List<Booking> workshopBookings = workshop.getWorkshopBookings();
-        StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
-
-        for (Booking booking : workshopBookings) {
-            csvContent.append(System.lineSeparator())
-                    .append(booking.getId()).append(",")
-                    .append(booking.getDateOrder()).append(",")
-                    .append(booking.getAmount()).append(",")
-                    .append(booking.getCustomer().getFirstName()).append(",")
-                    .append(booking.getCustomer().getLastName()).append(",")
-                    .append(booking.getCustomer().getEmail()).append(",")
-                    .append(booking.getCommentsCustomer()).append(",")
-                    .append(booking.getTotalPrice()).append(",")
-                    .append(booking.getWorkshop().getId()).append(",")
-                    .append(booking.getWorkshop().getTitle()).append(",")
-                    .append(booking.getWorkshop().getDate()).append(",");
-        }
-
-        byte[] content = csvContent.toString().getBytes();
-        return new ByteArrayResource(content);
+        return new ByteArrayResource(createCSVFromBookings(workshopBookings));
     }
 
     public ByteArrayResource generateAndDownloadCsv() {
         List<Booking> bookings = bookingRepository.findAll();
-        StringBuilder csvContent = new StringBuilder();
-        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
-
-        for (Booking booking : bookings) {
-            csvContent.append(System.lineSeparator())
-                    .append(booking.getId()).append(",")
-                    .append(booking.getDateOrder()).append(",")
-                    .append(booking.getAmount()).append(",")
-                    .append(booking.getCustomer().getFirstName()).append(",")
-                    .append(booking.getCustomer().getLastName()).append(",")
-                    .append(booking.getCustomer().getEmail()).append(",")
-                    .append(booking.getCommentsCustomer()).append(",")
-                    .append(booking.getTotalPrice()).append(",")
-                    .append(booking.getWorkshop().getId()).append(",")
-                    .append(booking.getWorkshop().getTitle()).append(",")
-                    .append(booking.getWorkshop().getDate()).append(",");
-
-        }
-        byte[] content = csvContent.toString().getBytes();
-        return new ByteArrayResource(content);
+        return new ByteArrayResource(createCSVFromBookings(bookings));
     }
 
 
@@ -261,7 +178,6 @@ public class BookingService {
         bookingRepository.delete(booking);
     }
 
-
     public BookingOutputDto transferBookingToBookingOutputDto(Booking booking) {
         BookingOutputDto bookingOutputDto = new BookingOutputDto();
         bookingOutputDto.id = booking.getId();
@@ -273,13 +189,11 @@ public class BookingService {
         bookingOutputDto.workshopTitle = booking.getWorkshop().getTitle();
         bookingOutputDto.workshopDate = booking.getWorkshop().getDate();
         bookingOutputDto.spotsAvailableWorkshop = booking.getWorkshop().getAvailableSpotsWorkshop();
-
         bookingOutputDto.customerId = booking.getCustomer().getId();
         bookingOutputDto.firstNameCustomer = booking.getCustomer().getFirstName();
         bookingOutputDto.lastNameCustomer = booking.getCustomer().getLastName();
         bookingOutputDto.emailCustomer = booking.getCustomer().getEmail();
         bookingOutputDto.reviewCustomerWritten = getReviewCustomerWritten(booking);
-
         return bookingOutputDto;
     }
 
@@ -288,9 +202,40 @@ public class BookingService {
         Booking booking = new Booking();
         booking.setCommentsCustomer(bookingInputDto.commentsCustomer);
         booking.setAmount(bookingInputDto.amount);
-
         return booking;
     }
+
+    public List<BookingOutputDto> processBookingsToBookingOutputDtos(List<Booking> bookings) {
+        List<BookingOutputDto> bookingOutputDtos = new ArrayList<>();
+        for (Booking b : bookings) {
+            BookingOutputDto bookingOutputDto = transferBookingToBookingOutputDto(b);
+            bookingOutputDtos.add(bookingOutputDto);
+        }
+        return bookingOutputDtos;
+    }
+
+    public byte[] createCSVFromBookings(List<Booking> bookings) {
+        StringBuilder csvContent = new StringBuilder();
+        csvContent.append("Boeking ID, Datum boeking, Aantal, Voornaam klant, Achternaam klant, Email klant, Opmerkingen klant, Totaal bedrag, Workshop ID, Titel workshop, Workshop datum");
+        for (Booking booking : bookings) {
+            csvContent.append(System.lineSeparator())
+                    .append(booking.getId()).append(",")
+                    .append(booking.getDateOrder()).append(",")
+                    .append(booking.getAmount()).append(",")
+                    .append(booking.getCustomer().getFirstName()).append(",")
+                    .append(booking.getCustomer().getLastName()).append(",")
+                    .append(booking.getCustomer().getEmail()).append(",")
+                    .append(booking.getCommentsCustomer()).append(",")
+                    .append(booking.getTotalPrice()).append(",")
+                    .append(booking.getWorkshop().getId()).append(",")
+                    .append(booking.getWorkshop().getTitle()).append(",")
+                    .append(booking.getWorkshop().getDate()).append(",");
+        }
+        return  csvContent.toString().getBytes();
+    }
+
+
+
 
     public Boolean getReviewCustomerWritten(Booking booking) {
         if (booking.getCustomer().getCustomerReviews() != null) {
