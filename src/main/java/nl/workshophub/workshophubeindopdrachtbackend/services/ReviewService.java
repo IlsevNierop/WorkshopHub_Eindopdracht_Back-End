@@ -41,7 +41,6 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
         if (review.getReviewVerified() != Boolean.TRUE) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
             if (!CheckAuthorization.isAuthorized(review.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
                 throw new ForbiddenException("You're not allowed to view this review.");
             }
@@ -51,13 +50,13 @@ public class ReviewService {
 
     public List<ReviewOutputDto> getReviewsVerifiedFromWorkshopOwner(Long workshopOwnerId) {
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
-        if (workshopOwner.getWorkshopOwner() != true) {
+        if (!workshopOwner.getWorkshopOwner()) {
             throw new BadRequestException("This user is a customer, and not a workshop owner.");
         }
         List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
         for (Workshop w : workshopOwner.getWorkshops()) {
             for (Review r : w.getWorkshopReviews()) {
-                if (r.getReviewVerified() != null && r.getReviewVerified() == true) {
+                if (r.getReviewVerified() == Boolean.TRUE) {
                     ReviewOutputDto reviewOutputDto = ReviewServiceTransferMethod.transferReviewToReviewOutputDto(r);
                     reviewOutputDtos.add(reviewOutputDto);
                 }
@@ -68,45 +67,23 @@ public class ReviewService {
 
     public List<ReviewOutputDto> getReviewsFromCustomer(Long customerId) {
         User customer = userRepository.findById(customerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + customerId + " doesn't exist."));
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view reviews from this user account.");
         }
-
         List<Review> reviews = reviewRepository.findAllByCustomerId(customerId);
-
-        List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
-        for (Review r : reviews) {
-            ReviewOutputDto reviewOutputDto = ReviewServiceTransferMethod.transferReviewToReviewOutputDto(r);
-            reviewOutputDtos.add(reviewOutputDto);
-        }
-        return reviewOutputDtos;
+        return processReviewsToReviewOutputDtos(reviews);
     }
 
-
-    //admin
     public List<ReviewOutputDto> getAllReviews() {
         List<Review> reviews = reviewRepository.findAll();
-        List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
-        for (Review r : reviews) {
-            ReviewOutputDto reviewOutputDto = ReviewServiceTransferMethod.transferReviewToReviewOutputDto(r);
-            reviewOutputDtos.add(reviewOutputDto);
-        }
-        return reviewOutputDtos;
+        return processReviewsToReviewOutputDtos(reviews);
     }
 
     public List<ReviewOutputDto> getReviewsToVerify() {
         List<Review> reviews = reviewRepository.findByReviewVerifiedIsNull();
-        List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
-        for (Review r : reviews) {
-            ReviewOutputDto reviewOutputDto = ReviewServiceTransferMethod.transferReviewToReviewOutputDto(r);
-            reviewOutputDtos.add(reviewOutputDto);
-        }
-        return reviewOutputDtos;
+        return processReviewsToReviewOutputDtos(reviews);
     }
-
 
     public ReviewOutputDto createReview(Long workshopId, Long customerId, ReviewInputDto reviewInputDto) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
@@ -115,13 +92,10 @@ public class ReviewService {
         if (customer == workshop.getWorkshopOwner()) {
             throw new ForbiddenException("You're not allowed to write a review about your own workshop.");
         }
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to create a review from this user account.");
         }
-
         for (Review r : customer.getCustomerReviews()) {
             if (r.getWorkshop().getId() == workshop.getId()) {
                 throw new BadRequestException("You've already submitted a review for this workshop, you can only submit 1 review per attended workshop.");
@@ -133,7 +107,6 @@ public class ReviewService {
                 ReviewServiceTransferMethod.transferReviewInputDtoToReview(reviewInputDto, review);
                 review.setWorkshop(workshop);
                 review.setCustomer(customer);
-                // when creating new review by customer, reviewVerified and feedbackAdmin should get default values so admin can later verify and give feedback.
                 review.setReviewVerified(null);
                 review.setFeedbackAdmin(null);
                 reviewRepository.save(review);
@@ -157,11 +130,8 @@ public class ReviewService {
         if (!CheckAuthorization.isAuthorized(review.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to update this review.");
         }
-
-        // to prevent the owner from overwriting the feedback from the admin, I'll make sure the inputdto has the same feedback as the original review. This could be prevented with a different inputdto for customer (excluding feedbackadmin and verifyreview) and for admin.
         reviewInputDto.feedbackAdmin = review.getFeedbackAdmin();
         ReviewServiceTransferMethod.transferReviewInputDtoToReview(reviewInputDto, review);
-        // after update review by customer, reviewVerified should get default value so admin can later verify.
         review.setReviewVerified(null);
         reviewRepository.save(review);
         return ReviewServiceTransferMethod.transferReviewToReviewOutputDto(review);
@@ -170,12 +140,19 @@ public class ReviewService {
     public void deleteReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new RecordNotFoundException("The review with ID " + reviewId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (!CheckAuthorization.isAuthorized(review.getCustomer(), (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to delete this review.");
         }
-
         reviewRepository.delete(review);
+    }
+
+    public List<ReviewOutputDto> processReviewsToReviewOutputDtos(List<Review> reviews) {
+        List<ReviewOutputDto> reviewOutputDtos = new ArrayList<>();
+        for (Review r : reviews) {
+            ReviewOutputDto reviewOutputDto = ReviewServiceTransferMethod.transferReviewToReviewOutputDto(r);
+            reviewOutputDtos.add(reviewOutputDto);
+        }
+        return reviewOutputDtos;
     }
 
 }
