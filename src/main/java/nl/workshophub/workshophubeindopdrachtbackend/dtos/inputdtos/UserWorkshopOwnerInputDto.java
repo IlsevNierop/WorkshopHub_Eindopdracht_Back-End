@@ -18,7 +18,7 @@ public class UserWorkshopOwnerInputDto {
     public String email;
 
     @NotBlank (message = "Password field shouldn't be empty.")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()\\[{}\\]:;',?/*~$^+=<>]).{8,20}$", message = "Password needs to contain the following: " +
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#%^&*()\\[{}\\]:;',?/~$+=<>]).{8,20}$", message = "Password needs to contain the following: " +
             "1. Minimum of 1 lowercase letter. 2. Minimum of 1 uppercase letter. 3. Minimum of 1 number 4. Minimum of 1 symbol. 5. It should be between 8 and 20 characters long.")
     public String password;
     @NotBlank (message = "Companyname field shouldn't be empty.")
