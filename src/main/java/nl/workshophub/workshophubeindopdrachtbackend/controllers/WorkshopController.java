@@ -54,7 +54,7 @@ public class WorkshopController {
         return new ResponseEntity<>(workshopService.getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
 
-    @GetMapping("/workshopowner/verify/{workshopOwnerId}")
+    @GetMapping("/workshopowner/publish/{workshopOwnerId}")
     public ResponseEntity<List<WorkshopOutputDto>> getAllWorkshopsToPublishFromWorkshopOwner(@PathVariable Long workshopOwnerId) {
         return new ResponseEntity<>(workshopService.getAllWorkshopsToPublishFromWorkshopOwner(workshopOwnerId), HttpStatus.OK);
     }
@@ -115,7 +115,7 @@ public class WorkshopController {
     }
 
 
-    @PutMapping("/workshopowner/verify/{workshopId}")
+    @PutMapping("/workshopowner/publish/{workshopId}")
     public ResponseEntity<WorkshopOutputDto> publishWorkshopByOwner(@PathVariable("workshopId") Long workshopId, @RequestParam Boolean publishWorkshop) {
 
         return new ResponseEntity<>(workshopService.publishWorkshopByOwner(workshopId, publishWorkshop), HttpStatus.ACCEPTED);
