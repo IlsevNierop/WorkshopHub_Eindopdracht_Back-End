@@ -23,6 +23,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -34,7 +35,7 @@ public class UserService {
         if (!CheckAuthorization.isAuthorized(customer, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view this profile.");
         }
-        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
+        return transferUserToCustomerOutputDto(customer);
     }
 
     public UserWorkshopOwnerOutputDto getWorkshopOwnerById(Long workshopOwnerId) {
@@ -46,14 +47,14 @@ public class UserService {
         if (!workshopOwner.getWorkshopOwner()) {
             throw new RecordNotFoundException("The user with ID " + workshopOwnerId + " is a customer and not a workshop owner.");
         }
-        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public List<UserWorkshopOwnerOutputDto> getWorkshopOwnersToVerify() {
         List<User> workshopOwners = userRepository.findByWorkshopOwnerIsTrueAndWorkshopOwnerVerifiedIsNullOrWorkshopOwnerVerifiedIsFalse();
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
         for (User workshopOwner : workshopOwners) {
-            workshopOwnerOutputDtos.add(UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner));
+            workshopOwnerOutputDtos.add(transferUserToWorkshopOwnerOutputDto(workshopOwner));
         }
         return workshopOwnerOutputDtos;
     }
@@ -62,14 +63,14 @@ public class UserService {
         List<User> users = userRepository.findAll();
         List<UserWorkshopOwnerOutputDto> workshopOwnerOutputDtos = new ArrayList<>();
         for (User user : users) {
-            workshopOwnerOutputDtos.add(UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(user));
+            workshopOwnerOutputDtos.add(transferUserToWorkshopOwnerOutputDto(user));
         }
         return workshopOwnerOutputDtos;
     }
 
     public Set<Authority> getUserAuthorities(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
-        UserCustomerOutputDto userOutputDto = UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
+        UserCustomerOutputDto userOutputDto = transferUserToCustomerOutputDto(user);
         return userOutputDto.authorities;
     }
 
@@ -77,23 +78,22 @@ public class UserService {
         if (userRepository.existsByEmailIgnoreCase(customerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + customerInputDto.email);
         }
-        User customer = UserServiceTransferMethod.transferUserInputDtoToUser(new User(), customerInputDto, passwordEncoder);
-        //TODO need to save first, because ID is needed when adding the authority
+        User customer = transferUserInputDtoToUser(new User(), customerInputDto, passwordEncoder);
         userRepository.save(customer);
         customer.getAuthorities().add(new Authority(customer.getId(), "ROLE_CUSTOMER"));
         userRepository.save(customer);
-        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
+        return transferUserToCustomerOutputDto(customer);
     }
 
     public UserWorkshopOwnerOutputDto createWorkshopOwner(UserWorkshopOwnerInputDto workshopOwnerInputDto) {
         if (userRepository.existsByEmailIgnoreCase(workshopOwnerInputDto.email)) {
             throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDto.email);
         }
-        User workshopOwner = UserServiceTransferMethod.transferUserInputDtoToUser(new User(), workshopOwnerInputDto, passwordEncoder);
+        User workshopOwner = transferUserInputDtoToUser(new User(), workshopOwnerInputDto, passwordEncoder);
         userRepository.save(workshopOwner);
         workshopOwner.getAuthorities().add(new Authority(workshopOwner.getId(), "ROLE_CUSTOMER"));
         userRepository.save(workshopOwner);
-        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public UserWorkshopOwnerOutputDto verifyWorkshopOwnerByAdmin(Long workshopOwnerId, Boolean
@@ -117,7 +117,7 @@ public class UserService {
             }
         }
         userRepository.save(workshopOwner);
-        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public UserCustomerOutputDto updateCustomer(Long customerId, UserCustomerInputDtoExclPassword userCustomerInputDtoExclPassword) {
@@ -131,8 +131,8 @@ public class UserService {
                 throw new BadRequestException("Another user already exists with the email: " + userCustomerInputDtoExclPassword.email);
             }
         }
-        userRepository.save(UserServiceTransferMethod.transferUserInputDtoToUser(customer, userCustomerInputDtoExclPassword));
-        return UserServiceTransferMethod.transferUserToCustomerOutputDto(customer);
+        userRepository.save(transferUserInputDtoToUser(customer, userCustomerInputDtoExclPassword));
+        return transferUserToCustomerOutputDto(customer);
     }
 
 
@@ -148,8 +148,8 @@ public class UserService {
                 throw new BadRequestException("Another user already exists with the email: " + workshopOwnerInputDtoExclPassword.email);
             }
         }
-        userRepository.save(UserServiceTransferMethod.transferUserInputDtoToUser(workshopOwner, workshopOwnerInputDtoExclPassword));
-        return UserServiceTransferMethod.transferUserToWorkshopOwnerOutputDto(workshopOwner);
+        userRepository.save(transferUserInputDtoToUser(workshopOwner, workshopOwnerInputDtoExclPassword));
+        return transferUserToWorkshopOwnerOutputDto(workshopOwner);
     }
 
     public String updatePassword(String email, PasswordInputDto passwordInputDto) {
@@ -188,12 +188,12 @@ public class UserService {
             }
         }
         try {
-            user.getAuthorities().add(new Authority(user.getId(),"ROLE_" + authority));
+            user.getAuthorities().add(new Authority(user.getId(), "ROLE_" + authority));
         } catch (Exception e) {
             throw new BadRequestException("This authority can't be added");
         }
         userRepository.save(user);
-        return UserServiceTransferMethod.transferUserToCustomerOutputDto(user);
+        return transferUserToCustomerOutputDto(user);
     }
 
     public void removeAuthority(Long userId, String authority) {
@@ -214,5 +214,82 @@ public class UserService {
         } catch (Exception e) {
             throw new BadRequestException("This user has a relation with either one or more workshop(s), review(s) and/or booking(s). You can't remove this user before removing the other items.");
         }
+    }
+
+    public UserCustomerOutputDto transferUserToCustomerOutputDto(User customer) {
+        UserCustomerOutputDto customerOutputDto = new UserCustomerOutputDto();
+        customerOutputDto.id = customer.getId();
+        customerOutputDto.firstName = customer.getFirstName();
+        customerOutputDto.lastName = customer.getLastName();
+        customerOutputDto.email = customer.getEmail();
+        customerOutputDto.workshopOwner = customer.getWorkshopOwner();
+        customerOutputDto.authorities = customer.getAuthorities();
+        customerOutputDto.profilePicUrl = customer.getProfilePicUrl();
+
+        return customerOutputDto;
+    }
+
+    public UserWorkshopOwnerOutputDto transferUserToWorkshopOwnerOutputDto(User workshopOwner) {
+        UserWorkshopOwnerOutputDto workshopOwnerOutputDto = new UserWorkshopOwnerOutputDto();
+        workshopOwnerOutputDto.id = workshopOwner.getId();
+        workshopOwnerOutputDto.firstName = workshopOwner.getFirstName();
+        workshopOwnerOutputDto.lastName = workshopOwner.getLastName();
+        workshopOwnerOutputDto.email = workshopOwner.getEmail();
+        workshopOwnerOutputDto.companyName = workshopOwner.getCompanyName();
+        workshopOwnerOutputDto.kvkNumber = workshopOwner.getKvkNumber();
+        workshopOwnerOutputDto.vatNumber = workshopOwner.getVatNumber();
+        workshopOwnerOutputDto.workshopOwnerVerified = workshopOwner.getWorkshopOwnerVerified();
+        workshopOwnerOutputDto.workshopOwner = workshopOwner.getWorkshopOwner();
+        if (workshopOwner.calculateAverageRatingAndNumberReviewsWorkshopOwner() != null) {
+            workshopOwnerOutputDto.averageRatingReviews = workshopOwner.calculateAverageRatingAndNumberReviewsWorkshopOwner().get(0);
+        }
+        workshopOwnerOutputDto.authorities = workshopOwner.getAuthorities();
+        workshopOwnerOutputDto.profilePicUrl = workshopOwner.getProfilePicUrl();
+
+        return workshopOwnerOutputDto;
+    }
+
+    public User transferUserInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDto workshopOwnerInputDto, PasswordEncoder passwordEncoder) {
+        workshopOwner.setPassword(passwordEncoder.encode(workshopOwnerInputDto.password));
+        workshopOwner.setFirstName(workshopOwnerInputDto.firstName);
+        workshopOwner.setLastName(workshopOwnerInputDto.lastName);
+        workshopOwner.setEmail(workshopOwnerInputDto.email);
+        workshopOwner.setCompanyName(workshopOwnerInputDto.companyName);
+        workshopOwner.setKvkNumber(workshopOwnerInputDto.kvkNumber);
+        workshopOwner.setVatNumber(workshopOwnerInputDto.vatNumber);
+        workshopOwner.setWorkshopOwner(workshopOwnerInputDto.workshopOwner);
+
+        return workshopOwner;
+    }
+
+    public User transferUserInputDtoToUser(User workshopOwner, UserWorkshopOwnerInputDtoExclPassword workshopOwnerInputDtoExclPassword) {
+        workshopOwner.setFirstName(workshopOwnerInputDtoExclPassword.firstName);
+        workshopOwner.setLastName(workshopOwnerInputDtoExclPassword.lastName);
+        workshopOwner.setEmail(workshopOwnerInputDtoExclPassword.email);
+        workshopOwner.setCompanyName(workshopOwnerInputDtoExclPassword.companyName);
+        workshopOwner.setKvkNumber(workshopOwnerInputDtoExclPassword.kvkNumber);
+        workshopOwner.setVatNumber(workshopOwnerInputDtoExclPassword.vatNumber);
+        workshopOwner.setWorkshopOwner(workshopOwnerInputDtoExclPassword.workshopOwner);
+
+        return workshopOwner;
+    }
+
+    public User transferUserInputDtoToUser(User customer, UserCustomerInputDto customerInputDto, PasswordEncoder passwordEncoder) {
+        customer.setPassword(passwordEncoder.encode(customerInputDto.password));
+        customer.setFirstName(customerInputDto.firstName);
+        customer.setLastName(customerInputDto.lastName);
+        customer.setEmail(customerInputDto.email);
+        customer.setWorkshopOwner(customerInputDto.workshopOwner);
+
+        return customer;
+    }
+
+    public User transferUserInputDtoToUser(User customer, UserCustomerInputDtoExclPassword customerInputDtoExclPassword) {
+        customer.setFirstName(customerInputDtoExclPassword.firstName);
+        customer.setLastName(customerInputDtoExclPassword.lastName);
+        customer.setEmail(customerInputDtoExclPassword.email);
+        customer.setWorkshopOwner(customerInputDtoExclPassword.workshopOwner);
+
+        return customer;
     }
 }
