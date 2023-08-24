@@ -92,7 +92,7 @@ public class SpringSecurityConfig {
 
                 .requestMatchers("/bookings/workshop/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
                 .requestMatchers(HttpMethod.GET, "/bookings/workshopowner/{workshopOwnerId}").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
-                .requestMatchers(HttpMethod.GET, "/bookings/workshopowner/generateanddownloadcsv/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
+                .requestMatchers(HttpMethod.GET, "/bookings/workshopowner/csv/**").hasAnyRole("WORKSHOPOWNER", "ADMIN")  //get
 
                 .requestMatchers(HttpMethod.POST, "/uploadworkshoppic/{workshopId}").hasAnyRole("WORKSHOPOWNER", "ADMIN")
                 .requestMatchers("/deleteworkshoppic/{workshopId}").hasAnyRole("WORKSHOPOWNER", "ADMIN") //delete
@@ -103,7 +103,7 @@ public class SpringSecurityConfig {
                 .requestMatchers("/workshops/admin/**").hasRole("ADMIN") //get, get, get, put
 
                 .requestMatchers(HttpMethod.GET, "/bookings").hasAnyRole("ADMIN") //get
-                .requestMatchers(HttpMethod.GET, "/bookings/admin/generateanddownloadcsv").hasRole("ADMIN") //get
+                .requestMatchers(HttpMethod.GET, "/bookings/admin/csv").hasRole("ADMIN") //get
 
                 .requestMatchers("/reviews/admin/**").hasRole("ADMIN") // get, get, put, delete
 
