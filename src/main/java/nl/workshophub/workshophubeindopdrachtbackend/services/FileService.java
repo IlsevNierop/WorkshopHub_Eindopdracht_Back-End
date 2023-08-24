@@ -52,16 +52,19 @@ public class FileService {
 
     }
 
-    public Resource downloadProfilePic(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
-
-        if (user.getProfilePicUrl() == null || user.getFileName() == null){
-            throw new RecordNotFoundException("The file doesn't exist.");
-        }
-        return downloadPic(user.getFileName());
+//    public Resource downloadProfilePic(Long userId) {
+//        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
+//
+//        if (user.getProfilePicUrl() == null || user.getFileName() == null){
+//            throw new RecordNotFoundException("The file doesn't exist.");
+//        }
+//        return downloadPic(user.getFileName());
+//    }
+    public Resource downloadProfilePic(String fileName) {
+        return downloadPic(fileName);
     }
 
-    public String uploadProfilePic(MultipartFile file, String url, Long userId) {
+    public String uploadProfilePic(MultipartFile file, String url, Long userId, String fileName) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
@@ -75,12 +78,12 @@ public class FileService {
                 throw new RuntimeException("A problem occurred with deleting: " + user.getFileName());
             }
         }
-        String fileName = storeFile(file);
+        storeFile(file, fileName);
         user.setProfilePicUrl(url);
         user.setFileName(fileName);
         userRepository.save(user);
 
-        return fileName;
+        return url;
     }
 
     public boolean deleteProfilePic(Long userId) {
@@ -100,21 +103,17 @@ public class FileService {
         }
     }
 
-    public Resource downloadWorkshopPic(Long workshopId) {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID: " + workshopId + " doesn't exist."));
-        if (workshop.getWorkshopPicUrl() == null || workshop.getFileName() == null){
-            throw new RecordNotFoundException("The file doesn't exist.");
-        }
-        return downloadPic(workshop.getFileName());
+    public Resource downloadWorkshopPic(String fileName) {
+        return downloadPic(fileName);
     }
 
-    public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId) {
+    public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId, String fileName) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-        String fileName = storeFile(file);
+        storeFile(file, fileName);
         workshop.setWorkshopPicUrl(url);
         workshop.setFileName(fileName);
         workshopRepository.save(workshop);
-        return fileName;
+        return url;
     }
 
     public boolean deleteWorkshopPic(Long workshopId) {
@@ -134,7 +133,18 @@ public class FileService {
         }
     }
 
-    public String storeFile(MultipartFile file) {
+    public Boolean storeFile(MultipartFile file, String fileName) {
+//        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
+        Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
+        try {
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Issue in storing the file", e);
+        }
+        return true;
+    }
+
+    public String storeFile2(MultipartFile file) {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
         Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
         try {
