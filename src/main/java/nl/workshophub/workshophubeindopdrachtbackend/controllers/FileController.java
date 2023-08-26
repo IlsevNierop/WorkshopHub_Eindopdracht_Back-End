@@ -28,8 +28,14 @@ public class FileController {
 
     @GetMapping("/downloadprofilepic/{fileName}")
     public ResponseEntity<Object> downloadProfilePic(@PathVariable String fileName) {
+        Resource resource = fileService.downloadPicture(fileName);
 
-        Resource resource = fileService.downloadProfilePic(fileName);
+        MediaType contentType = MediaType.IMAGE_JPEG;
+        return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + resource.getFilename()).body(resource);
+    }
+    @GetMapping("/downloadworkshoppic/{fileName}")
+    public ResponseEntity<Object> downloadWorkshopPic(@PathVariable String fileName) {
+        Resource resource = fileService.downloadPicture(fileName);
 
         MediaType contentType = MediaType.IMAGE_JPEG;
         return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + resource.getFilename()).body(resource);
@@ -46,25 +52,6 @@ public class FileController {
     }
 
 
-    @DeleteMapping("/deleteprofilepic/{userId}")
-    public ResponseEntity<Object> deleteProfilePic(@PathVariable Long userId) {
-
-        if (fileService.deleteProfilePic(userId)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            throw new BadRequestException("file does not exist in the system");
-        }
-
-
-    }
-    @GetMapping("/downloadworkshoppic/{fileName}")
-    public ResponseEntity<Object> downloadWorkshopPic(@PathVariable String fileName) {
-
-        Resource resource = fileService.downloadWorkshopPic(fileName);
-
-        MediaType contentType = MediaType.IMAGE_JPEG;
-        return ResponseEntity.ok().contentType(contentType).header(HttpHeaders.CONTENT_DISPOSITION, "inline;fileName=" + resource.getFilename()).body(resource);
-    }
 
     @PostMapping("/uploadworkshoppic/{workshopId}")
     public ResponseEntity<Object> uploadWorkshopPic(@PathVariable Long workshopId, @RequestParam("file") MultipartFile file){
@@ -77,6 +64,17 @@ public class FileController {
         return ResponseEntity.ok(url);
     }
 
+    @DeleteMapping("/deleteprofilepic/{userId}")
+    public ResponseEntity<Object> deleteProfilePic(@PathVariable Long userId) {
+
+        if (fileService.deleteProfilePic(userId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            throw new BadRequestException("file does not exist in the system");
+        }
+
+
+    }
     @DeleteMapping("/deleteworkshoppic/{workshopId}")
     public ResponseEntity<Object> deleteWorkshopPic(@PathVariable Long workshopId) {
 
