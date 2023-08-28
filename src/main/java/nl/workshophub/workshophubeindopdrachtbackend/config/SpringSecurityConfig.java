@@ -56,8 +56,8 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/workshops/workshopowner/{workshopOwnerId}").permitAll() //everyone can see the workshop calendar //get
                 .requestMatchers(HttpMethod.GET, "/reviews/{reviewId}").permitAll() //get
                 .requestMatchers(HttpMethod.GET, "/reviews/workshopowner/{workshopOwnerId}").permitAll() //everyone can see verified reviews //get
-                .requestMatchers(HttpMethod.GET, "/downloadworkshoppic/{workshopId}").permitAll()
-                .requestMatchers("/downloadprofilepic/{userId}").permitAll() //get
+                .requestMatchers(HttpMethod.GET, "/downloadworkshoppic/{fileName}").permitAll()
+                .requestMatchers("/downloadprofilepic/{fileName}").permitAll() //get
 
                 //...............................authority: customer...............................
 
