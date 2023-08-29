@@ -89,22 +89,22 @@ public class WorkshopService {
 
 
     public List<WorkshopOutputDto> getAllWorkshopsFromWorkshopOwnerByWorkshopOwner(Long workshopOwnerId) {
-        List<Workshop> workshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
+        List<Workshop> workshops = workshopRepository.findByWorkshopOwnerId(workshopOwnerId);
         return processWorkshopsToWorkshopOutputDtos(workshops, workshopOwner);
     }
 
     public List<WorkshopOutputDto> getAllWorkshopsToPublishFromWorkshopOwner(Long workshopOwnerId) {
-        List<Workshop> workshops = workshopRepository.findByWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsNullOrPublishWorkshopIsFalseOrderByDate(workshopOwnerId);
         User workshopOwner = userRepository.findById(workshopOwnerId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + workshopOwnerId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(workshopOwner, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
             throw new ForbiddenException("You're not allowed to view the workshops from this workshopowner.");
         }
+        List<Workshop> workshops = workshopRepository.findByWorkshopOwnerIdAndWorkshopVerifiedIsTrueAndPublishWorkshopIsNullOrPublishWorkshopIsFalseOrderByDate(workshopOwnerId);
         return processWorkshopsToWorkshopOutputDtos(workshops, workshopOwner);
     }
 

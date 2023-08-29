@@ -8,12 +8,15 @@ import nl.workshophub.workshophubeindopdrachtbackend.util.FieldErrorHandling;
 import nl.workshophub.workshophubeindopdrachtbackend.services.WorkshopService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -149,9 +152,10 @@ public class WorkshopController {
     }
 
     public WorkshopOutputDto uploadWorkshopPicture(MultipartFile file, WorkshopOutputDto workshopOutputDto) {
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(workshopOutputDto.id.toString())).toUriString();
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadworkshoppic/").path(Objects.requireNonNull(fileName)).toUriString();
         workshopOutputDto.workshopPicUrl = url;
-        fileService.uploadWorkshopPic(file, url, workshopOutputDto.id);
+        fileService.uploadWorkshopPic(file, url, workshopOutputDto.id, fileName);
         return workshopOutputDto;
     }
 

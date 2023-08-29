@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -25,10 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Date;
-import java.time.Instant;
 import java.util.Collection;
-import java.util.Objects;
 
 @Service
 public class FileService {
@@ -52,16 +48,11 @@ public class FileService {
 
     }
 
-    public Resource downloadProfilePic(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("User with ID: " + userId + " doesn't exist."));
-
-        if (user.getProfilePicUrl() == null || user.getFileName() == null){
-            throw new RecordNotFoundException("The file doesn't exist.");
-        }
-        return downloadPic(user.getFileName());
+    public Resource downloadPicture(String fileName) {
+        return downloadPic(fileName);
     }
 
-    public String uploadProfilePic(MultipartFile file, String url, Long userId) {
+    public String uploadProfilePic(MultipartFile file, String url, Long userId, String fileName) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RecordNotFoundException("The user with ID " + userId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!CheckAuthorization.isAuthorized(user, (Collection<GrantedAuthority>) authentication.getAuthorities(), authentication.getName())) {
@@ -75,12 +66,21 @@ public class FileService {
                 throw new RuntimeException("A problem occurred with deleting: " + user.getFileName());
             }
         }
-        String fileName = storeFile(file);
+        storeFile(file, fileName);
         user.setProfilePicUrl(url);
         user.setFileName(fileName);
         userRepository.save(user);
 
-        return fileName;
+        return url;
+    }
+
+    public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId, String fileName) {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
+        storeFile(file, fileName);
+        workshop.setWorkshopPicUrl(url);
+        workshop.setFileName(fileName);
+        workshopRepository.save(workshop);
+        return url;
     }
 
     public boolean deleteProfilePic(Long userId) {
@@ -100,23 +100,6 @@ public class FileService {
         }
     }
 
-    public Resource downloadWorkshopPic(Long workshopId) {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID: " + workshopId + " doesn't exist."));
-        if (workshop.getWorkshopPicUrl() == null || workshop.getFileName() == null){
-            throw new RecordNotFoundException("The file doesn't exist.");
-        }
-        return downloadPic(workshop.getFileName());
-    }
-
-    public String uploadWorkshopPic(MultipartFile file, String url, Long workshopId) {
-        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID " + workshopId + " doesn't exist."));
-        String fileName = storeFile(file);
-        workshop.setWorkshopPicUrl(url);
-        workshop.setFileName(fileName);
-        workshopRepository.save(workshop);
-        return fileName;
-    }
-
     public boolean deleteWorkshopPic(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RecordNotFoundException("The workshop with ID: " + workshopId + " doesn't exist."));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -134,16 +117,16 @@ public class FileService {
         }
     }
 
-    public String storeFile(MultipartFile file) {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename() + String.valueOf(Date.from(Instant.now()).getTime()))); // added the datefrom etc so files can't have the same name and overwrite .
+    public Boolean storeFile(MultipartFile file, String fileName) {
         Path filePath = Paths.get(fileStoragePath + File.separator + fileName);
         try {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Issue in storing the file", e);
         }
-        return fileName;
+        return true;
     }
+
     public Resource downloadPic(String fileName) {
         Path path = Paths.get(fileStorageLocation).toAbsolutePath().resolve(fileName);
         Resource resource;

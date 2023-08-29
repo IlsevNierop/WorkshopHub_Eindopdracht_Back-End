@@ -52,7 +52,7 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getOneBookingById(bookingId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "workshopowner/generateanddownloadcsv/{workshopOwnerId}", produces = "text/csv")
+    @GetMapping(value = "workshopowner/csv/{workshopOwnerId}", produces = "text/csv")
     public ResponseEntity<byte[]> generateAndDownloadCsvWorkshopOwner(@PathVariable Long workshopOwnerId) {
         ByteArrayResource resource = bookingService.generateAndDownloadCsvWorkshopOwner(workshopOwnerId);
         HttpHeaders headers = new HttpHeaders();
@@ -64,7 +64,7 @@ public class BookingController {
                 .body(resource.getByteArray());
     }
 
-    @GetMapping(value = "workshopowner/generateanddownloadcsv/workshop/{workshopId}", produces = "text/csv")
+    @GetMapping(value = "workshopowner/csv/workshop/{workshopId}", produces = "text/csv")
     public ResponseEntity<byte[]> generateAndDownloadCsvWorkshop(@PathVariable Long workshopId) {
         ByteArrayResource resource = bookingService.generateAndDownloadCsvWorkshop(workshopId);
         HttpHeaders headers = new HttpHeaders();
@@ -75,7 +75,7 @@ public class BookingController {
                 .headers(headers)
                 .body(resource.getByteArray());
     }
-    @GetMapping(value = "admin/generateanddownloadcsv", produces = "text/csv")
+    @GetMapping(value = "admin/csv", produces = "text/csv")
     public ResponseEntity<byte[]> generateAndDownloadCsv() {
         ByteArrayResource resource = bookingService.generateAndDownloadCsv();
         HttpHeaders headers = new HttpHeaders();
